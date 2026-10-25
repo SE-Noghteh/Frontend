@@ -1,13 +1,36 @@
-/**
- * SAMPLE FILE
- *
- * Generic reusable input component.
- */
-
 import type { InputHTMLAttributes } from "react";
 
-type InputProps = InputHTMLAttributes<HTMLInputElement>;
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  error?: string;
+  helperText?: string;
+  isRequired?: boolean;
+}
 
-export function Input(props: InputProps) {
-  return <input {...props} />;
+export function Input({
+  label,
+  error,
+  helperText,
+  isRequired,
+  className = "",
+  ...props
+}: InputProps) {
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <label className="text-label text-text-primary font-medium">
+        {label} {isRequired && <span className="text-status-error">*</span>}
+      </label>
+      <input
+        className={`w-full rounded-md border px-3 py-2 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors ${
+          error ? "border-status-error bg-surface-error" : "border-border-decorative bg-surface-card"
+        } ${className}`}
+        {...props}
+      />
+      {error ? (
+        <p className="text-caption text-status-error">{error}</p>
+      ) : helperText ? (
+        <p className="text-caption text-text-secondary">{helperText}</p>
+      ) : null}
+    </div>
+  );
 }
