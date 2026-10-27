@@ -6,7 +6,10 @@ export const loginSchema = yup.object().shape({
   
   email: yup.string().when("authMethod", {
     is: "email",
-    then: (schema) => schema.email("فرمت ایمیل معتبر نیست").required("ایمیل الزامی است"),
+    then: (schema) => 
+      schema
+        .required("نشانی ایمیل معتبر نیست. نمونه: name@example.com")
+        .email("نشانی ایمیل معتبر نیست. نمونه: name@example.com"),
     otherwise: (schema) => schema.notRequired(),
   }),
 
@@ -14,20 +17,26 @@ export const loginSchema = yup.object().shape({
     is: "mobile",
     then: (schema) => 
       schema
-        .required("شماره موبایل الزامی است")
-        .matches(/^09\d{9}$/, "شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد"),
+        .required("شماره موبایل معتبر نیست. شماره باید با 09 شروع شود و 11 رقم داشته باشد")
+        .matches(/^09\d{9}$/, "شماره موبایل معتبر نیست. شماره باید با 09 شروع شود و 11 رقم داشته باشد"),
     otherwise: (schema) => schema.notRequired(),
   }),
 
   password: yup.string().when(["authMethod", "loginMethod"], {
     is: (authMethod: string, loginMethod: string) => authMethod === "email" && loginMethod === "password",
-    then: (schema) => schema.required("رمز عبور الزامی است").min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد"),
+    then: (schema) => 
+      schema
+        .required("شماره موبایل و رمز عبور را وارد کن")
+        .min(8, "رمز عبور باید حداقل ۱۲ کاراکتر باشد"), 
     otherwise: (schema) => schema.notRequired(),
   }),
 
   otpCode: yup.string().when("loginMethod", {
     is: "otp",
-    then: (schema) => schema.required("کد تایید الزامی است").length(6, "کد تایید باید ۶ رقمی باشد"),
+    then: (schema) => 
+      schema
+        .required("کد وارد شده نادرست است، دوباره امتحان کن")
+        .length(6, "کد وارد شده نادرست است، دوباره امتحان کن"),
     otherwise: (schema) => schema.notRequired(),
   }),
   

@@ -4,11 +4,12 @@ import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { SegmentedToggle } from "@/components/ui/SegmentedToggle";
+import { ErrorBox } from "@/components/ui/ErrorBox";
 import { useAuth } from "@/hooks/useAuth";
 import type { LoginFormValues } from "@/types/Auth/authTypes";
 
 export function JobSeekerLoginForm() {
-  const { login, isLoading, globalError, fieldErrors } = useAuth();
+  const { login, isLoading, globalError } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormValues>({
     authMethod: "mobile",
@@ -35,7 +36,6 @@ export function JobSeekerLoginForm() {
       className="flex flex-col gap-4 w-full text-right font-vazirmatn pb-12" 
       dir="rtl"
     >
-      
       <div className="text-right mb-2">
         <h1 
           className="text-card-title font-bold mb-3" 
@@ -71,7 +71,6 @@ export function JobSeekerLoginForm() {
           helperText="شماره با ۰۹ شروع می‌شود."
           value={formData.mobile}
           onChange={(e) => handleChange("mobile", e.target.value)}
-          error={fieldErrors.mobile}
         />
       ) : (
         <Input
@@ -82,7 +81,6 @@ export function JobSeekerLoginForm() {
           helperText="ایمیل مرتبط با حساب را وارد کن."
           value={formData.email}
           onChange={(e) => handleChange("email", e.target.value)}
-          error={fieldErrors.email}
         />
       )}
 
@@ -108,7 +106,6 @@ export function JobSeekerLoginForm() {
           helperText="رمز را فراموش کردی؟"
           value={formData.password}
           onChange={(e) => handleChange("password", e.target.value)}
-          error={fieldErrors.password}
         />
       ) : (
         <Input
@@ -119,7 +116,6 @@ export function JobSeekerLoginForm() {
           helperText="کد شش‌رقمی به شماره تو ارسال می‌شود."
           value={formData.otpCode}
           onChange={(e) => handleChange("otpCode", e.target.value)}
-          error={fieldErrors.otpCode}
         />
       )}
 
@@ -133,17 +129,13 @@ export function JobSeekerLoginForm() {
         />
       </div>
 
-      {globalError && (
-        <div className="bg-surface-error border border-status-error text-status-error text-label p-3 rounded-md text-right w-full">
-          {globalError}
-        </div>
-      )}
+      <ErrorBox message={globalError} />
 
       <Button 
         type="submit" 
         fullWidth 
         disabled={isLoading} 
-        className="mt-2 w-full bg-action-primary hover:bg-action-hover text-white py-3 rounded-lg font-bold transition-colors"
+        className="mt-2 w-full bg-action-primary hover:bg-action-hover text-white py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
       >
         {isLoading ? "در حال ورود..." : formData.loginMethod === "password" ? "ورود" : "تایید کد و ورود"}
       </Button>
