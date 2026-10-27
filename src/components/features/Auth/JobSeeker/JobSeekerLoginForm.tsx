@@ -31,15 +31,14 @@ export function JobSeekerLoginForm() {
   };
 
   return (
-    <form 
-      onSubmit={handleSubmit} 
-      className="flex flex-col gap-4 w-full text-right font-vazirmatn pb-12" 
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 w-full text-right font-vazirmatn pb-12"
       dir="rtl"
     >
-      <div className="text-right mb-2">
-        <h1 
-          className="text-card-title font-bold mb-3" 
-          style={{ color: "var(--color-blue-4)" }}
+      <div className="text-right mb-2 ">
+        <h1 className="text-card-title font-bold mb-3 "
+        style={{ color: "var(--color-text-primary)" }}
         >
           ورود به زدلنسر
         </h1>
@@ -67,6 +66,7 @@ export function JobSeekerLoginForm() {
           label="شماره موبایل"
           isRequired
           type="tel"
+          dir="rtl"
           placeholder="09xx xxx xxxx"
           helperText="شماره با ۰۹ شروع می‌شود."
           value={formData.mobile}
@@ -77,6 +77,8 @@ export function JobSeekerLoginForm() {
           label="ایمیل"
           isRequired
           type="email"
+          dir="ltr"
+          className="text-left"
           placeholder="name@example.com"
           helperText="ایمیل مرتبط با حساب را وارد کن."
           value={formData.email}
@@ -103,22 +105,31 @@ export function JobSeekerLoginForm() {
           label="رمز عبور"
           isRequired
           placeholder="••••••••"
-          helperText="رمز را فراموش کردی؟"
+          helperText="حداقل ۱۲ نویسه؛ برای نمایش رمز از آیکن چشم استفاده کن."
           value={formData.password}
           onChange={(e) => handleChange("password", e.target.value)}
-        />
+        >
+          <a 
+            href="#" 
+            className="text-label font-bold text-action-primary hover:underline mt-1 inline-block"
+          >
+            رمز را فراموش کرده‌ای؟
+          </a>
+        </PasswordInput>
       ) : (
         <Input
           label="کد تایید"
           isRequired
           type="text"
-          placeholder="کد ۶ رقمی"
-          helperText="کد شش‌رقمی به شماره تو ارسال می‌شود."
+          placeholder="کد شش رقمی"
+          helperText="کد شش‌رقمی پیامک شده را وارد کن"
           value={formData.otpCode}
           onChange={(e) => handleChange("otpCode", e.target.value)}
         />
       )}
 
+      <ErrorBox message={globalError} />
+      
       <div className="flex items-center w-full mt-2">
         <Checkbox
           label="مرا در این دستگاه به خاطر بسپار"
@@ -129,12 +140,11 @@ export function JobSeekerLoginForm() {
         />
       </div>
 
-      <ErrorBox message={globalError} />
 
-      <Button 
-        type="submit" 
-        fullWidth 
-        disabled={isLoading} 
+      <Button
+        type="submit"
+        fullWidth
+        disabled={isLoading}
         className="mt-2 w-full bg-action-primary hover:bg-action-hover text-white py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
       >
         {isLoading ? "در حال ورود..." : formData.loginMethod === "password" ? "ورود" : "تایید کد و ورود"}
@@ -142,7 +152,7 @@ export function JobSeekerLoginForm() {
 
       <div className="text-center text-label text-text-secondary mt-4 w-full">
         حساب نداری؟{" "}
-        <a href="#" className="text-blue-4 hover:underline font-bold">
+        <a href="#" className="text-action-primary hover:underline font-bold">
           ساخت حساب
         </a>
       </div>

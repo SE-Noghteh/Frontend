@@ -1,26 +1,23 @@
-import  { type InputHTMLAttributes, useState } from "react";
+import { type InputHTMLAttributes, type ReactNode, useState } from "react";
 
 interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  error?: string;
   helperText?: string;
   isRequired?: boolean;
+  children?: ReactNode; 
 }
 
 export function PasswordInput({
   label,
-  error,
   helperText,
   isRequired,
+  children, 
   className = "",
   ...props
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const baseStyles = "w-full rounded-md border px-3 py-2 pl-10 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors";
-  const stateStyles = error 
-    ? "border-status-error bg-surface-error" 
-    : "border-border-decorative bg-surface-card";
+  const baseStyles = "w-full rounded-md border px-3 py-2 pl-10 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors border-border-decorative bg-surface-card";
 
   return (
     <div className="flex flex-col gap-1.5 w-full">
@@ -30,7 +27,7 @@ export function PasswordInput({
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
-          className={`${baseStyles} ${stateStyles} ${className}`}
+          className={`${baseStyles} ${className}`}
           {...props}
         />
         <button
@@ -46,11 +43,15 @@ export function PasswordInput({
           )}
         </button>
       </div>
-      {error ? (
-        <p className="text-caption text-status-error">{error}</p>
-      ) : helperText ? (
+      {helperText ? (
         <p className="text-caption text-text-secondary">{helperText}</p>
       ) : null}
+      
+      {children && (
+        <div className="mt-1">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

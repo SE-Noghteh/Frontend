@@ -35,8 +35,8 @@ export function AuthLayout({ children, activeTab, onTabChange }: AuthLayoutProps
 
       {/* Footer*/}
       <footer className="w-full bg-action-primary text-white py-4 px-8 flex justify-between items-center text-caption z-10">
-        <span>زدلنسر؛ شروع را آسان می‌کند</span>
-        <span>نیاز به راهنمایی داری؟ <a href="#" className="text-brand-peach hover:underline mr-1">پشتیبانی</a></span>
+        <span>زدلنسر؛ شروع راه تو</span>
+        <span><a href="#" className="text-brand-peach hover:underline mr-1">نیاز به راهنمایی داری؟ </a></span>
       </footer>
     </div>
   );

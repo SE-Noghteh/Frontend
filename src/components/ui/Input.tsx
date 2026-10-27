@@ -2,14 +2,12 @@ import type { InputHTMLAttributes } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  error?: string;
   helperText?: string;
   isRequired?: boolean;
 }
 
 export function Input({
   label,
-  error,
   helperText,
   isRequired,
   className = "",
@@ -21,14 +19,10 @@ export function Input({
         {label} {isRequired && <span className="text-status-error">*</span>}
       </label>
       <input
-        className={`w-full rounded-md border px-3 py-2 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors ${
-          error ? "border-status-error bg-surface-error" : "border-border-decorative bg-surface-card"
-        } ${className}`}
+        className={`w-full rounded-md border px-3 py-2 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors border-border-decorative bg-surface-card ${className}`}
         {...props}
       />
-      {error ? (
-        <p className="text-caption text-status-error">{error}</p>
-      ) : helperText ? (
+      {helperText ? (
         <p className="text-caption text-text-secondary">{helperText}</p>
       ) : null}
     </div>
