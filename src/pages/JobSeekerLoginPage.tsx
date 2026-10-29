@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AuthLayout } from "@/components/features/Auth/AuthLayout";
 import { JobSeekerLoginForm } from "@/components/features/Auth/JobSeeker/JobSeekerLoginForm";
+import { JobSeekerRegisterForm } from "@/components/features/Auth/JobSeeker/JobSeekerRegisterForm";
 
 export function JobSeekerLoginPage() {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
@@ -11,9 +12,7 @@ export function JobSeekerLoginPage() {
         {activeTab === "login" ? (
           <JobSeekerLoginForm />
         ) : (
-          <div className="flex items-center justify-center h-full text-text-secondary">
-            فرم ساخت حساب کارجو به زودی...
-          </div>
+          <JobSeekerRegisterForm />
         )}
       </div>
     </AuthLayout>

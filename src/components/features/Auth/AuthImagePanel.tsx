@@ -26,7 +26,7 @@ export function AuthImagePanel({ userType }: { userType: "jobseeker" | "employer
         <img 
           src={currentImages.desktop} 
           alt="Desktop background" 
-          className="w-full h-full object-cover object-top" 
+          className="w-full h-full object-contain object-top" 
         />
       </div>
     </div>
