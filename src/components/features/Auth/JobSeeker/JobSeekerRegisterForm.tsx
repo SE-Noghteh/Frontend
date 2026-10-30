@@ -16,6 +16,7 @@ import { useEffect } from "react";
 export function JobSeekerRegisterForm() {
   const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: yupResolver(registerSchema),
+    mode: "onTouched",
     defaultValues: {
       gender: "",
       province: "",
@@ -64,13 +65,13 @@ export function JobSeekerRegisterForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="نام" isRequired placeholder="نامت را بنویس" {...register("firstName")} helperText={errors.firstName?.message} />
-          <Input label="نام خانوادگی" isRequired placeholder="نام خانوادگی ات را بنویس" {...register("lastName")} helperText={errors.lastName?.message} />
+          <Input label="نام" isRequired placeholder="نامت را بنویس" {...register("firstName")} error={errors.firstName?.message} />
+          <Input label="نام خانوادگی" isRequired placeholder="نام خانوادگی ات را بنویس" {...register("lastName")} error={errors.lastName?.message} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select label="استان" isRequired options={provinceOptions} {...register("province")} helperText={errors.province?.message} />
-          <Select label="شهر" isRequired options={currentCityOptions} disabled={!selectedProvince} {...register("city")} helperText={errors.city?.message } />
+          <Select label="استان" isRequired options={provinceOptions} {...register("province")} error={errors.province?.message} />
+          <Select label="شهر" isRequired options={currentCityOptions} disabled={!selectedProvince} {...register("city")} error={errors.city?.message}  />
         </div>
         <p className="text-caption text-text-secondary -mt-2 text-right">با تغییر استان، شهر ناسازگار پاک می‌شود.</p>
 
@@ -78,7 +79,8 @@ export function JobSeekerRegisterForm() {
           label="نشانی کامل محل سکونت" 
           isRequired 
           {...register("address")} 
-          helperText={errors.address?.message || "نشانی خصوصی است و در پروفایل عمومی نمایش داده نمی‌شود."} 
+          error={errors.address?.message}
+          helperText="نشانی خصوصی است و در پروفایل عمومی نمایش داده نمی‌شود." 
         />
 
         <Input 
@@ -86,14 +88,16 @@ export function JobSeekerRegisterForm() {
           isRequired 
           placeholder="**********" 
           {...register("postalCode")} 
-          helperText={errors.postalCode?.message} 
+          error={errors.postalCode?.message} 
         />
 
         <Input 
           label="کد ملی" 
           isRequired 
+          placeholder="کد ملی ۱۰ رقمی" 
           {...register("nationalCode")} 
-          helperText={errors.nationalCode?.message || "بدون خط تیره و فاصله"} 
+          error={errors.nationalCode?.message}
+          helperText="بدون خط تیره و فاصله" 
         />
 
         <div className="flex flex-col gap-1.5">
@@ -101,12 +105,12 @@ export function JobSeekerRegisterForm() {
             تاریخ تولد شمسی <span className="text-status-error">*</span>
           </label>
           <div className="grid grid-cols-3 gap-2">
-            <Select label="روز" options={dayOptions} {...register("birthDay")} />
-            <Select label="ماه" options={monthOptions} {...register("birthMonth")} />
-            <Select label="سال" options={yearOptions} {...register("birthYear")} />
+            <Select label="روز" options={dayOptions} {...register("birthDay")} error={errors.birthDay?.message ? " " : ""} />
+            <Select label="ماه" options={monthOptions} {...register("birthMonth")} error={errors.birthMonth?.message ? " " : ""} />
+            <Select label="سال" options={yearOptions} {...register("birthYear")} error={errors.birthYear?.message ? " " : ""} />
           </div>
           {(errors.birthDay || errors.birthMonth || errors.birthYear) && (
-            <p className="text-caption text-status-error mt-1">تاریخ تولد الزامی است</p>
+            <p className="text-caption text-status-error mt-1">تاریخ تولد کامل را انتخاب کنید.</p>
           )}
         </div>
 
@@ -135,6 +139,7 @@ export function JobSeekerRegisterForm() {
             accept="image/*"
             value={idCardImage as unknown as File}
             onChange={(file) => setValue("idCardImage", file as any, { shouldValidate: true })}
+            error={errors.idCardImage?.message}
           />
           <p className="text-caption text-text-secondary text-right leading-relaxed mt-1">
             فرمت مجاز: تصویر جی‌پی‌جی یا پی‌ان‌جی - حداکثر ۵ مگابایت.
@@ -156,6 +161,7 @@ export function JobSeekerRegisterForm() {
           <VideoUploadBox
             value={identityVideo as unknown as File}
             onChange={(file) => setValue("identityVideo", file as any, { shouldValidate: true })}
+            error={errors.identityVideo?.message}
           />
 
           <p className="text-caption text-text-secondary text-right leading-relaxed mt-1">
@@ -182,8 +188,9 @@ export function JobSeekerRegisterForm() {
         />
 
         <div className="flex items-center gap-4 mt-4">
-          <Button type="button" variant="secondary" className="w-1/3">بازگشت</Button>
-          <Button type="submit" variant="primary" className="w-2/3">ادامه: اطلاعات حساب</Button>
+          <Button type="submit" variant="primary" fullWidth>
+            ادامه: اطلاعات حساب
+          </Button>
         </div>
         
         <p className="text-caption text-text-secondary text-right mt-2">

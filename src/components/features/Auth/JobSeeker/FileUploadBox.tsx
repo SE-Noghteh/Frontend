@@ -9,6 +9,7 @@ interface FileUploadBoxProps {
   helperText?: string;
   value?: File | null;
   onChange?: (file: File | null) => void;
+  error?: string; 
 }
 
 export function FileUploadBox({
@@ -20,6 +21,7 @@ export function FileUploadBox({
   helperText,
   value,
   onChange,
+  error,
 }: FileUploadBoxProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -50,7 +52,6 @@ export function FileUploadBox({
     if (file) processFile(file);
   };
 
-  // Drag and Drop
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!value) setIsDragging(true); 
@@ -76,11 +77,13 @@ export function FileUploadBox({
     <div className="flex flex-col gap-2 w-full">
       <div
         className={`relative flex flex-col items-center justify-center p-6 rounded-lg border-2 transition-all ${
-          value
-            ? "border-border-decorative bg-surface-card"
-            : isDragging
-              ? "border-action-primary bg-brand-peach-soft border-solid scale-[1.01]" // استایل هنگام درگ کردن
-              : "border-dashed border-border-decorative bg-surface-card hover:bg-surface-hover cursor-pointer"
+          error 
+            ? "border-status-error" 
+            : value
+              ? "border-border-decorative bg-surface-card"
+              : isDragging
+                ? "border-action-primary bg-brand-peach-soft border-solid scale-[1.01]"
+                : "border-dashed border-border-decorative bg-surface-card hover:bg-surface-hover cursor-pointer"
         }`}
         onClick={() => {
           if (!value) fileInputRef.current?.click();
@@ -160,11 +163,13 @@ export function FileUploadBox({
         )}
       </div>
 
-      {helperText && (
+      {error ? (
+        <p className="text-caption text-status-error text-right mt-1">{error}</p>
+      ) : helperText ? (
         <p className="text-caption text-text-secondary text-right leading-relaxed">
           {helperText}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -3,9 +3,10 @@ import { useRef, useState, useEffect } from "react";
 interface VideoUploadBoxProps {
   value?: File | null;
   onChange?: (file: File | null) => void;
+  error?: string;
 }
 
-export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
+export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
@@ -13,7 +14,6 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [cameraError, setCameraError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -30,7 +30,6 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
       onChange?.(file);
     }
   };
-
 
   const startCamera = async () => {
     try {
@@ -61,7 +60,6 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
 
   const startRecording = () => {
     if (!mediaStream) return;
-    setRecordedChunks([]);
     const recorder = new MediaRecorder(mediaStream);
     const chunks: Blob[] = [];
 
@@ -102,7 +100,11 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className={`relative flex flex-col items-center justify-center p-6 rounded-lg border-2 transition-colors ${
-        value ? "border-border-decorative bg-surface-card" : "border-dashed border-border-decorative bg-surface-card"
+        error 
+          ? "border-status-error bg-surface-card" 
+          : value 
+            ? "border-border-decorative bg-surface-card" 
+            : "border-dashed border-border-decorative bg-surface-card"
       }`}>
         <input
           type="file"
@@ -171,6 +173,12 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
         )}
       </div>
 
+      {error && (
+        <p className="text-caption text-status-error text-right mt-1">
+          {error}
+        </p>
+      )}
+
       {isRecordingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-surface-card rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col gap-4">
@@ -193,7 +201,7 @@ export function VideoUploadBox({ value, onChange }: VideoUploadBoxProps) {
                   muted 
                   playsInline 
                   className="w-full h-full object-cover mirror" 
-                  style={{ transform: "scaleX(-1)" }} // آینه‌ای کردن برای راحتی کاربر
+                  style={{ transform: "scaleX(-1)" }}
                 />
                 {isRecording && (
                   <div className="absolute top-4 right-4 bg-status-error text-white px-3 py-1 rounded-full text-caption animate-pulse flex items-center gap-2">

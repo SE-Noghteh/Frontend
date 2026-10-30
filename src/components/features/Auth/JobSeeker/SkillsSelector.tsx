@@ -8,7 +8,7 @@ interface SkillsSelectorProps {
 }
 
 const MOCK_SKILLS: Skill[] = [
-  { id: "1", title: "طراحی گرافیک", category: "انتخاب‌شده" }, 
+  { id: "1", title: "طراحی گرافیک", category: "" }, 
   { id: "2", title: "طراحی رابط کاربری", category: "طراحی تجربه‌های دیجیتال" },
   { id: "3", title: "طراحی محصول", category: "ایده‌پردازی و حل مسئله" },
   { id: "4", title: "طراحی صنعتی", category: "به‌زودی؛ فعلاً قابل انتخاب نیست" },
@@ -89,6 +89,9 @@ export function SkillsSelector({ value, onChange, error }: SkillsSelectorProps) 
         </div>
       )}
 
+      <p className="text-caption text-text-secondary text-right mt-1">
+        اگر نتیجه‌ای پیدا نشد، عبارت کوتاه‌تر یا حوزه دیگری را جست‌وجو کن؛ انتخاب‌های قبلی‌ات باقی می‌مانند.
+      </p>
 
       {/*Results drop-down list*/}
       {isOpen && (
@@ -121,9 +124,6 @@ export function SkillsSelector({ value, onChange, error }: SkillsSelectorProps) 
         </div>
       )}
 
-      <p className="text-caption text-text-secondary text-right mt-1">
-        اگر نتیجه‌ای پیدا نشد، عبارت کوتاه‌تر یا حوزه دیگری را جست‌وجو کن؛ انتخاب‌های قبلی‌ات باقی می‌مانند.
-      </p>
     </div>
   );
 }
