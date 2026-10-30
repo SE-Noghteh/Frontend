@@ -9,6 +9,7 @@ import { RegisterStepper } from "./RegisterStepper";
 import { SkillsSelector } from "./SkillsSelector";
 import { IdentityInstructionsBox } from "./IdentityInstructionsBox"; 
 import { VideoUploadBox } from "./VideoUploadBox";
+import { AgeStatusBox } from "./AgeStatusBox";
 import { registerSchema, type RegisterFormValues } from "@/schemas/registerSchema";
 import { genderOptions, provinceOptions, cityOptions, dayOptions, monthOptions, yearOptions } from "@/data/registerData";
 import { useEffect } from "react";
@@ -112,6 +113,12 @@ export function JobSeekerRegisterForm() {
           {(errors.birthDay || errors.birthMonth || errors.birthYear) && (
             <p className="text-caption text-status-error mt-1">تاریخ تولد کامل را انتخاب کنید.</p>
           )}
+
+          <AgeStatusBox 
+            year={birthYear} 
+            month={birthMonth} 
+            day={birthDay} 
+          />
         </div>
 
         <Controller
