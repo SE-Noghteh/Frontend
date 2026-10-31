@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
-import { AuthHeader } from "./AuthHeader";
-import { AuthTabs } from "./AuthTabs";
-import { AuthImagePanel } from "./AuthImagePanel";
+import { AuthHeader } from "./JobseekerAuthHeader";
+import { AuthTabs } from "./JobseekerAuthTabs";
+import { AuthImagePanel } from "./JobseekerAuthImagePanel";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ interface AuthLayoutProps {
   onTabChange: (tab: "login" | "signup") => void;
 }
 
-export function AuthLayout({ children, activeTab, onTabChange }: AuthLayoutProps) {
+export function AuthLayout({ children, activeTab, onTabChange}: AuthLayoutProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col w-full">
       

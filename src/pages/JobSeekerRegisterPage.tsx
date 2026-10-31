@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AuthLayout } from "@/components/features/Auth/AuthLayout";
+import { AuthLayout } from "@/components/features/Auth/JobseekerAuthLayout";
 import { JobSeekerRegisterForm } from "@/components/features/Auth/JobSeeker/JobSeekerRegisterForm";
 
 export function JobSeekerRegisterPage() {
