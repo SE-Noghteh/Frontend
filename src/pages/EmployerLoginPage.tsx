@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AuthLayout } from "@/components/features/Auth/EmployerAuthLayout";
 import { EmployerLoginForm } from "@/components/features/Auth/Employer/EmployerLoginForm";
+import { EmployerSignupForm } from "@/components/features/Auth/Employer/EmployerSignupForm";
 
 export function EmployerLoginPage() {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
@@ -15,9 +16,7 @@ export function EmployerLoginPage() {
         {activeTab === "login" ? (
           <EmployerLoginForm />
         ) : (
-          <div className="flex items-center justify-center h-full text-text-secondary py-10">
-            فرم ساخت حساب کارفرما به زودی...
-          </div>
+          <EmployerSignupForm />
         )}
       </div>
     </AuthLayout>

@@ -46,7 +46,7 @@ export function AuthLayout({ children, activeTab, onTabChange, userType }: AuthL
           </div>
 
           {/* عکس */}
-          <div className="w-full h-45 lg:h-auto lg:flex-1 relative overflow-hidden">
+          <div className="w-full h-45 lg:h-[calc(137vh-0px)] relative overflow-hidden">
             <AuthImagePanel userType={userType} />
           </div>
 
