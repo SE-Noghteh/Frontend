@@ -1,24 +1,19 @@
-/**
- * SAMPLE FILE
- *
- * Authentication-related API communication belongs here.
- */
+import type { LoginFormValues, AuthResponse } from "@/types/Auth/authTypes";
 
-import type {
-  AuthResponse,
-  LoginCredentials,
-} from "@/types/Auth/authTypes";
+export async function login(values: LoginFormValues): Promise<AuthResponse> {
+  console.log("Login attempt with:", values);
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  
+  if (values.password === "wrong") {
+    throw new Error("رمز عبور یا نام کاربری اشتباه است.");
+  }
 
-export function login(
-  credentials: LoginCredentials,
-): Promise<AuthResponse | null> {
-  void credentials;
-
-  // Replace with a real API request.
-  return Promise.resolve(null);
+  return {
+    user: { id: "1", fullName: "کارآموز", email: values.email || "user@example.com" },
+    accessToken: "mock-token-123",
+  };
 }
 
 export function logout(): Promise<void> {
-  // Replace with a real API request if required.
   return Promise.resolve();
 }
