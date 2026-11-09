@@ -8,12 +8,12 @@ interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> {
 export function Checkbox({ label, description, className = "", ...props }: CheckboxProps) {
   return (
     <label 
-      className={`flex flex-row-reverse items-start justify-between w-full cursor-pointer group gap-4 ${className}`}
+      className={`flex flex-row-reverse items-start justify-end w-full cursor-pointer group gap-3 ${className}`}
     >
-      <div className="relative flex items-center justify-center mt-0.5">
+      <div className="relative flex items-center justify-center mt-1">
         <input
           type="checkbox"
-          className="peer w-5 h-5 rounded border-border-decorative bg-surface-card text-action-primary focus:ring-focus-ring accent-action-primary cursor-pointer appearance-none border checked:bg-action-primary checked:border-action-primary transition-colors"
+          className="peer w-5 h-5 rounded border-2 border-interface-secondary bg-surface-card text-action-primary focus:ring-focus-ring accent-action-primary cursor-pointer appearance-none checked:bg-action-primary checked:border-action-primary transition-colors"
           {...props}
         />
 
