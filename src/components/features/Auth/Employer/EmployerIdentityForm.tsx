@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { iranProvinces } from "@/data/iranProvinces";
+import { EmployerDocumentsForm } from "./EmployerDocumentsForm"; // ← اضافه شد
 
 export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
   const [formData, setFormData] = useState({
@@ -23,14 +24,21 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
     hasLicense: false,
   });
 
+  const [step, setStep] = useState(2); // ← استیت جدید برای مرحله
+
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    setStep(3); // ← رفتن به مرحله ۳
   };
+
+  // اگر مرحله ۳ بود، فرم مدارک را نشان بده
+  if (step === 3) {
+    return <EmployerDocumentsForm onBack={() => setStep(2)} />;
+  }
 
   return (
     <form
