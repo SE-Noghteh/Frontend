@@ -11,7 +11,7 @@ import { VideoUploadBox } from "../VideoUploadBox";
 import { AgeStatusBox } from "../AgeStatusBox";
 import { registerBasicSchema, type RegisterBasicFormValues } from "@/schemas/registerJobSeekerSchema";
 import { genderOptions, provinceOptions, cityOptions, dayOptions, monthOptions, yearOptions } from "@/data/registerData";
-import { useEffect } from "react";
+import { useEffect, useRef  } from "react";
 
 interface BasicInfoStepProps {
   onNext: (data: RegisterBasicFormValues) => void;
@@ -48,9 +48,24 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   const monthName = monthOptions.find(m => m.value === birthMonth)?.label;
   const birthDate = birthDay && monthName && birthYear ? `${birthDay} ${monthName} ${birthYear}` : "";
 
-  useEffect(() => {
-    setValue("city", "");
-  }, [selectedProvince, setValue]);
+  const isFirstRender = useRef(true);
+
+useEffect(() => {
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
+    return;
+  }
+  setValue("city", "");
+}, [selectedProvince, setValue]);
+
+useEffect(() => {
+  if (defaultValues?.idCardImage) {
+    setValue("idCardImage", defaultValues.idCardImage);
+  }
+  if (defaultValues?.identityVideo) {
+    setValue("identityVideo", defaultValues.identityVideo);
+  }
+}, [defaultValues, setValue]);
 
   const currentCityOptions = selectedProvince ? cityOptions[selectedProvince] || [] : [];
 
@@ -114,7 +129,7 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
           error={errors.idCardImage?.message}
         />
         <p className="text-caption text-text-secondary text-right leading-relaxed mt-1">
-          فرمت مجاز: تصویر جی‌پی‌جی یا پی‌ان‌جی - حداکثر ۵ مگابایت.<br />تصویر شناسنامه فقط برای بررسی هویت استفاده می‌شود و عمومی نیست.
+          فرمت مجاز: تصویر JPG یا PNG - حداکثر ۵ مگابایت.<br />تصویر شناسنامه فقط برای بررسی هویت استفاده می‌شود و عمومی نیست.
         </p>
       </div>
 
@@ -123,9 +138,8 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
         <IdentityInstructionsBox fullName={fullName} birthDate={birthDate} />
         <VideoUploadBox value={identityVideo as unknown as File} onChange={(file) => setValue("identityVideo", file as any, { shouldValidate: true })} error={errors.identityVideo?.message} />
         <p className="text-caption text-text-secondary text-right leading-relaxed mt-1">
-          فرمت مجاز: MP4 یا MOV - بین ۵ تا ۲۰ ثانیه - حداکثر ۵۰ مگابایت.<br />ویدیو فقط برای بررسی هویت استفاده می‌شود و عمومی نیست.
+          ویدیو فقط برای بررسی هویت استفاده می‌شود و عمومی نیست.
         </p>
-        {errors.identityVideo && <p className="text-caption text-status-error mt-1">{errors.identityVideo.message}</p>}
       </div>
 
       <Controller

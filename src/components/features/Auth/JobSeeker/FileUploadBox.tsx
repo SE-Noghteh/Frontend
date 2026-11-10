@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface FileUploadBoxProps {
   title: string;
@@ -26,6 +26,14 @@ export function FileUploadBox({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false); 
+  
+  useEffect(() => {
+    if (value && !previewUrl) {
+      const url = URL.createObjectURL(value);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [value, previewUrl]);
 
   const processFile = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {

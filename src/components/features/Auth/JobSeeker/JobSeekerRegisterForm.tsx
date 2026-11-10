@@ -24,13 +24,13 @@ export function JobSeekerRegisterForm() {
     <div className="w-full flex flex-col gap-6">
       <RegisterStepper currentStep={currentStep} />
       
-      {currentStep === 1 && (
+      <div className={currentStep === 1 ? "block" : "hidden"}>
         <BasicInfoStep onNext={handleNextStep} defaultValues={formData} />
-      )}
+      </div>
       
-      {currentStep === 2 && (
+      <div className={currentStep === 2 ? "block" : "hidden"}>
         <AccountStep onNext={handleNextStep} onPrev={handlePrevStep} defaultValues={formData} />
-      )}
+      </div>
 
       {/* 
       {currentStep === 3 && (

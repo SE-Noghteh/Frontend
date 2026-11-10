@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { normalizeDigits } from "@/utils/normalizeDigits";
 
 // ==========================================
 // 1. Base Fields (Shared)
@@ -6,6 +7,7 @@ import * as yup from "yup";
 export const phoneSchema = yup
   .string()
   .required("شماره همراه را وارد کنید")
+  .transform((value) => (value ? normalizeDigits(value) : value))
   .matches(/^09\d{9}$/, "شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود");
 
 export const passwordSchema = yup
@@ -23,11 +25,23 @@ export const passwordSchema = yup
 export const registerBasicSchema = yup.object({
   firstName: yup.string().required("نام را وارد کن"),
   lastName: yup.string().required("نام خانوادگی را وارد کن"),
-  nationalCode: yup.string().required("کد ملی را وارد کن").matches(/^\d{10}$/, "کد ملی معتبر ۱۰ رقمی وارد کن"),
+
+  nationalCode: yup
+    .string()
+    .required("کد ملی را وارد کن")
+    .transform((value) => (value ? normalizeDigits(value) : value))
+    .matches(/^\d{10}$/, "کد ملی معتبر ۱۰ رقمی وارد کن"),
+
   gender: yup.string().required("جنسیت را انتخاب کن"),
   province: yup.string().required("استان را انتخاب کن"),
   city: yup.string().required("شهر را انتخاب کن"),
-  postalCode: yup.string().required("کد پستی را وارد کن"),
+
+  postalCode: yup
+  .string()
+  .required("کد پستی را وارد کن")
+  .transform((value) => (value ? normalizeDigits(value) : value))
+  .matches(/^\d{10}$/, "کد پستی معتبر ۱۰ رقمی وارد کن"),
+
   address: yup.string().required("نشانی را وارد کن"),
   birthDay: yup.string().required("تاریخ تولد کامل را انتخاب کن"),
   birthMonth: yup.string().required("تاریخ تولد کامل را انتخاب کن"),

@@ -15,6 +15,14 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (value && !previewUrl) {
+      const url = URL.createObjectURL(value);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [value, previewUrl]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
 
