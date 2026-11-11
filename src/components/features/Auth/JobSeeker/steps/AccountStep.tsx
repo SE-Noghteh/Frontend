@@ -7,28 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { registerAccountSchema, type RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 import { useState } from "react";
 import { PhoneVerificationModal } from "../PhoneVerificationModal"; 
+import {PasswordCriteria} from "@/components/features/Auth/JobSeeker/PasswordCriteria";
 
-function PasswordCriteria({ password }: { password: string }) {
-  const criteria = [
-    { label: "حداقل ۱۲ کاراکتر", isValid: password.length >= 12 },
-    { label: "حاوی حرف کوچک و بزرگ", isValid: /[a-z]/.test(password) && /[A-Z]/.test(password) },
-    { label: "حاوی یک عدد", isValid: /[0-9]/.test(password) },
-    { label: "حاوی یک نماد", isValid: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
-  ];
-
-  return (
-    <div className="flex flex-col gap-1.5 mt-2 pr-2">
-      {criteria.map((c, i) => (
-        <div key={i} className="flex items-center gap-2 text-caption">
-          <div className={`w-4 h-4 rounded-full flex items-center justify-center border ${c.isValid ? "border-status-success bg-status-success text-white" : "border-text-disabled text-transparent"}`}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </div>
-          <span className={c.isValid ? "text-text-primary" : "text-text-secondary"}>{c.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 interface AccountStepProps {
   onNext: (data: RegisterAccountFormValues) => void;
@@ -37,7 +17,7 @@ interface AccountStepProps {
 }
 
 export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps) {
-  const { register, handleSubmit, watch, formState: { errors, isSubmitted } } = useForm<RegisterAccountFormValues>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitted, touchedFields } } = useForm<RegisterAccountFormValues>({
     resolver: yupResolver(registerAccountSchema),
     mode: "onTouched",
     defaultValues: {
@@ -107,7 +87,7 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
           {...register("password")}
           error={errors.password?.message}
         >
-          <PasswordCriteria password={password} />
+           <PasswordCriteria password={password} isTouched={touchedFields.password} />
         </PasswordInput>
 
         <PasswordInput
@@ -116,19 +96,22 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
           placeholder="رمز عبور را دوباره وارد کنید"
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
-          helperText="تکرار رمز با رمز عبور یکسان نیست."
         />
 
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-col gap-3 mt-2">
           <Checkbox
             label="قوانین زدلنسر و حریم خصوصی را می‌پذیرم. *"
+            hasError={!!errors.termsAccepted} 
             {...register("termsAccepted")}
           />
-          {errors.termsAccepted && <p className="text-caption text-status-error">{errors.termsAccepted.message}</p>}
           
-          <div className="flex items-center gap-4 mt-1 pr-8">
-            <a href="#" className="text-label text-interface-secondary hover:underline">قوانین زدلنسر</a>
-            <a href="#" className="text-label text-interface-secondary hover:underline">حریم خصوصی</a>
+          <div className="flex items-center gap-4 pr-7">
+            <a href="#" className="text-label text-interface-secondary hover:underline">
+              قوانین زدلنسر
+            </a>
+            <a href="#" className="text-label text-interface-secondary hover:underline">
+              حریم خصوصی
+            </a>
           </div>
         </div>
 
