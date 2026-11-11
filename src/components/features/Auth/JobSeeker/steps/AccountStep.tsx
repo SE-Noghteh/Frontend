@@ -77,7 +77,7 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
           error={errors.phone?.message}
           onSendCode={handleSendCode}
           isCodeSent={isCodeSent}
-          helperText={isCodeSent ? "شماره همراه تایید شد." : "برای تایید شماره، روی ارسال کد کلیک کنید."}
+          helperText="برای تایید شماره، روی ارسال کد کلیک کنید."
         />
 
         <PasswordInput
@@ -128,6 +128,10 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
       <PhoneVerificationModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+        onEditPhone={() => {
+          setIsModalOpen(false);
+          setIsCodeSent(false);
+        }}
         phone={phone} 
         onVerify={handleVerifyCode} 
       />
