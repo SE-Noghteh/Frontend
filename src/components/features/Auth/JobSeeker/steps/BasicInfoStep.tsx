@@ -152,7 +152,7 @@ useEffect(() => {
 
       <div className="flex items-center gap-4 mt-4">
         <Button type="submit" variant="primary" fullWidth>
-          ادامه: اطلاعات حساب
+          ادامه، اطلاعات حساب
         </Button>
       </div>
       

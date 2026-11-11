@@ -17,7 +17,7 @@ interface AccountStepProps {
 }
 
 export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps) {
-  const { register, handleSubmit, watch, formState: { errors, isSubmitted, touchedFields } } = useForm<RegisterAccountFormValues>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitted, touchedFields, isValid } } = useForm<RegisterAccountFormValues>({
     resolver: yupResolver(registerAccountSchema),
     mode: "onTouched",
     defaultValues: {
@@ -31,6 +31,8 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
 
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const password = watch("password", "");
   const phone = watch("phone", "");
@@ -60,9 +62,22 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
     return errorMessages;
   };
 
+  const onSubmitHandler = (data: RegisterAccountFormValues) => {
+    if (!isCodeSent) {
+      setVerificationError("شماره همراه باید با کد پیامکی تأیید شود.");
+      return;
+    }
+    setVerificationError(null);
+    
+    setIsSubmitting(true);
+    setTimeout(() => {
+      onNext(data);
+    }, 1000);
+  };
+
   return (
     <>
-      <form onSubmit={handleSubmit(onNext)} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmitHandler)} className="flex flex-col gap-6">
         <div className="text-right mb-2">
           <h2 className="text-card-title font-bold" style={{ color: "var(--color-text-primary)" }}>اطلاعات حساب</h2>
           <p className="text-label text-text-secondary mt-2">شماره همراه و یک رمز مطمئن، کلید ورود تو به زدلنسر است.</p>
@@ -73,9 +88,18 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
           label="شماره همراه"
           isRequired
           placeholder="شماره همراه ۱۱ رقمی"
-          {...register("phone")}
-          error={errors.phone?.message}
-          onSendCode={handleSendCode}
+          {...register("phone", {
+            onChange: () => {
+              setVerificationError(null);
+              setIsCodeSent(false);
+            }
+          })}
+          value={phone}
+          error={verificationError || errors.phone?.message} 
+          onSendCode={() => {
+            setVerificationError(null); 
+            handleSendCode();
+          }}
           isCodeSent={isCodeSent}
           helperText="برای تایید شماره، روی ارسال کد کلیک کنید."
         />
@@ -115,12 +139,32 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
           </div>
         </div>
 
-        <div className="flex gap-4 mt-6">
-          <Button type="button" variant="secondary" onClick={onPrev} className="flex-1">
+        <div className="flex gap-3 sm:gap-4 mt-6">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={onPrev} 
+            disabled={isSubmitting}  
+            className="flex-1 whitespace-nowrap"
+          >
             بازگشت
           </Button>
-          <Button type="submit" variant="primary" className="flex-1">
-            ادامه: اطلاعات والد
+          <Button 
+            type="submit" 
+            variant="primary" 
+            className="flex-1 whitespace-nowrap"
+            disabled={!isValid || isSubmitting}
+            leftIcon={
+              isSubmitting ? (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : null
+            }
+          >
+            <span className="inline sm:hidden">ادامه</span>
+            <span className="hidden sm:inline">ادامه: اطلاعات والد</span>
           </Button>
         </div>
       </form>

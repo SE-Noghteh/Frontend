@@ -14,7 +14,7 @@ export function AuthImagePanel({ userType }: { userType: "jobseeker" | "employer
 
   return (
     <div className="w-full h-full relative">
-      <div className="block lg:hidden w-full h-48 relative overflow-hidden bg-gray-50"> 
+      <div className="block lg:hidden w-full h-48 relative overflow-hidden"> 
         <img 
           src={currentImages.mobile} 
           alt="Mobile background" 

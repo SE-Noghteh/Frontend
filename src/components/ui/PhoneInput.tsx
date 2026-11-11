@@ -18,8 +18,11 @@ export function PhoneInput({
   onSendCode,
   isCodeSent,
   className = "",
+  value,
   ...props
 }: PhoneInputProps) {
+  const isSendCodeDisabled = !value || String(value).length < 11;
+
   return (
     <div className="flex flex-col gap-1.5 w-full">
       <label className="text-label text-text-primary font-medium">
@@ -67,6 +70,7 @@ export function PhoneInput({
             type="button" 
             variant="secondary" 
             onClick={onSendCode}
+            disabled={isCodeSent || String(value || "").length < 11} 
             className="whitespace-nowrap !px-4 h-[42px]"
           >
             ارسال کد
