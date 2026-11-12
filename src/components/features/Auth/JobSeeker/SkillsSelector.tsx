@@ -8,7 +8,7 @@ interface SkillsSelectorProps {
 }
 
 const MOCK_SKILLS: Skill[] = [
-  { id: "1", title: "طراحی گرافیک", category: "" }, 
+  { id: "1", title: "طراحی گرافیک", category: "  " }, 
   { id: "2", title: "طراحی رابط کاربری", category: "طراحی تجربه‌های دیجیتال" },
   { id: "3", title: "طراحی محصول", category: "ایده‌پردازی و حل مسئله" },
   { id: "4", title: "طراحی صنعتی", category: "به‌زودی؛ فعلاً قابل انتخاب نیست" },

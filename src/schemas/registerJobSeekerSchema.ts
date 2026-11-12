@@ -117,10 +117,9 @@ export const registerParentSchema = yup.object({
 export type RegisterParentFormValues = yup.InferType<typeof registerParentSchema>;
 
 // ==========================================
-// 5. Final Submission Schema
+// 4. Step 4: Finish
 // ==========================================
-export const fullJobSeekerSchema = registerBasicSchema
-  .concat(registerAccountSchema)
-  .concat(registerParentSchema);
+export const registerFinishSchema = yup.object({
+}).required();
 
-export type FullJobSeekerFormValues = yup.InferType<typeof fullJobSeekerSchema>;
+export type RegisterFinishFormValues = yup.InferType<typeof registerFinishSchema>;

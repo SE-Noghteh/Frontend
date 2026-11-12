@@ -3,11 +3,13 @@ import { RegisterStepper } from "./RegisterStepper";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { AccountStep } from "./steps/AccountStep";
 import { ParentInfoStep } from "./steps/ParentInfoStep";
-// import { FinishStep } from "./steps/FinishStep";
+import { FinishStep } from "./steps/FinishStep"; 
+import { useNavigate } from "react-router-dom"; 
 
 export function JobSeekerRegisterForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const navigate = useNavigate();
 
   const handleNextStep = (data: Record<string, any>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -24,15 +26,24 @@ export function JobSeekerRegisterForm() {
     <div className="w-full flex flex-col gap-6">
       <RegisterStepper currentStep={currentStep} />
       
-      <div className={currentStep === 1 ? "block" : "hidden"}>
+      <div 
+        style={{ display: currentStep === 1 ? "block" : "none" }} 
+        aria-hidden={currentStep !== 1}
+      >
         <BasicInfoStep onNext={handleNextStep} defaultValues={formData} />
       </div>
       
-      <div className={currentStep === 2 ? "block" : "hidden"}>
+      <div 
+        style={{ display: currentStep === 2 ? "block" : "none" }} 
+        aria-hidden={currentStep !== 2}
+      >
         <AccountStep onNext={handleNextStep} onPrev={handlePrevStep} defaultValues={formData} />
-      </div> 
+      </div>
 
-      <div className={currentStep === 3 ? "block" : "hidden"}>
+      <div 
+        style={{ display: currentStep === 3 ? "block" : "none" }} 
+        aria-hidden={currentStep !== 3}
+      >
         <ParentInfoStep 
           onNext={handleNextStep} 
           onPrev={handlePrevStep} 
@@ -40,15 +51,20 @@ export function JobSeekerRegisterForm() {
           birthYear={formData.birthYear}
           birthMonth={formData.birthMonth}
           birthDay={formData.birthDay}
-          userPhone={formData.phone} 
+          userPhone={formData.phone}
         />
       </div>
       
-      {/* 
-      {currentStep === 4 && (
-        <FinishStep onPrev={handlePrevStep} formData={formData} />
-      )} 
-      */}
+      <div 
+        style={{ display: currentStep === 4 ? "block" : "none" }} 
+        aria-hidden={currentStep !== 4}
+      >
+        <FinishStep 
+          onPrev={handlePrevStep} 
+          onDashboard={() => navigate("/dashboard")} 
+          parentPhone={formData.parentPhone}
+        />
+      </div>
     </div>
   );
 }

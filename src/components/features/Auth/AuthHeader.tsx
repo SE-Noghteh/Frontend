@@ -1,16 +1,26 @@
 interface AuthHeaderProps {
   onLoginClick: () => void;
+  onTrackClick?: () => void; 
 }
 
-export function AuthHeader({ onLoginClick }: AuthHeaderProps) {
+export function AuthHeader({ onLoginClick, onTrackClick }: AuthHeaderProps) {
   return (
-    <header className="flex items-center justify-between w-full h-16">
-      <div className="flex items-center">
+    <header className="flex items-center justify-between w-full h-16" dir="rtl">
+      
+      <div className="flex items-center gap-6">
         <img 
           src="@/../public/images/ZedlancerLogo.svg" 
           alt="زدلنسر" 
           className="h-8 w-auto object-contain" 
         />
+        
+        <button 
+          type="button"
+          onClick={onTrackClick} 
+          className="text-label text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+        >
+          پیگیری
+        </button>
       </div>
       
       <button 
@@ -20,6 +30,7 @@ export function AuthHeader({ onLoginClick }: AuthHeaderProps) {
       >
         ورود
       </button>
+      
     </header>
   );
 }

@@ -15,7 +15,7 @@ export function AuthLayout({ children, activeTab, onTabChange }: AuthLayoutProps
       
       <div className="flex flex-col lg:flex-row-reverse flex-1 w-full">
         
-        <div className="w-full lg:w-[59.375%] flex flex-col px-8 lg:px-24 pt-8 lg:pt-0 bg-white z-10 order-last lg:order-none">
+        <div className="w-full lg:w-[59.375%] flex flex-col px-8 lg:px-24 pt-8 lg:pt-0 bg-white z-10 order-last lg:order-0">
           
           <div className="hidden lg:block pt-8">
             <AuthHeader onLoginClick={() => onTabChange("login")} />
@@ -30,7 +30,7 @@ export function AuthLayout({ children, activeTab, onTabChange }: AuthLayoutProps
           </div>
         </div>
 
-        <div className="w-full lg:w-[40.625%] relative flex flex-col order-first lg:order-none">
+        <div className="w-full lg:w-[40.625%] relative flex flex-col order-first lg:order-0">
           
           <div className="block lg:hidden w-full px-8 pt-8 pb-4 bg-white">
             <AuthHeader onLoginClick={() => onTabChange("login")} />
