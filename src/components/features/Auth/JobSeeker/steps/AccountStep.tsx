@@ -5,7 +5,7 @@ import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 import { registerAccountSchema, type RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PhoneVerificationModal } from "../PhoneVerificationModal"; 
 import {PasswordCriteria} from "@/components/features/Auth/JobSeeker/PasswordCriteria";
 
@@ -33,6 +33,9 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    setIsSubmitting(false);
+  }, []);
   
   const password = watch("password", "");
   const phone = watch("phone", "");
@@ -72,6 +75,7 @@ export function AccountStep({ onNext, onPrev, defaultValues }: AccountStepProps)
     setIsSubmitting(true);
     setTimeout(() => {
       onNext(data);
+      setIsSubmitting(false);
     }, 1000);
   };
 

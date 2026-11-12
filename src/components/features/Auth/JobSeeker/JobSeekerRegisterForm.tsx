@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RegisterStepper } from "./RegisterStepper";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { AccountStep } from "./steps/AccountStep";
-// import { ParentInfoStep } from "./steps/ParentInfoStep";
+import { ParentInfoStep } from "./steps/ParentInfoStep";
 // import { FinishStep } from "./steps/FinishStep";
 
 export function JobSeekerRegisterForm() {
@@ -30,13 +30,19 @@ export function JobSeekerRegisterForm() {
       
       <div className={currentStep === 2 ? "block" : "hidden"}>
         <AccountStep onNext={handleNextStep} onPrev={handlePrevStep} defaultValues={formData} />
-      </div>
+      </div> 
 
-      {/* 
-      {currentStep === 3 && (
-        <ParentInfoStep onNext={handleNextStep} onPrev={handlePrevStep} defaultValues={formData} />
-      )} 
-      */}
+      <div className={currentStep === 3 ? "block" : "hidden"}>
+        <ParentInfoStep 
+          onNext={handleNextStep} 
+          onPrev={handlePrevStep} 
+          defaultValues={formData} 
+          birthYear={formData.birthYear}
+          birthMonth={formData.birthMonth}
+          birthDay={formData.birthDay}
+          userPhone={formData.phone} 
+        />
+      </div>
       
       {/* 
       {currentStep === 4 && (

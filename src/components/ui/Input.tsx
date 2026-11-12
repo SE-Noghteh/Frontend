@@ -40,7 +40,7 @@ export function Input({
       </div>
       
       {error ? (
-        <p className="text-caption text-status-error">{error}</p>
+        <p className="text-caption text-status-error whitespace-pre-line">{error}</p>
       ) : helperText ? (
         <p className="text-caption text-text-secondary">{helperText}</p>
       ) : null}

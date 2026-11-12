@@ -101,13 +101,20 @@ export const registerAccountSchema = yup.object({
 export type RegisterAccountFormValues = yup.InferType<typeof registerAccountSchema>;
 
 // ==========================================
-// 4. Step 3 & 4 (Placeholders for future)
+// 4. Step 3: Parent Info
 // ==========================================
-export const registerParentSchema = yup.object({}).required(); // در آینده تکمیل می‌شود
-export type RegisterParentFormValues = yup.InferType<typeof registerParentSchema>;
+export const registerParentSchema = yup.object({
+  parentFullName: yup.string().trim(),
+  parentPhone: yup
+    .string()
+    .transform((value) => (value ? normalizeDigits(value) : value))
+    .test("parent-phone-valid", "شماره همراه والد معتبر نیست", function (value) {
+      if (!value) return true; 
+      return /^09\d{9}$/.test(value);
+    }),
+}).required();
 
-export const registerFinishSchema = yup.object({}).required();
-export type RegisterFinishFormValues = yup.InferType<typeof registerFinishSchema>;
+export type RegisterParentFormValues = yup.InferType<typeof registerParentSchema>;
 
 // ==========================================
 // 5. Final Submission Schema
