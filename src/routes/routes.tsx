@@ -17,6 +17,7 @@ import SeekerCollabsPage from "@/pages/SeekerCollabsPage";
 import SeekerRequestDetailPage from "@/pages/SeekerRequestDetailPage";
 import SeekerRequestsPage from "@/pages/SeekerRequestsPage";
 import SupportPage from "@/pages/SupportPage";
+import { RoleSelectionPage } from "@/pages/RoleSelectionPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,8 +30,16 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    path: "/login",
+    element: <RoleSelectionPage mode="login" />,
+  },
+  {
+    path: "/signup",
+    element: <RoleSelectionPage mode="signup" />,
+  },
+  {
     path: "/jobseekerlogin",
-    element: <JobSeekerLoginPage />, 
+    element: <JobSeekerLoginPage />,
   },
   {
     path: "/jobseekerlogin/forgot-password",
