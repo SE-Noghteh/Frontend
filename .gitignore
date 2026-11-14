@@ -7,28 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies
 node_modules
-
-# Build outputs
 dist
 dist-ssr
-
-# Local environment files
 *.local
-.env
-.env.*
-!.env.example
-
-# TypeScript
-*.tsbuildinfo
-
-# Test coverage
-coverage
-
-# Cache
-.cache
-.vite
 
 # Editor directories and files
 .vscode/*
@@ -40,7 +22,3 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
-# OS files
-Thumbs.db
-Desktop.ini
