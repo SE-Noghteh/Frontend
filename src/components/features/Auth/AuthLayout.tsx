@@ -46,7 +46,7 @@ export function AuthLayout({ children, activeTab, onTabChange }: AuthLayoutProps
       </div>
 
       {/* footer */}
-      <footer className="w-full bg-action-primary text-white py-4 px-8 flex justify-between items-center text-caption z-20 relative">
+      <footer className="w-full bg-action-primary text-white py-4 px-8 flex justify-between items-center text-caption z-10 relative">
         <span>زدلنسر؛ شروع راه تو</span>
         <span><a href="#" className=" hover:underline mr-1">نیاز به راهنمایی داری؟ </a></span>
       </footer>

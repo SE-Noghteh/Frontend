@@ -37,7 +37,12 @@ export function JobSeekerRegisterForm() {
         style={{ display: currentStep === 2 ? "block" : "none" }} 
         aria-hidden={currentStep !== 2}
       >
-        <AccountStep onNext={handleNextStep} onPrev={handlePrevStep} defaultValues={formData} />
+        <AccountStep 
+          onNext={handleNextStep} 
+          onPrev={handlePrevStep} 
+          defaultValues={formData} 
+          basicData={formData} 
+        />
       </div>
 
       <div 

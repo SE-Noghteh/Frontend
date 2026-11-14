@@ -12,6 +12,10 @@ interface PhoneVerificationModalProps {
   phone: string;
   onVerify: (code: string) => void;
   simulateError?: ErrorType; 
+  isLoading?: boolean; 
+  error?: string | null; 
+  onResend?: (onSuccess: () => void) => void;
+  isResending?: boolean;
 }
 
 export function PhoneVerificationModal({ 
@@ -20,10 +24,14 @@ export function PhoneVerificationModal({
   onEditPhone,
   phone, 
   onVerify,
-  simulateError = null 
+  simulateError = null,
+  isLoading = false, 
+  error = null,
+  onResend, 
+  isResending = false
 }: PhoneVerificationModalProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
-  const [timeLeft, setTimeLeft] = useState(120); 
+  const [timeLeft, setTimeLeft] = useState(60); 
   const [attemptsTimeLeft, setAttemptsTimeLeft] = useState(600); 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -89,18 +97,26 @@ export function PhoneVerificationModal({
 
   const handleSubmit = () => {
     const fullCode = code.join("");
-    if (fullCode.length === 6) {
+    if (fullCode.length === 6 && !isLoading) {
       onVerify(fullCode);
     }
   };
 
   const handleResendCode = () => {
-    setTimeLeft(120);
-    setCode(Array(6).fill(""));
-    inputRefs.current[0]?.focus();
+    if (onResend) {
+      onResend(() => {
+        setTimeLeft(60); 
+        setCode(Array(6).fill(""));
+        inputRefs.current[0]?.focus();
+      });
+    } else {
+      setTimeLeft(60);
+      setCode(Array(6).fill(""));
+      inputRefs.current[0]?.focus();
+    }
   };
 
-  const isInputDisabled = isTimeout || isTooManyAttempts || isSmsFailed;
+  const isInputDisabled = isTimeout || isTooManyAttempts || isSmsFailed || isLoading;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -112,6 +128,7 @@ export function PhoneVerificationModal({
             onClick={onClose} 
             className="text-text-secondary hover:text-text-primary p-2 rounded-full border border-border-subtle bg-surface-card transition-colors"
             aria-label="بستن"
+            disabled={isLoading} 
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -130,6 +147,7 @@ export function PhoneVerificationModal({
         <button 
           onClick={onEditPhone}
           className="text-label font-medium text-action-primary hover:underline text-right mb-6 w-fit"
+          disabled={isLoading}
         >
           ویرایش شماره
         </button>
@@ -154,10 +172,12 @@ export function PhoneVerificationModal({
                 disabled={isInputDisabled}
                 className={`w-full max-w-[3rem] aspect-[3/4] sm:aspect-square flex-1 text-center text-section-title font-bold rounded-md border focus:outline-none transition-all placeholder:font-normal
                   ${isInputDisabled 
-                    ? "bg-disabled-surface border-transparent text-disabled-text cursor-not-allowed" // ظاهر خاکستری برای خطاهای مسدودکننده
-                    : isTimeout || isInvalidCode
-                      ? "border-status-error text-status-error bg-surface-card" // قرمز برای اتمام زمان و کد اشتباه
-                      : "border-border-decorative text-interface-secondary bg-surface-card focus:ring-2 focus:ring-focus-ring focus:border-transparent placeholder:text-charcoal-4" // عادی
+                    ? "bg-disabled-surface border-transparent text-disabled-text cursor-not-allowed" 
+                    : error
+                      ? "border-status-error text-status-error bg-surface-card" // اگر خطای بک‌اند داشت، قرمز شود
+                      : isTimeout || isInvalidCode
+                        ? "border-status-error text-status-error bg-surface-card" 
+                        : "border-border-decorative text-interface-secondary bg-surface-card focus:ring-2 focus:ring-focus-ring focus:border-transparent placeholder:text-charcoal-4"
                   }
                 `}
                 placeholder="-"
@@ -178,6 +198,14 @@ export function PhoneVerificationModal({
           )}
         </div>
 
+        {error && !isLoading && (
+          <div className="mb-4">
+            <ErrorBox 
+              title="خطا در تایید کد" 
+              description={error} 
+            />
+          </div>
+        )}
 
         {isTimeout && !isTooManyAttempts && !isSmsFailed && (
           <div className="mb-4">
@@ -219,19 +247,19 @@ export function PhoneVerificationModal({
         )}
 
 
-        {(isTimeout || isSmsFailed) && !isTooManyAttempts && (
+        {timeLeft === 0 && !isTooManyAttempts && !isLoading && (
           <div className="mb-4">
             <Button 
               type="button" 
               variant="primary" 
               fullWidth
               onClick={handleResendCode}
+              disabled={isResending} 
             >
-              ارسال دوباره‌ی کد
+              {isResending ? "در حال ارسال..." : "ارسال دوباره‌ی کد"}
             </Button>
           </div>
         )}
-
         <Button 
           onClick={handleSubmit} 
           variant="primary" 
@@ -239,7 +267,7 @@ export function PhoneVerificationModal({
           disabled={code.join("").length !== 6 || isInputDisabled}
           className="mt-2"
         >
-          تأیید و ادامه
+          {isLoading ? "در حال تایید..." : "تأیید و ادامه"}
         </Button>
       </div>
     </Modal>

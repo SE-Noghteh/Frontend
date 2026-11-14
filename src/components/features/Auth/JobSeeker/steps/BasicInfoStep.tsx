@@ -10,8 +10,9 @@ import { IdentityInstructionsBox } from "../IdentityInstructionsBox";
 import { VideoUploadBox } from "../VideoUploadBox";
 import { AgeStatusBox } from "../AgeStatusBox";
 import { registerBasicSchema, type RegisterBasicFormValues } from "@/schemas/registerJobSeekerSchema";
-import { genderOptions, provinceOptions, cityOptions, dayOptions, monthOptions, yearOptions } from "@/data/registerData";
+import { provinceOptions, dayOptions, monthOptions, yearOptions } from "@/data/registerData";
 import { useEffect, useRef  } from "react";
+import { useSignupOptions } from "@/hooks/JobSeeker/useJobSeekerSignup";
 
 interface BasicInfoStepProps {
   onNext: (data: RegisterBasicFormValues) => void;
@@ -19,6 +20,8 @@ interface BasicInfoStepProps {
 }
 
 export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
+  const { data: options, isLoading: isLoadingOptions } = useSignupOptions();
+
   const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<RegisterBasicFormValues>({
     resolver: yupResolver(registerBasicSchema),
     mode: "onTouched",
@@ -29,7 +32,7 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
       birthDay: "",
       birthMonth: "",
       birthYear: "",
-      skills: [],
+      interests: [],
       ...defaultValues,
     }
   });
@@ -47,6 +50,12 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   const fullName = `${firstName || ""} ${lastName || ""}`.trim();
   const monthName = monthOptions.find(m => m.value === birthMonth)?.label;
   const birthDate = birthDay && monthName && birthYear ? `${birthDay} ${monthName} ${birthYear}` : "";
+
+  const cityOptions = options?.cities.map(city => ({ label: city, value: city })) || [];
+  const genderOptions = options?.genders.map(gender => ({ 
+    label: gender === "male" ? "مرد" : "زن", 
+    value: gender 
+  })) || [];
 
   const isFirstRender = useRef(true);
 
@@ -67,7 +76,11 @@ useEffect(() => {
   }
 }, [defaultValues, setValue]);
 
-  const currentCityOptions = selectedProvince ? cityOptions[selectedProvince] || [] : [];
+  // const currentCityOptions = selectedProvince ? cityOptions[selectedProvince] || [] : [];
+
+  if (isLoadingOptions) {
+    return <div className="text-center p-4">در حال دریافت اطلاعات...</div>; 
+  }
 
   return (
     <form onSubmit={handleSubmit(onNext)} className="flex flex-col gap-4">
@@ -85,7 +98,7 @@ useEffect(() => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select label="استان" isRequired options={provinceOptions} {...register("province")} error={errors.province?.message} />
-        <Select label="شهر" isRequired options={currentCityOptions} disabled={!selectedProvince} {...register("city")} error={errors.city?.message}  />
+        <Select label="شهر" isRequired options={cityOptions} disabled={!selectedProvince} {...register("city")} error={errors.city?.message}  />
       </div>
       <p className="text-caption text-text-secondary -mt-2 text-right">با تغییر استان، شهر ناسازگار پاک می‌شود.</p>
 
@@ -143,10 +156,15 @@ useEffect(() => {
       </div>
 
       <Controller
-        name="skills"
+        name="interests"
         control={control}
         render={({ field }) => (
-          <SkillsSelector value={field.value || []} onChange={field.onChange} error={errors.skills?.message} />
+          <SkillsSelector 
+            value={field.value || []} 
+            onChange={field.onChange} 
+            error={errors.interests?.message} 
+            options={options?.interests} 
+          />
         )}
       />
 

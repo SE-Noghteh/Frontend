@@ -65,17 +65,13 @@ export const registerBasicSchema = yup.object({
       }
       return age >= 15 && age <= 22;
     }),
-  skills: yup
+
+    interests: yup
     .array()
-    .of(
-      yup.object().shape({
-        id: yup.string().required(),
-        title: yup.string().required(),
-        category: yup.string().required(),
-      })
-    )
+    .of(yup.string().required())
     .min(1, "حداقل یک مهارت را انتخاب کنید")
-    .required("انتخاب مهارت الزامی است"),
+    .required("انتخاب مهارت الزامی است")
+    .default([]),
   idCardImage: yup.mixed().required("تصویر شناسنامه الزامی است"),
   identityVideo: yup.mixed().required("ویدیو هویت الزامی است"),
 }).required();
