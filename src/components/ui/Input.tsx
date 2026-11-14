@@ -23,8 +23,10 @@ export function Input({
       
       <div className="relative">
         <input
-          className={`w-full rounded-md border px-3 py-2 text-body text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-focus-ring transition-colors bg-surface-card ${
-            error ? "border-status-error focus:ring-status-error" : "border-border-decorative"
+          className={`w-full rounded-md border px-3 py-2 text-body text-text-primary placeholder:text-text-disabled focus:outline-none transition-colors bg-surface-card shadow-sm ${
+            error 
+              ? "border-status-error focus:ring-2 focus:ring-status-error/50" 
+              : "border-[#457b9d] focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary"
           } ${className}`}
           {...props}
         />
