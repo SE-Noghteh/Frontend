@@ -5,11 +5,10 @@ import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 import { registerAccountSchema, type RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PhoneVerificationModal } from "../PhoneVerificationModal"; 
-import {PasswordCriteria} from "@/components/features/Auth/JobSeeker/PasswordCriteria";
+import { PasswordCriteria } from "@/components/features/Auth/JobSeeker/PasswordCriteria";
 import { useJobSeekerSignup, useJobSeekerVerifyOtp, useJobSeekerResendOtp } from "@/hooks/JobSeeker/useJobSeekerSignup";
-
 
 interface AccountStepProps {
   onNext: (data: RegisterAccountFormValues) => void;
@@ -18,8 +17,8 @@ interface AccountStepProps {
   basicData: any;
 }
 
-export function AccountStep({ onNext, onPrev, defaultValues, basicData }: AccountStepProps & { basicData: any }) {
-  const { register, handleSubmit, watch, formState: { errors, isSubmitted, touchedFields, isValid } } = useForm<RegisterAccountFormValues>({
+export function AccountStep({ onNext, onPrev, defaultValues, basicData }: AccountStepProps) {
+  const { register, handleSubmit, trigger, getValues, watch, formState: { errors, touchedFields, isValid } } = useForm<RegisterAccountFormValues>({
     resolver: yupResolver(registerAccountSchema),
     mode: "onTouched",
     defaultValues: {
@@ -34,24 +33,39 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [verificationError, setVerificationError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pendingAccountData, setPendingAccountData] = useState<RegisterAccountFormValues | null>(null);
-  const { mutate: signup, isPending: isSigningUp, error: signupError } = useJobSeekerSignup();
+  
+  const { mutate: signup } = useJobSeekerSignup();
   const { mutate: verifyOtp, isPending: isVerifying } = useJobSeekerVerifyOtp();
   const { mutate: resendOtp, isPending: isResending } = useJobSeekerResendOtp();
 
-  useEffect(() => {
-    setIsSubmitting(false);
-  }, []);
-  
   const password = watch("password", "");
   const phone = watch("phone", "");
 
-  const handleSendCode = () => {
-    if (phone.length === 11) {
-      setIsModalOpen(true); 
-    } else {
-    }
+  const handleSendCode = async () => {
+    const isPhoneValid = await trigger("phone");
+    if (!isPhoneValid) return;
+
+    setVerificationError(null);
+    setIsModalOpen(true);
+
+    signup(
+      { basicData, accountData: getValues() },
+      {
+        onSuccess: () => {
+          resendOtp(phone, {
+            onSuccess: () => {
+              setIsCodeSent(true);
+            },
+            onError: (err: any) => {
+              setVerificationError(err.response?.data?.message || "خطا در ارسال پیامک");
+            }
+          });
+        },
+        onError: (err: any) => {
+          setVerificationError(err.response?.data?.message || "خطا در ثبت اطلاعات");
+        }
+      }
+    );
   };
 
   const handleVerifyCode = (code: string) => {
@@ -61,9 +75,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         onSuccess: () => {
           setIsCodeSent(true);
           setIsModalOpen(false);
-          if (pendingAccountData) {
-            onNext(pendingAccountData);
-          }
+          onNext(getValues()); 
         },
         onError: (err: any) => {
           setVerificationError(err.response?.data?.message || "کد وارد شده اشتباه است");
@@ -75,45 +87,22 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
   const handleResendOtp = (onSuccessCallback: () => void) => {
     resendOtp(phone, {
       onSuccess: () => {
+        setVerificationError(null);
         onSuccessCallback();
       },
       onError: (err: any) => {
-        console.error("Resend error:", err);
-      }
+        setVerificationError(err.response?.data?.message || "خطا در ارسال مجدد کد");
+      },
     });
-  };
-
-  const getGlobalErrors = () => {
-    const errorMessages: string[] = [];
-    if (isSubmitted || Object.keys(errors).length > 0) {
-      if (errors.phone) errorMessages.push("شماره همراه معتبر نیست یا وارد نشده است.");
-      if (errors.password) errorMessages.push("رمز عبور با قوانین مطابقت ندارد.");
-      if (errors.confirmPassword) errorMessages.push("تکرار رمز عبور با رمز عبور یکسان نیست.");
-      if (errors.termsAccepted) errorMessages.push("پذیرش قوانین و حریم خصوصی الزامی است.");
-    }
-    return errorMessages;
   };
 
   const onSubmitHandler = (data: RegisterAccountFormValues) => {
     if (!isCodeSent) {
-      setVerificationError("شماره همراه باید با کد پیامکی تأیید شود.");
+      setVerificationError("لطفاً ابتدا شماره همراه خود را با کد پیامکی تأیید کنید.");
+      setIsModalOpen(true);
       return;
     }
-    setVerificationError(null);
-    
-    setPendingAccountData(data);
-
-    signup(
-      { basicData, accountData: data },
-      {
-        onSuccess: () => {
-          setIsModalOpen(true);
-        },
-        onError: (err: any) => {
-          setVerificationError(err.response?.data?.message || "خطا در ثبت‌نام. لطفا دوباره تلاش کنید.");
-        }
-      }
-    );
+    onNext(data);
   };
 
   return (
@@ -123,7 +112,6 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           <h2 className="text-card-title font-bold" style={{ color: "var(--color-text-primary)" }}>اطلاعات حساب</h2>
           <p className="text-label text-text-secondary mt-2">شماره همراه و یک رمز مطمئن، کلید ورود تو به زدلنسر است.</p>
         </div>
-
 
         <PhoneInput
           label="شماره همراه"
@@ -137,10 +125,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           })}
           value={phone}
           error={verificationError || errors.phone?.message} 
-          onSendCode={() => {
-            setVerificationError(null); 
-            handleSendCode();
-          }}
+          onSendCode={handleSendCode}
           isCodeSent={isCodeSent}
           helperText="برای تایید شماره، روی ارسال کد کلیک کنید."
         />
@@ -185,7 +170,6 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
             type="button" 
             variant="secondary" 
             onClick={onPrev} 
-            disabled={isSigningUp}  
             className="flex-1 whitespace-nowrap"
           >
             بازگشت
@@ -194,15 +178,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
             type="submit" 
             variant="primary" 
             className="flex-1 whitespace-nowrap"
-            disabled={!isValid || isSigningUp}
-            leftIcon={
-              isSigningUp  ? (
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : null
-            }
+            disabled={!isValid}
           >
             <span className="inline sm:hidden">ادامه</span>
             <span className="hidden sm:inline">ادامه: اطلاعات والد</span>
@@ -219,7 +195,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         }}
         phone={phone} 
         onVerify={handleVerifyCode} 
-        isLoading={isVerifying} 
+        isLoading={isVerifying}
         error={verificationError}
         onResend={handleResendOtp}
         isResending={isResending}

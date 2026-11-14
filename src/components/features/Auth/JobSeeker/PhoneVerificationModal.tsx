@@ -11,7 +11,7 @@ interface PhoneVerificationModalProps {
   onEditPhone: () => void;
   phone: string;
   onVerify: (code: string) => void;
-  simulateError?: ErrorType; 
+  simulateError?: ErrorType;
   isLoading?: boolean; 
   error?: string | null; 
   onResend?: (onSuccess: () => void) => void;
@@ -25,13 +25,13 @@ export function PhoneVerificationModal({
   phone, 
   onVerify,
   simulateError = null,
-  isLoading = false, 
+  isLoading = false,
   error = null,
-  onResend, 
+  onResend,
   isResending = false
 }: PhoneVerificationModalProps) {
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
-  const [timeLeft, setTimeLeft] = useState(60); 
+  const [timeLeft, setTimeLeft] = useState(120); 
   const [attemptsTimeLeft, setAttemptsTimeLeft] = useState(600); 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -174,7 +174,7 @@ export function PhoneVerificationModal({
                   ${isInputDisabled 
                     ? "bg-disabled-surface border-transparent text-disabled-text cursor-not-allowed" 
                     : error
-                      ? "border-status-error text-status-error bg-surface-card" // اگر خطای بک‌اند داشت، قرمز شود
+                      ? "border-status-error text-status-error bg-surface-card"
                       : isTimeout || isInvalidCode
                         ? "border-status-error text-status-error bg-surface-card" 
                         : "border-border-decorative text-interface-secondary bg-surface-card focus:ring-2 focus:ring-focus-ring focus:border-transparent placeholder:text-charcoal-4"
@@ -246,7 +246,6 @@ export function PhoneVerificationModal({
           </div>
         )}
 
-
         {timeLeft === 0 && !isTooManyAttempts && !isLoading && (
           <div className="mb-4">
             <Button 
@@ -260,6 +259,7 @@ export function PhoneVerificationModal({
             </Button>
           </div>
         )}
+
         <Button 
           onClick={handleSubmit} 
           variant="primary" 
