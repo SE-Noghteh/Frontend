@@ -1,11 +1,21 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import PublicLayout from "@/layouts/PublicLayout";
 import ComponentsTestPage from "@/pages/ComponentsTestPage";
+import FaqPage from "@/pages/FaqPage";
+import LandingPage from "@/pages/LandingPage";
+import OpportunitySearchPage from "@/pages/OpportunitySearchPage";
+import SupportPage from "@/pages/SupportPage";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <div>Home</div>,
+    element: <PublicLayout />,
+    children: [
+      { path: "/", element: <LandingPage /> },
+      { path: "/search", element: <OpportunitySearchPage /> },
+      { path: "/faq", element: <FaqPage /> },
+      { path: "/support", element: <SupportPage /> },
+    ],
   },
   {
     path: "/components-test",
