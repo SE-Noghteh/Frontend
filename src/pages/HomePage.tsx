@@ -1,14 +1,13 @@
-/**
- * SAMPLE FILE
- *
- * Pages are route-level components.
- * Pages should primarily compose smaller components.
- */
+import Footer from "@/components/shared/Footer/Footer";
 
 export default function HomePage() {
   return (
-    <main>
-      <h1>Home</h1>
-    </main>
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow p-10">
+        <h1>Home</h1>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
