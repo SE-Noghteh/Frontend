@@ -1,0 +1,219 @@
+@theme {
+  /* =========================
+     Typography
+     ========================= */
+
+  --font-vazirmatn: "Vazirmatn", sans-serif;
+
+  --text-display: 36px;
+  --text-page-title: 28px;
+  --text-section-title: 22px;
+  --text-card-title: 18px;
+  --text-body: 16px;
+  --text-label: 14px;
+  --text-caption: 12px;
+
+
+  /* =========================
+     Primitive - Neutral
+     ========================= */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-charcoal: #262321;
+  --color-charcoal-1: #514f4d;
+  --color-charcoal-2: #7d7b7a;
+  --color-charcoal-3: #a8a7a6;
+  --color-charcoal-4: #d4d3d3;
+
+  --color-off-white: #fcfcfd;
+  --color-border-soft: #e4e0da;
+
+  --color-disabled-surface: #e9e6e1;
+  --color-disabled-text: #928a84;
+
+
+  /* =========================
+     Primitive - Ocean
+     ========================= */
+
+  --color-ocean-1: #0e191f;
+  --color-ocean-2: #1c313f;
+  --color-ocean-3: #294a5e;
+  --color-ocean-4: #37627e;
+  --color-ocean-5: #6a95b1;
+  --color-ocean-6: #8fb0c4;
+  --color-ocean-7: #b5cad8;
+  --color-ocean-8: #dae5eb;
+
+  --color-ocean-blue: #457b9d;
+
+
+  /* =========================
+     Primitive - Blue
+     ========================= */
+
+  --color-blue-1: #060b11;
+  --color-blue-2: #0c1523;
+  --color-blue-3: #112034;
+  --color-blue-4: #172a46;
+  --color-blue-5: #4a5d79;
+  --color-blue-6: #77869a;
+  --color-blue-7: #a5aebc;
+  --color-blue-8: #d2d7dd;
+
+  --color-blue: #1d3557;
+
+
+  /* =========================
+     Primitive - Green
+     ========================= */
+
+  --color-green-1: #24281c;
+  --color-green-2: #485037;
+  --color-green-3: #6d7953;
+  --color-green-4: #91a16e;
+  --color-green-5: #c4d4a1;
+  --color-green-6: #d3dfb9;
+  --color-green-7: #e1e9d0;
+  --color-green-8: #f0f4e8;
+
+  --color-green: #b5c98a;
+
+
+  /* =========================
+     Primitive - Peach
+     ========================= */
+
+  --color-peach-1: #312323;
+  --color-peach-2: #634746;
+  --color-peach-3: #946a6a;
+  --color-peach-4: #c68e8d;
+  --color-peach-5: #f9c1c0;
+  --color-peach-6: #fad0d0;
+  --color-peach-7: #fce0df;
+  --color-peach-8: #fff3f3;
+
+
+  /* =========================
+     Primitive - Brand
+     ========================= */
+
+  --color-brand-peach: #f7b1b0;
+  --color-brand-peach-soft: #f4e4de;
+  --color-brand-peach-dark: #262321;
+  --color-brand-peach-pale: #fcf8f6;
+
+
+  /* =========================
+     Primitive - Semantic colors
+     ========================= */
+
+  --color-info: #315f86;
+  --color-info-soft: #eef3f8;
+
+  --color-warning: #795413;
+  --color-warning-soft: #fbf4e5;
+
+  --color-error: #a3312d;
+  --color-error-soft: #fbefed;
+  --color-error-hover: #8c2825;
+  --color-error-pressed: #74211e;
+
+  --color-success: #256448;
+  --color-success-soft: #edf5ef;
+
+  --color-box: #ffccff;
+
+
+  /* =========================
+     Semantic - Surface
+     ========================= */
+
+  --color-surface-card: var(--color-white);
+  --color-surface-selected: var(--color-brand-peach-soft);
+  --color-surface-info: var(--color-info-soft);
+  --color-surface-warning: var(--color-warning-soft);
+  --color-surface-error: var(--color-error-soft);
+  --color-surface-success: var(--color-success-soft);
+  --color-surface-disabled: var(--color-disabled-surface);
+  --color-surface-hover: var(--color-brand-peach-pale);
+
+
+  /* =========================
+     Semantic - Text
+     ========================= */
+
+  --color-text-primary: var(--color-charcoal);
+  --color-text-secondary: var(--color-charcoal-1);
+  --color-text-disabled: var(--color-disabled-text);
+
+
+  /* =========================
+     Semantic - Action
+     ========================= */
+
+  --color-action-primary: var(--color-blue);
+  --color-action-hover: var(--color-ocean-2);
+  --color-action-pressed: var(--color-ocean-1);
+
+  --color-action-destructive-hover: var(--color-error-hover);
+  --color-action-destructive-pressed: var(--color-error-pressed);
+
+
+  /* =========================
+     Semantic - Interface
+     ========================= */
+
+  --color-interface-secondary: var(--color-ocean-blue);
+
+
+  /* =========================
+     Semantic - Border
+     ========================= */
+
+  --color-border-subtle: var(--color-green);
+  --color-border-decorative: var(--color-border-soft);
+
+  /* TODO: replace with real disabled-border token when available */
+  --color-border-disabled: var(--color-disabled-surface);
+
+
+  /* =========================
+     Semantic - Background
+     ========================= */
+
+  --color-background-page: var(--color-off-white);
+
+
+  /* =========================
+     Semantic - Accent
+     ========================= */
+
+  --color-accent-default: var(--color-brand-peach);
+
+
+  /* =========================
+     Semantic - Status
+     ========================= */
+
+  --color-status-info: var(--color-info);
+  --color-status-warning: var(--color-warning);
+  --color-status-error: var(--color-error);
+  --color-status-success: var(--color-success);
+
+
+  /* =========================
+     Semantic - Focus
+     ========================= */
+
+  --color-focus-ring: var(--color-brand-peach-dark);
+
+
+  /* =========================
+     Semantic - Icon
+     ========================= */
+
+  --color-icon-source: var(--color-black);
+}

@@ -14,3 +14,35 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+# Noghteh Frontend
+
+Frontend application for the Noghteh project.
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- pnpm
+- React Router
+- TanStack Query
+- Zustand
+- Yup
+
+## Requirements
+
+Before running the project, make sure the following tools are installed:
+
+- Node.js
+- pnpm
+- Git
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/SE-Noghteh/Frontend.git
