@@ -129,4 +129,44 @@ export const jobSeekerService = {
 
     return response.data;
   },
+
+  loginWithOtp: async (phone: string): Promise<OtpResponse> => {
+    const response = await apiClient.post<OtpResponse>(
+      "/job-seekers/otp", 
+      { phone, action: "login" }
+    );
+    return response.data;
+  },
+
+ 
+  verifyLoginOtp: async (phone: string, code: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>(
+      "/job-seekers/verify-otp", 
+      { phone, otp: code }
+    );
+
+    if (response.data.accessToken) {
+      localStorage.setItem("accessToken", response.data.accessToken);
+    }
+
+    return response.data;
+  },
+
+  
+  forgotPassword: async (phone: string): Promise<OtpResponse> => {
+    const response = await apiClient.post<OtpResponse>(
+      "/job-seekers/forgot-password", 
+      { phone }
+    );
+    return response.data;
+  },
+
+ 
+  resetPassword: async (phone: string, code: string, newPassword: string): Promise<void> => {
+    await apiClient.post("/job-seekers/reset-password", {
+      phone,
+      otp: code,
+      new_password: newPassword,
+    });
+  },
 };

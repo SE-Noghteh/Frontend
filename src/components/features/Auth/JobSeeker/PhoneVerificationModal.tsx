@@ -250,7 +250,6 @@ export function PhoneVerificationModal({
           <div className="mb-4">
             <Button 
               type="button" 
-              variant="primary" 
               fullWidth
               onClick={handleResendCode}
               disabled={isResending} 
@@ -262,7 +261,6 @@ export function PhoneVerificationModal({
 
         <Button 
           onClick={handleSubmit} 
-          variant="primary" 
           fullWidth 
           disabled={code.join("").length !== 6 || isInputDisabled}
           className="mt-2"

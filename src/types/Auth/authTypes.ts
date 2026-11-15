@@ -9,3 +9,8 @@ export interface AuthResponse {
   user: User;
   accessToken: string;
 }
+
+export interface OtpLoginFormValues {
+  phone: string;
+}
+
