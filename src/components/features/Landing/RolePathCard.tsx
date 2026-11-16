@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { RoleBadge } from "@/components/ui/RoleBadge";
 import type { UserRole } from "@/types/Landing/landing";
@@ -28,14 +29,10 @@ export function RolePathCard({ role, text, ctaLabel, delay, hasDivider }: RolePa
       <RoleScene role={role} className="w-[140px] sm:w-[190px]" />
       <RoleBadge role={role} size="md" className="mt-2" />
       <p className="mt-4 max-w-[280px] text-label leading-8 text-text-secondary">{text}</p>
-      {/* TODO: replace with the shared Button component (link to sign-up). */}
-      <button
-        type="button"
-        className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-blue-8 bg-surface-card px-6 py-3 text-label font-bold text-text-primary transition-colors hover:border-blue"
-      >
+      {/* TODO: point to the sign-up page once it exists. */}
+      <Button variant="secondary" className="mt-6" endIcon={<ArrowLeft />}>
         {ctaLabel}
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-      </button>
+      </Button>
     </Reveal>
   );
 }

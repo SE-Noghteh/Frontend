@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
+import { Button, type ButtonColor } from "@/components/ui/Button";
 import { RoleIcon } from "@/components/ui/RoleIcon";
 import { SectionContainer } from "@/components/ui/SectionContainer";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -14,6 +15,12 @@ import type { UserRole } from "@/types/Landing/landing";
 import { RoleDashboardPreview } from "./RoleDashboardPreview";
 import { RoleIntroCard } from "./RoleIntroCard";
 import { RoleStepList } from "./RoleStepList";
+
+const ROLE_BUTTON_COLOR: Record<UserRole, ButtonColor> = {
+  seeker: "peach",
+  employer: "blue",
+  parent: "green",
+};
 
 /** Tabs that explain what each of the three roles does on the platform. */
 export function RolesSection() {
@@ -66,14 +73,10 @@ export function RolesSection() {
               >
                 <RoleIntroCard role={activeRole} guide={guide} />
                 <RoleStepList role={activeRole} steps={guide.steps} />
-                {/* TODO: replace with the shared Button component (link to sign-up). */}
-                <button
-                  type="button"
-                  className={`group mt-8 inline-flex w-fit items-center gap-2 rounded-xl px-6 py-3.5 text-label font-bold transition-colors ${style.solid} ${style.solidHover}`}
-                >
+                {/* TODO: point to the sign-up page once it exists. */}
+                <Button color={ROLE_BUTTON_COLOR[activeRole]} className="mt-8 w-fit" endIcon={<ArrowLeft />}>
                   {guide.ctaLabel}
-                  <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-                </button>
+                </Button>
               </motion.div>
             </AnimatePresence>
 

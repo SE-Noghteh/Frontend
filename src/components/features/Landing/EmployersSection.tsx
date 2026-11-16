@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BadgeCheck, Check, FileSignature, Gauge, Wallet } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionContainer } from "@/components/ui/SectionContainer";
 import { EASE_OUT } from "@/constants/motion";
@@ -84,19 +85,10 @@ export function EmployersSection() {
                 ))}
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                {/* TODO: replace both with the shared Button component. */}
-                <button
-                  type="button"
-                  className="rounded-xl bg-white px-7 py-3.5 text-label font-extrabold text-green-1 transition-colors hover:bg-green-8"
-                >
-                  ثبت آگهی
-                </button>
-                <button
-                  type="button"
-                  className="rounded-xl border border-white/30 px-7 py-3.5 text-label font-bold text-white transition-colors hover:bg-white/10"
-                >
+                <Button tone="onDark">ثبت آگهی</Button>
+                <Button tone="onDark" variant="secondary">
                   تعرفه ثبت آگهی
-                </button>
+                </Button>
               </div>
             </motion.div>
           </AnimatePresence>

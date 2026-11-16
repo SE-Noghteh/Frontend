@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Lock, ShieldCheck, Star } from "lucide-react";
 
+import { ButtonLink } from "@/components/ui/Button";
 import { EASE_OUT } from "@/constants/motion";
 
 import { HeroFloatingBadge } from "./HeroFloatingBadge";
@@ -49,20 +50,12 @@ export function HeroSection() {
           </motion.p>
 
           <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center gap-3">
-            {/* TODO: replace both links with the shared Button component. */}
-            <a
-              href="#search"
-              className="group inline-flex items-center gap-2 rounded-xl bg-action-primary px-7 py-4 text-body font-bold text-white transition-colors hover:bg-action-hover"
-            >
+            <ButtonLink href="#search" endIcon={<ArrowLeft />}>
               دیدن فرصت‌ها
-              <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-            </a>
-            <a
-              href="#employers"
-              className="inline-flex items-center rounded-xl border border-blue-8 bg-surface-card px-7 py-4 text-body font-bold text-text-primary transition-colors hover:border-blue"
-            >
+            </ButtonLink>
+            <ButtonLink href="#employers" variant="secondary">
               کارفرما هستم
-            </a>
+            </ButtonLink>
           </motion.div>
         </div>
 
