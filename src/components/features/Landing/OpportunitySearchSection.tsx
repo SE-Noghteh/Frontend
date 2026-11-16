@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { EASE_OUT } from "@/constants/motion";
 import { useOpportunities } from "@/hooks/useOpportunities";
@@ -75,15 +76,9 @@ export function OpportunitySearchSection() {
                 <h3 className="text-card-title font-extrabold text-text-primary">
                   {toPersianDigits(results.length)} فرصت مطابق فیلترهای تو
                 </h3>
-                {/* TODO: replace with the shared Button component. */}
-                <button
-                  type="button"
-                  onClick={() => goToSearchPage(filters)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-action-primary px-5 py-2.5 text-label font-bold text-white transition-colors hover:bg-action-hover"
-                >
+                <Button size="sm" endIcon={<ArrowLeft />} onClick={() => goToSearchPage(filters)}>
                   مشاهده همه نتایج
-                  <ArrowLeft className="size-4" />
-                </button>
+                </Button>
               </div>
               {results.length ? (
                 <OpportunityGrid

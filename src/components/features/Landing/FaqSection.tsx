@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
 
+import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionContainer } from "@/components/ui/SectionContainer";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -22,20 +22,12 @@ export function FaqSection() {
           <FaqAccordion items={faqs} />
         </Reveal>
         <Reveal delay={120} className="mt-8 flex flex-wrap gap-3">
-          {/* TODO: replace both links with the shared Button component. */}
-          <Link
-            to="/faq"
-            className="group inline-flex items-center gap-2 rounded-xl bg-action-primary px-7 py-3.5 text-label font-bold text-white transition-colors hover:bg-action-hover"
-          >
+          <ButtonLink to="/faq" endIcon={<ArrowLeft />}>
             دیدن همه‌ی سؤال‌ها
-            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-          </Link>
-          <Link
-            to="/support"
-            className="rounded-xl border border-blue-8 bg-surface-card px-7 py-3.5 text-label font-bold text-text-primary transition-colors hover:border-blue"
-          >
+          </ButtonLink>
+          <ButtonLink to="/support" variant="secondary">
             ارتباط با پشتیبانی
-          </Link>
+          </ButtonLink>
         </Reveal>
       </SectionContainer>
     </section>
