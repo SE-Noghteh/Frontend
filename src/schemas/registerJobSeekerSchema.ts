@@ -43,14 +43,13 @@ export const registerBasicSchema = yup.object({
   .matches(/^\d{10}$/, "کد پستی معتبر ۱۰ رقمی وارد کن"),
 
   address: yup.string().required("نشانی را وارد کن"),
-  birthDay: yup.string().required("تاریخ تولد کامل را انتخاب کن"),
-  birthMonth: yup.string().required("تاریخ تولد کامل را انتخاب کن"),
-  birthYear: yup
-    .string()
-    .required("تاریخ تولد کامل را انتخاب کنید")
-    .test("is-age-valid", "سن شما باید بین ۱۵ تا ۲۲ سال باشد", function (value) {
-      const { birthMonth, birthDay } = this.parent;
-      if (!value || !birthMonth || !birthDay) return true;
+  birthDateObj: yup.mixed().required("تاریخ تولد الزامی است").test(
+    "is-age-valid",
+    "سن شما باید بین ۱۵ تا ۲۲ سال باشد",
+    function (value) {
+      if (!value) return true;
+      const dateObj = value as any; // DateObject
+      if (!dateObj.year || !dateObj.month || !dateObj.day) return false;
 
       const formatter = new Intl.DateTimeFormat("en-US-u-ca-persian", { year: "numeric", month: "numeric", day: "numeric" });
       const now = new Date();
@@ -59,12 +58,13 @@ export const registerBasicSchema = yup.object({
       const currentMonth = parseInt(parts.find(p => p.type === "month")!.value, 10);
       const currentDay = parseInt(parts.find(p => p.type === "day")!.value, 10);
 
-      let age = currentYear - parseInt(value, 10);
-      if (currentMonth < parseInt(birthMonth, 10) || (currentMonth === parseInt(birthMonth, 10) && currentDay < parseInt(birthDay, 10))) {
+      let age = currentYear - dateObj.year;
+      if (currentMonth < dateObj.month.number || (currentMonth === dateObj.month.number && currentDay < dateObj.day)) {
         age--;
       }
       return age >= 15 && age <= 22;
-    }),
+    }
+  ),
 
     interests: yup
     .array()

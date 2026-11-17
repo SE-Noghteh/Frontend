@@ -1,4 +1,4 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -7,12 +7,13 @@ import { RadioGroup } from "@/components/ui/RadioGroup";
 import { FileUploadBox } from "../FileUploadBox";
 import { SkillsSelector } from "../SkillsSelector";
 import { IdentityInstructionsBox } from "../IdentityInstructionsBox"; 
-import { VideoUploadBox } from "../VideoUploadBox";
-import { AgeStatusBox } from "../AgeStatusBox";
+import { VideoUploadBox } from "../VideoUploadBox"; 
 import { registerBasicSchema, type RegisterBasicFormValues } from "@/schemas/registerJobSeekerSchema";
-import { provinceOptions, dayOptions, monthOptions, yearOptions } from "@/data/registerData";
-import { useEffect, useRef  } from "react";
+import { provinceOptions, monthOptions } from "@/data/registerData";
+import { useEffect, useRef } from "react";
 import { useSignupOptions } from "@/hooks/JobSeeker/useJobSeekerSignup";
+import { FormBirthDateInput } from "@/components/features/Auth/JobSeeker/FormBirthDateInput";
+import { DateObject } from "react-multi-date-picker"; 
 
 interface BasicInfoStepProps {
   onNext: (data: RegisterBasicFormValues) => void;
@@ -22,20 +23,20 @@ interface BasicInfoStepProps {
 export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   const { data: options, isLoading: isLoadingOptions } = useSignupOptions();
 
-  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<RegisterBasicFormValues>({
+  const methods = useForm<RegisterBasicFormValues>({
     resolver: yupResolver(registerBasicSchema),
     mode: "onTouched",
     defaultValues: {
       gender: "",
       province: "",
       city: "",
-      birthDay: "",
-      birthMonth: "",
-      birthYear: "",
+      birthDateObj: null as any, 
       interests: [],
       ...defaultValues,
     }
   });
+  
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = methods;
 
   const idCardImage = watch("idCardImage");
   const identityVideo = watch("identityVideo");
@@ -43,14 +44,20 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
 
   const firstName = watch("firstName");
   const lastName = watch("lastName");
-  const birthDay = watch("birthDay");
-  const birthMonth = watch("birthMonth");
-  const birthYear = watch("birthYear");
+  
+  const birthDateObj = watch("birthDateObj") as DateObject | null;
+  const birthYear = birthDateObj?.year?.toString() || "";
+  const birthMonth = birthDateObj?.month?.number?.toString() || "";
+  const birthDay = birthDateObj?.day?.toString() || "";
 
   const fullName = `${firstName || ""} ${lastName || ""}`.trim();
-  const monthName = monthOptions.find(m => m.value === birthMonth)?.label;
-  const birthDate = birthDay && monthName && birthYear ? `${birthDay} ${monthName} ${birthYear}` : "";
+  const monthName = monthOptions.find(m => 
+    m.value === birthMonth || 
+    m.value === String(Number(birthMonth)) || 
+    m.value === birthMonth?.padStart(2, '0')
+  )?.label;
 
+  const birthDate = birthDay && monthName && birthYear ? `${birthDay} ${monthName} ${birthYear}` : "";
   const cityOptions = options?.cities.map(city => ({ label: city, value: city })) || [];
   const genderOptions = options?.genders.map(gender => ({ 
     label: gender === "male" ? "مرد" : "زن", 
@@ -59,34 +66,28 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
 
   const isFirstRender = useRef(true);
 
-useEffect(() => {
-  if (isFirstRender.current) {
-    isFirstRender.current = false;
-    return;
-  }
-  setValue("city", "");
-}, [selectedProvince, setValue]);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setValue("city", "");
+  }, [selectedProvince, setValue]);
 
-useEffect(() => {
-  if (defaultValues?.idCardImage) {
-    setValue("idCardImage", defaultValues.idCardImage);
-  }
-  if (defaultValues?.identityVideo) {
-    setValue("identityVideo", defaultValues.identityVideo);
-  }
-}, [defaultValues, setValue]);
-
-  // const currentCityOptions = selectedProvince ? cityOptions[selectedProvince] || [] : [];
+  useEffect(() => {
+    if (defaultValues?.idCardImage) setValue("idCardImage", defaultValues.idCardImage);
+    if (defaultValues?.identityVideo) setValue("identityVideo", defaultValues.identityVideo);
+  }, [defaultValues, setValue]);
 
   if (isLoadingOptions) {
     return <div className="text-center p-4">در حال دریافت اطلاعات...</div>; 
   }
 
   return (
+   <FormProvider {...methods}>
     <form onSubmit={handleSubmit(onNext)} className="flex flex-col gap-4">
       <div className="text-right mb-2">
-        <h2 className="text-card-title font-bold "
-        style={{ color: "var(--color-text-primary)" }}>اطلاعات پایه</h2>
+        <h2 className="text-card-title font-bold " style={{ color: "var(--color-text-primary)" }}>اطلاعات پایه</h2>
         <p className="text-label text-text-secondary mt-1">اول کمی از خودت بگو تا فرصت‌های مناسب تو را پیدا کنیم.</p>
         <p className="text-caption text-text-secondary mt-1">فیلدهای ستاره‌دار الزامی‌اند.</p>
       </div>
@@ -106,20 +107,7 @@ useEffect(() => {
       <Input label="کد پستی" isRequired placeholder="**********" {...register("postalCode")} error={errors.postalCode?.message} />
       <Input label="کد ملی" isRequired placeholder="کد ملی ۱۰ رقمی" {...register("nationalCode")} error={errors.nationalCode?.message} helperText="بدون خط تیره و فاصله" />
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-label text-text-primary font-medium mb-1">
-          تاریخ تولد شمسی <span className="text-status-error">*</span>
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          <Select label="روز" options={dayOptions} {...register("birthDay")} error={errors.birthDay?.message ? " " : ""} />
-          <Select label="ماه" options={monthOptions} {...register("birthMonth")} error={errors.birthMonth?.message ? " " : ""} />
-          <Select label="سال" options={yearOptions} {...register("birthYear")} error={errors.birthYear?.message ? " " : ""} />
-        </div>
-        {(errors.birthDay || errors.birthMonth || errors.birthYear) && (
-          <p className="text-caption text-status-error mt-1">تاریخ تولد کامل را انتخاب کنید.</p>
-        )}
-        <AgeStatusBox year={birthYear} month={birthMonth} day={birthDay} />
-      </div>
+      <FormBirthDateInput />
 
       <Controller
         name="gender"
@@ -178,5 +166,6 @@ useEffect(() => {
         اطلاعات خصوصی است و فقط برای ساخت پروفایل استفاده می‌شود.
       </p>
     </form>
+   </FormProvider>
   );
 }

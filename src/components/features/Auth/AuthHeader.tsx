@@ -13,24 +13,7 @@ export function AuthHeader({ onLoginClick, onTrackClick }: AuthHeaderProps) {
           alt="زدلنسر" 
           className="h-8 w-auto object-contain" 
         />
-        
-        <button 
-          type="button"
-          onClick={onTrackClick} 
-          className="text-label text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-        >
-          پیگیری
-        </button>
       </div>
-      
-      <button 
-        type="button"
-        onClick={onLoginClick}
-        className="text-label text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-      >
-        ورود
-      </button>
-      
     </header>
   );
 }

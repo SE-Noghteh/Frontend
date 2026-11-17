@@ -29,6 +29,10 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
+      if (!["video/mp4", "video/quicktime"].includes(file.type)) {
+        alert("فقط فرمت‌های MP4 و MOV مجاز هستند.");
+        return;
+      }
       if (file.size > 50 * 1024 * 1024) {
         alert("حجم فایل نباید بیشتر از ۵۰ مگابایت باشد.");
         return;
@@ -76,8 +80,8 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: "video/webm" });
-      const file = new File([blob], "recorded-video.webm", { type: "video/webm" });
+      const blob = new Blob(chunks, { type: "video/mp4" });
+      const file = new File([blob], "recorded-video.mp4", { type: "video/mp4" });
       const url = URL.createObjectURL(blob);
       
       setPreviewUrl(url);
@@ -118,7 +122,7 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
           type="file"
           ref={fileInputRef}
           className="hidden"
-          accept="video/mp4,video/x-m4v,video/*"
+          accept="video/mp4,video/quicktime,.mp4,.mov"
           onChange={handleFileChange}
         />
 
