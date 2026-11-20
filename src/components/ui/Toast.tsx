@@ -8,16 +8,21 @@ interface ToastProps {
   description?: string;
   icon?: ReactNode;
   onClose: () => void;
-  duration?: number; 
+  duration?: number;
+  variantClass?: string;
 }
 
-export function Toast({ 
-  message, 
-  title, 
-  description, 
-  icon, 
-  onClose, 
-  duration = 5000 
+const DEFAULT_VARIANT =
+  "bg-surface-error border-status-error text-status-error";
+
+export function Toast({
+  message,
+  title,
+  description,
+  icon,
+  onClose,
+  duration = 5000,
+  variantClass = DEFAULT_VARIANT,
 }: ToastProps) {
   useEffect(() => {
     if (!message && !title && !description) return;
@@ -31,13 +36,14 @@ export function Toast({
   const displayDescription = description;
 
   return createPortal(
-    <div 
-      className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:right-8 md:translate-x-0 z-50 w-[calc(100%-2rem)] md:w-[400px] max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300"
+    <div
+      className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:right-8 md:translate-x-0 z-50 w-[calc(100%-2rem)] max-w-[280px] md:w-[400px] md:max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300"
       role="alert"
       dir="rtl"
     >
-      <div className="flex items-start gap-3 p-4 rounded-lg bg-surface-error border border-status-error border-r-4 border-r-status-error text-status-error shadow-lg text-right">
-        
+      <div
+        className={`flex items-start gap-2 md:gap-3 p-2.5 md:p-4 rounded-md md:rounded-lg border border-r-4 shadow-lg text-right ${variantClass}`}
+      >
         <div className="shrink-0 mt-0.5">
           {icon || (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -48,19 +54,19 @@ export function Toast({
           )}
         </div>
 
-        <div className="flex flex-col gap-1 flex-1">
+        <div className="flex flex-col gap-0.5 md:gap-1 flex-1 min-w-0">
           {displayTitle && (
-            <span className="text-label font-bold">{displayTitle}</span>
+            <span className="text-label font-bold leading-snug">{displayTitle}</span>
           )}
           {displayDescription && (
-            <span className="text-caption font-medium">{displayDescription}</span>
+            <span className="text-caption font-medium leading-relaxed">{displayDescription}</span>
           )}
         </div>
 
-        <button 
+        <button
           onClick={onClose}
           type="button"
-          className="shrink-0 p-1 -m-1 text-status-error/70 hover:text-status-error hover:bg-status-error/10 rounded-md transition-colors"
+          className="shrink-0 p-1 -m-1 opacity-70 hover:opacity-100 rounded-md transition-opacity"
           aria-label="بستن پیام"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -1,18 +1,7 @@
-
 import { apiClient } from "@/lib/apiClient";
-
-import type {
-  SignupResponse,
-  RegisterBasicInfo,
-} from "@/types/Auth/register";
-
-import type {
-  RegisterAccountFormValues,
-} from "@/schemas/registerJobSeekerSchema";
-
-import type {
-  AuthResponse,
-} from "@/types/Auth/authTypes";
+import type { SignupResponse, RegisterBasicInfo } from "@/types/Auth/register";
+import type { RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
+import type { AuthResponse } from "@/types/Auth/authTypes";
 
 export interface OtpResponse {
   expires_in: number;
@@ -26,19 +15,13 @@ export interface SignupOptionsResponse {
   interests: string[];
 }
 
-const toFormString = (
-  value: string | number | boolean | null | undefined
-): string => {
+const toFormString = (value: string | number | boolean | null | undefined): string => {
   return value == null ? "" : String(value);
 };
 
 export const jobSeekerService = {
   sendOtp: async (phone: string): Promise<OtpResponse> => {
-    const response = await apiClient.post<OtpResponse>(
-      "/job-seekers/otp",
-      { phone }
-    );
-
+    const response = await apiClient.post<OtpResponse>("/job-seekers/otp", { phone });
     return response.data;
   },
 
@@ -54,9 +37,14 @@ export const jobSeekerService = {
     formData.append("city", toFormString(basicData.city));
     formData.append("address", toFormString(basicData.address));
 
-    formData.append("birth_year", toFormString(basicData.birthYear));
-    formData.append("birth_month", toFormString(basicData.birthMonth));
-    formData.append("birth_day", toFormString(basicData.birthDay));
+    const birthDate = basicData.birthDateObj;
+    const birthYear = birthDate?.year ?? "";
+    const birthMonth = birthDate?.month?.number ?? "";
+    const birthDay = birthDate?.day ?? "";
+
+    formData.append("birth_year", toFormString(birthYear));
+    formData.append("birth_month", toFormString(birthMonth));
+    formData.append("birth_day", toFormString(birthDay));
 
     const genderMap: Record<string, string> = {
       "مرد": "male",
@@ -64,9 +52,7 @@ export const jobSeekerService = {
       male: "male",
       female: "female",
     };
-
     const gender = genderMap[basicData.gender] ?? basicData.gender;
-
     formData.append("gender", toFormString(gender));
 
     if (Array.isArray(basicData.interests)) {
@@ -79,7 +65,6 @@ export const jobSeekerService = {
     formData.append("password", toFormString(accountData.password));
 
     const video = basicData.identityVideo;
-
     if (!(video instanceof Blob)) {
       throw new Error("فایل ویدیوی تأیید هویت معتبر نیست.");
     }
@@ -90,31 +75,18 @@ export const jobSeekerService = {
       video instanceof File ? video.name : "verification-video"
     );
 
-    const response = await apiClient.post<SignupResponse>(
-      "/job-seekers/signup",
-      formData,
-      {
-        headers: {
-          "Content-Type": undefined,
-        },
-      }
-    );
+    const response = await apiClient.post<SignupResponse>("/job-seekers/signup", formData, {
+      headers: { "Content-Type": undefined },
+    });
 
     return response.data;
   },
 
-  verifyOtp: async (
-    phone: string,
-    code: string
-  ): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>(
-      "/job-seekers/verify-otp",
-      {
-        phone,
-        otp: code,
-      }
-    );
-
+  verifyOtp: async (phone: string, code: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>("/job-seekers/verify-otp", {
+      phone,
+      otp: code,
+    });
     return response.data;
   },
 
@@ -123,45 +95,28 @@ export const jobSeekerService = {
   },
 
   getSignupOptions: async (): Promise<SignupOptionsResponse> => {
-    const response = await apiClient.get<SignupOptionsResponse>(
-      "/job-seekers/signup-options"
-    );
-
+    const response = await apiClient.get<SignupOptionsResponse>("/job-seekers/signup-options");
     return response.data;
   },
 
   loginWithOtp: async (phone: string): Promise<OtpResponse> => {
-    const response = await apiClient.post<OtpResponse>(
-      "/job-seekers/otp", 
-      { phone, action: "login" }
-    );
+    const response = await apiClient.post<OtpResponse>("/job-seekers/otp", { phone, action: "login" });
     return response.data;
   },
 
- 
   verifyLoginOtp: async (phone: string, code: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>(
-      "/job-seekers/verify-otp", 
-      { phone, otp: code }
-    );
-
+    const response = await apiClient.post<AuthResponse>("/job-seekers/verify-otp", { phone, otp: code });
     if (response.data.accessToken) {
       localStorage.setItem("accessToken", response.data.accessToken);
     }
-
     return response.data;
   },
 
-  
   forgotPassword: async (phone: string): Promise<OtpResponse> => {
-    const response = await apiClient.post<OtpResponse>(
-      "/job-seekers/forgot-password", 
-      { phone }
-    );
+    const response = await apiClient.post<OtpResponse>("/job-seekers/forgot-password", { phone });
     return response.data;
   },
 
- 
   resetPassword: async (phone: string, code: string, newPassword: string): Promise<void> => {
     await apiClient.post("/job-seekers/reset-password", {
       phone,

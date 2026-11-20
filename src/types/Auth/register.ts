@@ -1,3 +1,5 @@
+import { DateObject } from "react-multi-date-picker";
+
 export interface Skill {
   id: string;
   title: string;
@@ -14,9 +16,7 @@ export interface RegisterBasicInfo {
   city: string;
   postalCode: string;
   address: string;
-  birthDay: string;
-  birthMonth: string;
-  birthYear: string;
+  birthDateObj: DateObject | null;
   interests: string[];
   idCardImage?: File | null;
   identityVideo?: File | null;

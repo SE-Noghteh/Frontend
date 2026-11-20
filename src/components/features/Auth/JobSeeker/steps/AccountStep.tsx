@@ -9,6 +9,7 @@ import { useState } from "react";
 import { PhoneVerificationModal } from "../PhoneVerificationModal"; 
 import { PasswordCriteria } from "@/components/features/Auth/JobSeeker/PasswordCriteria";
 import { useJobSeekerSignup, useJobSeekerVerifyOtp, useJobSeekerResendOtp } from "@/hooks/JobSeeker/useJobSeekerSignup";
+import { resolveErrorMessage } from "@/utils/resolveErrorMessage"; 
 
 interface AccountStepProps {
   onNext: (data: RegisterAccountFormValues) => void;
@@ -57,12 +58,13 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
               setIsCodeSent(true);
             },
             onError: (err: any) => {
-              setVerificationError(err.response?.data?.message || "خطا در ارسال پیامک");
+              // ⬅️ استفاده از تابع ترجمه خطا
+              setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
             }
           });
         },
         onError: (err: any) => {
-          setVerificationError(err.response?.data?.message || "خطا در ثبت اطلاعات");
+          setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
         }
       }
     );
@@ -78,7 +80,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           onNext(getValues()); 
         },
         onError: (err: any) => {
-          setVerificationError(err.response?.data?.message || "کد وارد شده اشتباه است");
+          setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
         }
       }
     );
@@ -91,7 +93,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         onSuccessCallback();
       },
       onError: (err: any) => {
-        setVerificationError(err.response?.data?.message || "خطا در ارسال مجدد کد");
+        setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
       },
     });
   };
@@ -127,7 +129,9 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           error={verificationError || errors.phone?.message} 
           onSendCode={handleSendCode}
           isCodeSent={isCodeSent}
-          helperText="برای تایید شماره، روی ارسال کد کلیک کنید."
+          helperText="ابتدا تمام موارد فرم را پر کنید سپس برای تایید شماره، روی ارسال کد کلیک کنید."
+          autoComplete="off"
+          isSendCodeDisabled={!isValid || isCodeSent} 
         />
 
         <PasswordInput
@@ -136,6 +140,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           placeholder="رمز عبور را با دقت وارد کنید"
           {...register("password")}
           error={errors.password?.message}
+          autoComplete="new-password" 
         >
            <PasswordCriteria password={password} isTouched={touchedFields.password} />
         </PasswordInput>
@@ -146,6 +151,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           placeholder="رمز عبور را دوباره وارد کنید"
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
+          autoComplete="new-password"
         />
 
         <div className="flex flex-col gap-3 mt-2">
@@ -178,7 +184,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
             type="submit" 
             variant="primary" 
             className="flex-1 whitespace-nowrap"
-            disabled={!isValid}
+            disabled={!isValid || !isCodeSent}
           >
             <span className="inline sm:hidden">ادامه</span>
             <span className="hidden sm:inline">ادامه: اطلاعات والد</span>

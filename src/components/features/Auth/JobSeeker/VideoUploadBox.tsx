@@ -15,6 +15,7 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [recordTime, setRecordTime] = useState(0); 
 
   useEffect(() => {
     if (value && !previewUrl) {
@@ -68,11 +69,34 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
       setMediaStream(null);
     }
     setIsRecordingModalOpen(false);
+    setIsRecording(false);
+    setRecordTime(0);
   };
 
   const startRecording = () => {
     if (!mediaStream) return;
-    const recorder = new MediaRecorder(mediaStream);
+    
+    const mimeTypes = [
+      'video/mp4;codecs=avc1', 
+      'video/mp4', 
+      'video/webm;codecs=vp9', 
+      'video/webm'
+    ];
+    
+    let selectedMimeType = '';
+    for (const mime of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mime)) {
+        selectedMimeType = mime;
+        break;
+      }
+    }
+
+    if (!selectedMimeType) {
+      alert("مرورگر شما از ضبط ویدیو پشتیبانی نمی‌کند.");
+      return;
+    }
+
+    const recorder = new MediaRecorder(mediaStream, { mimeType: selectedMimeType });
     const chunks: Blob[] = [];
 
     recorder.ondataavailable = (e) => {
@@ -80,8 +104,11 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: "video/mp4" });
-      const file = new File([blob], "recorded-video.mp4", { type: "video/mp4" });
+      // استفاده از نوع خروجی ضبط شده
+      const blob = new Blob(chunks, { type: selectedMimeType });
+      // پسوند فایل را بر اساس فرمت تعیین می‌کنیم
+      const extension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
+      const file = new File([blob], `recorded-video.${extension}`, { type: selectedMimeType });
       const url = URL.createObjectURL(blob);
       
       setPreviewUrl(url);
@@ -92,6 +119,7 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
     recorder.start();
     setMediaRecorder(recorder);
     setIsRecording(true);
+    setRecordTime(0);
   };
 
   const stopRecording = () => {
@@ -100,6 +128,22 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
       setIsRecording(false);
     }
   };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordTime((prev) => {
+          if (prev >= 19) { 
+            stopRecording();
+            return 20;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording, mediaRecorder]);
 
   useEffect(() => {
     return () => {
@@ -218,7 +262,7 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
                 {isRecording && (
                   <div className="absolute top-4 right-4 bg-status-error text-white px-3 py-1 rounded-full text-caption animate-pulse flex items-center gap-2">
                     <div className="w-2 h-2 bg-white rounded-full" />
-                    در حال ضبط...
+                    در حال ضبط... ({20 - recordTime} ثانیه)
                   </div>
                 )}
               </div>
