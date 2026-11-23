@@ -43,6 +43,7 @@ export function JobSeekerLoginForm() {
           placeholder="09xx xxx xxxx"
           error={errors.mobile?.message}
           {...register("mobile")} 
+          autoComplete="off"
         />
         
         <PasswordInput
@@ -51,6 +52,7 @@ export function JobSeekerLoginForm() {
           placeholder="••••••••"
           error={errors.password?.message}
           {...register("password")}
+          autoComplete="new-password"
         />
         
         <div className="flex justify-start">

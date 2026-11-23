@@ -8,10 +8,15 @@ export function resolveErrorMessage(errorString: string | null | undefined): str
     }
   
     if (error.includes("wait before requesting") || error.includes("rate limit")) {
-      return "برای دریافت مجدد کد، لطفاً کمی صبر کنید.";
+      return "";
     }
-    if (error.includes("phone") && error.includes("exists")) {
-      return "این شماره همراه قبلاً ثبت شده است.";
+    if(error.includes("national code") && error.includes("phone") && error.includes("registered"))
+    {
+      return"این شماره همراه یا کد ملی قبلا ثبت شده است."
+    }
+    if(error.includes("national_code") && error.includes("invalid"))
+    {
+      return"کد ملی معتبر نیست."
     }
     if (error.includes("password")) {
       return "رمز عبور معتبر نیست.";
@@ -21,4 +26,14 @@ export function resolveErrorMessage(errorString: string | null | undefined): str
     }
   
     return "خطایی رخ داده است، لطفاً دوباره تلاش کنید.";
+  }
+
+  export function isNonBlockingOtpError(errorString: string | null | undefined): boolean {
+    if (!errorString) return false;
+    const error = errorString.toLowerCase();
+    return (
+      error.includes("wait before requesting") ||
+      error.includes("rate limit") ||
+      error.includes("too many requests")
+    );
   }

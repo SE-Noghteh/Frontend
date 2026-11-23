@@ -10,6 +10,7 @@ interface PhoneInputProps
   onSendCode?: () => void;
   isCodeSent?: boolean;
   isSendCodeDisabled?: boolean; 
+  isSendingCode?: boolean;
 }
 
 export function PhoneInput({
@@ -20,6 +21,7 @@ export function PhoneInput({
   onSendCode,
   isCodeSent = false,
   isSendCodeDisabled = false,
+  isSendingCode = false,
   className = "",
   value,
   ...props
@@ -78,14 +80,33 @@ export function PhoneInput({
 
         {!isCodeSent && (
           <Button
-            type="button"
-            variant="secondary"
-            onClick={onSendCode}
-            disabled={isButtonDisabled} 
-            className="whitespace-nowrap !px-4 h-[44px]" 
-          >
-            ارسال کد
-          </Button>
+          type="button"
+          variant="secondary"
+          onClick={onSendCode}
+          disabled={isButtonDisabled}
+          className="whitespace-nowrap !px-4 h-[44px]"
+        >
+          {isSendingCode ? (
+            <span className="flex items-center gap-1.5">
+              <svg
+                className="animate-spin"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              در حال ارسال...
+            </span>
+          ) : (
+            "ارسال کد"
+          )}
+        </Button>
         )}
       </div>
 
@@ -96,6 +117,10 @@ export function PhoneInput({
       ) : isCodeSent ? (
         <p className="text-caption text-status-success mt-0.5">
           شماره همراه تأیید شد.
+        </p>
+      ) : isSendingCode ? (
+        <p className="text-caption text-text-secondary mt-0.5">
+          در حال بررسی و ارسال کد...
         </p>
       ) : helperText ? (
         <p className="text-caption text-text-secondary mt-0.5">

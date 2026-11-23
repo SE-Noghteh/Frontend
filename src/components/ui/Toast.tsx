@@ -37,7 +37,7 @@ export function Toast({
 
   return createPortal(
     <div
-      className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:right-8 md:translate-x-0 z-50 w-[calc(100%-2rem)] max-w-[280px] md:w-[400px] md:max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300"
+      className="fixed bottom-40 md:bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:right-8 md:translate-x-0 z-[100] w-[calc(100%-2rem)] max-w-[280px] md:w-[400px] md:max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300"
       role="alert"
       dir="rtl"
     >

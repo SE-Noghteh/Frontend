@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { isAxiosError } from "axios";
-import { login as loginService } from "@/services/Auth/authService";
+import { login as loginService } from "@/services/Auth/JobSeeker/jobSeekerAuthService";
 import { useAuthStore } from "@/store/auth/useAuthStore";
 import type { LoginFormValues } from "@/types/Auth/authTypes";
 
@@ -49,6 +49,8 @@ function resolveLoginErrorMessage(error: unknown): string {
       return "اطلاعات ورود نادرست است، شماره موبایل یا رمز عبور را دوباره بررسی کن.";
     case 404:
       return "حساب کاربری با این مشخصات پیدا نشد.";
+      case 429:
+        return "تعداد تلاش‌های شما برای ورود بیش از حد مجاز بوده است. لطفاً ۱۵ دقیقه دیگر دوباره تلاش کنید.";
     default:
       return serverMessage || "خطایی رخ داده است، لطفا دوباره تلاش کنید.";
   }

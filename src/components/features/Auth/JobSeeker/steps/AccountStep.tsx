@@ -6,10 +6,11 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 import { registerAccountSchema, type RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 import { useState } from "react";
-import { PhoneVerificationModal } from "../PhoneVerificationModal"; 
+import { PhoneVerificationModal } from "../PhoneVerificationModal";
 import { PasswordCriteria } from "@/components/features/Auth/JobSeeker/PasswordCriteria";
 import { useJobSeekerSignup, useJobSeekerVerifyOtp, useJobSeekerResendOtp } from "@/hooks/JobSeeker/useJobSeekerSignup";
-import { resolveErrorMessage } from "@/utils/resolveErrorMessage"; 
+import { resolveErrorMessage, isNonBlockingOtpError } from "@/utils/resolveErrorMessage";
+import { Toast } from "@/components/ui/Toast"; 
 
 interface AccountStepProps {
   onNext: (data: RegisterAccountFormValues) => void;
@@ -32,9 +33,12 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
   });
 
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
-  
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [sendCodeToastError, setSendCodeToastError] = useState<string | null>(null);
+
   const { mutate: signup } = useJobSeekerSignup();
   const { mutate: verifyOtp, isPending: isVerifying } = useJobSeekerVerifyOtp();
   const { mutate: resendOtp, isPending: isResending } = useJobSeekerResendOtp();
@@ -47,7 +51,9 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
     if (!isPhoneValid) return;
 
     setVerificationError(null);
-    setIsModalOpen(true);
+    setModalError(null);
+    setSendCodeToastError(null);
+    setIsSendingCode(true);
 
     signup(
       { basicData, accountData: getValues() },
@@ -55,16 +61,35 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         onSuccess: () => {
           resendOtp(phone, {
             onSuccess: () => {
+              setIsSendingCode(false);
               setIsCodeSent(true);
+              setIsModalOpen(true);
             },
             onError: (err: any) => {
-              // ⬅️ استفاده از تابع ترجمه خطا
-              setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
+              setIsSendingCode(false);
+              const rawMessage = err.response?.data?.message || err.message;
+
+              if (isNonBlockingOtpError(rawMessage)) {
+                setIsCodeSent(false);
+                setIsModalOpen(true);
+                setModalError(resolveErrorMessage(rawMessage));
+              } else {
+                setSendCodeToastError(resolveErrorMessage(rawMessage));
+              }
             }
           });
         },
         onError: (err: any) => {
-          setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
+          setIsSendingCode(false);
+          const rawMessage = err.response?.data?.message || err.message;
+
+          if (isNonBlockingOtpError(rawMessage)) {
+            setIsCodeSent(false);
+            setIsModalOpen(true);
+            setModalError(resolveErrorMessage(rawMessage));
+          } else {
+            setSendCodeToastError(resolveErrorMessage(rawMessage));
+          }
         }
       }
     );
@@ -77,7 +102,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         onSuccess: () => {
           setIsCodeSent(true);
           setIsModalOpen(false);
-          onNext(getValues()); 
+          onNext(getValues());
         },
         onError: (err: any) => {
           setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
@@ -90,10 +115,11 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
     resendOtp(phone, {
       onSuccess: () => {
         setVerificationError(null);
+        setModalError(null);
         onSuccessCallback();
       },
       onError: (err: any) => {
-        setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
+        setModalError(resolveErrorMessage(err.response?.data?.message || err.message));
       },
     });
   };
@@ -122,16 +148,19 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           {...register("phone", {
             onChange: () => {
               setVerificationError(null);
+              setModalError(null);
+              setSendCodeToastError(null); 
               setIsCodeSent(false);
             }
           })}
           value={phone}
-          error={verificationError || errors.phone?.message} 
+          error={errors.phone?.message}
           onSendCode={handleSendCode}
           isCodeSent={isCodeSent}
           helperText="ابتدا تمام موارد فرم را پر کنید سپس برای تایید شماره، روی ارسال کد کلیک کنید."
           autoComplete="off"
-          isSendCodeDisabled={!isValid || isCodeSent} 
+          isSendCodeDisabled={!isValid || isCodeSent}
+          isSendingCode={isSendingCode}
         />
 
         <PasswordInput
@@ -140,9 +169,9 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           placeholder="رمز عبور را با دقت وارد کنید"
           {...register("password")}
           error={errors.password?.message}
-          autoComplete="new-password" 
+          autoComplete="new-password"
         >
-           <PasswordCriteria password={password} isTouched={touchedFields.password} />
+          <PasswordCriteria password={password} isTouched={touchedFields.password} />
         </PasswordInput>
 
         <PasswordInput
@@ -157,32 +186,28 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         <div className="flex flex-col gap-3 mt-2">
           <Checkbox
             label="قوانین زدلنسر و حریم خصوصی را می‌پذیرم. *"
-            hasError={!!errors.termsAccepted} 
+            hasError={!!errors.termsAccepted}
             {...register("termsAccepted")}
           />
-          
+
           <div className="flex items-center gap-4 pr-7">
-            <a href="#" className="text-label text-interface-secondary hover:underline">
-              قوانین زدلنسر
-            </a>
-            <a href="#" className="text-label text-interface-secondary hover:underline">
-              حریم خصوصی
-            </a>
+            <a href="#" className="text-label text-interface-secondary hover:underline">قوانین زدلنسر</a>
+            <a href="#" className="text-label text-interface-secondary hover:underline">حریم خصوصی</a>
           </div>
         </div>
 
         <div className="flex gap-3 sm:gap-4 mt-6">
-          <Button 
-            type="button" 
-            variant="secondary" 
-            onClick={onPrev} 
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onPrev}
             className="flex-1 whitespace-nowrap"
           >
             بازگشت
           </Button>
-          <Button 
-            type="submit" 
-            variant="primary" 
+          <Button
+            type="submit"
+            variant="primary"
             className="flex-1 whitespace-nowrap"
             disabled={!isValid || !isCodeSent}
           >
@@ -192,17 +217,31 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         </div>
       </form>
 
-      <PhoneVerificationModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      {sendCodeToastError && (
+        <Toast
+          title="خطا در ارسال کد"
+          description={sendCodeToastError}
+          onClose={() => setSendCodeToastError(null)}
+          duration={6000}
+        />
+      )}
+
+      <PhoneVerificationModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalError(null);
+        }}
         onEditPhone={() => {
           setIsModalOpen(false);
           setIsCodeSent(false);
+          setModalError(null);
+          setVerificationError(null);
         }}
-        phone={phone} 
-        onVerify={handleVerifyCode} 
+        phone={phone}
+        onVerify={handleVerifyCode}
         isLoading={isVerifying}
-        error={verificationError}
+        error={modalError || verificationError}
         onResend={handleResendOtp}
         isResending={isResending}
       />

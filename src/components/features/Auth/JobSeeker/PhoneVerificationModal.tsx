@@ -57,15 +57,21 @@ export function PhoneVerificationModal({
 
   const farsiError = resolveErrorMessage(error);
 
+  const isRateLimitError =
+    !!error &&
+    (error.toLowerCase().includes("wait before requesting") ||
+    error.toLowerCase().includes("rate limit") ||
+    error.toLowerCase().includes("too many requests"));
+
   const isCodeInvalid =
     hasAttemptedSubmit &&
     !!error &&
     !isSmsFailed &&
     !isTooManyAttempts &&
-    !isTimeout;
+    !isTimeout &&
+    !isRateLimitError;
 
   const showToastForError =
-    hasAttemptedSubmit &&
     !!error &&
     !isCodeInvalid &&
     !isSmsFailed &&
@@ -106,7 +112,7 @@ export function PhoneVerificationModal({
   }, [isTooManyAttemptsByServer]);
 
   useEffect(() => {
-    if (!hasAttemptedSubmit && !isSmsFailed && !isTooManyAttempts && !isTimeout) {
+    if (!error && !isSmsFailed && !isTooManyAttempts && !isTimeout) {
       setToastMessage(null);
       return;
     }
@@ -122,6 +128,9 @@ export function PhoneVerificationModal({
     } else if (isTimeout) {
       setToastTitle("اعتبار کد تمام شده است");
       setToastMessage("یک کد جدید درخواست کن؛ کد قبلی دیگر معتبر نیست.");
+    } else if (isRateLimitError) {
+      setToastTitle("کمی صبر کن");
+      setToastMessage("برای دریافت مجدد کد، لطفاً چند لحظه صبر کن و دوباره تلاش کن.");
     } else if (showToastForError) {
       setToastTitle("خطا در اطلاعات وارد شده");
       setToastMessage(farsiError);
@@ -129,13 +138,13 @@ export function PhoneVerificationModal({
       setToastMessage(null);
     }
   }, [
+    error,
     isSmsFailed,
     isTooManyAttemptsByServer,
     isTooManyAttempts,
     isTimeout,
     showToastForError,
     farsiError,
-    hasAttemptedSubmit,
     attemptsTimeLeft,
   ]);
 
@@ -240,9 +249,23 @@ export function PhoneVerificationModal({
           </div>
 
           <p className="text-label text-text-secondary mb-6">
-            {isSmsFailed
-              ? `پیامک به شماره‌ی ${maskPhone(phone)} ارسال نشد.`
-              : `کد شش‌رقمی به شماره‌ی ${maskPhone(phone)} پیامک شد.`}
+            {isSmsFailed ? (
+              <>
+                پیامک به شماره‌ی{" "}
+                <span dir="ltr" className="inline-block">
+                  {maskPhone(phone)}
+                </span>{" "}
+                ارسال نشد.
+              </>
+            ) : (
+              <>
+                کد شش‌رقمی به شماره‌ی{" "}
+                <span dir="ltr" className="inline-block">
+                  {maskPhone(phone)}
+                </span>{" "}
+                پیامک شد.
+              </>
+            )}
           </p>
 
           <button
@@ -293,8 +316,6 @@ export function PhoneVerificationModal({
             {!isInputDisabled && (
               <p className="text-caption text-text-secondary mt-2 leading-relaxed">
                 کد را از چپ به راست وارد کنید؛ اعتبار کد {formatTime(timeLeft)} است.
-                <br />
-                تا {remainingAttempts} تلاش دیگر برای وارد کردن صحیح کد فرصت داری.
               </p>
             )}
 
