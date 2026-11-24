@@ -16,6 +16,7 @@ export interface ComponentTest {
 }
 
 export const COMPONENT_TESTS: ComponentTest[] = [
+  { key: "calendar", title: "تقویم", component: lazy(() => import("./CalendarDemo")) },
   { key: "button", title: "دکمه", component: lazy(() => import("./ButtonDemo")) },
   { key: "sidebar", title: "سایدبار", component: lazy(() => import("./SidebarDemo")) },
 ];
