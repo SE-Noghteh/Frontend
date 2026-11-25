@@ -14,7 +14,11 @@ import SeekerCollabsPage from "@/pages/SeekerCollabsPage";
 import SeekerRequestDetailPage from "@/pages/SeekerRequestDetailPage";
 import SeekerRequestsPage from "@/pages/SeekerRequestsPage";
 import SupportPage from "@/pages/SupportPage";
-
+import EmployerDashboardLayout from "@/layouts/EmployerDashboardLayout";
+import EmployerAdsPage from "@/pages/EmployerAdsPage";
+import EmployerCreateAdPage from "@/pages/EmployerCreateAdPage";
+import EmployerAdPublishedPage from "@/pages/EmployerAdPublishedPage";
+import EmployerAdDetailPage from "@/pages/EmployerAdDetailPage";
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
@@ -38,6 +42,32 @@ export const router = createBrowserRouter([
       { path: "requests/:requestId", element: <SeekerRequestDetailPage /> },
     ],
   },
+  {
+  path: "/employer",
+  element: <EmployerDashboardLayout />,
+  children: [
+    {
+      index: true,
+      element: <Navigate to="/employer/ads" replace />,
+    },
+    {
+      path: "ads",
+      element: <EmployerAdsPage />,
+    },
+    {
+      path: "ads/create",
+      element: <EmployerCreateAdPage />,
+    },
+    {
+      path: "ads/:adId/published",
+      element: <EmployerAdPublishedPage />,
+    },
+    {
+  path: "ads/:adId",
+  element: <EmployerAdDetailPage />,
+},
+  ],
+},
   {
     path: "/about",
     element: <AboutPage />,
