@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { JobSeekerLoginPage } from "@/pages/JobSeekerLoginPage";
-import { JobSeekerOtpLoginPage } from "@/pages/JobSeekerOtpLoginPage";
+import { JobSeekerForgotPasswordPage } from "@/pages/JobSeekerForgotPasswordPage";
+import { JobSeekerResetPasswordPage } from "@/pages/JobSeekerResetPasswordPage";
 
 export const router = createBrowserRouter([
   {
@@ -12,7 +13,11 @@ export const router = createBrowserRouter([
     element: <JobSeekerLoginPage />, 
   },
   {
-    path: "/jobseekerlogin/otp",
-    element: <JobSeekerOtpLoginPage />,
+    path: "/jobseekerlogin/forgot-password",
+    element: <JobSeekerForgotPasswordPage />,
+  },
+  {
+    path: "/jobseekerlogin/reset-password",
+    element: <JobSeekerResetPasswordPage />,
   },
 ]);

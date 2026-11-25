@@ -9,7 +9,7 @@ export function AuthHeader({ onLoginClick, onTrackClick }: AuthHeaderProps) {
       
       <div className="flex items-center gap-6">
         <img 
-          src="@/../public/images/ZedlancerLogo.svg" 
+          src="/images/ZedlancerLogo.svg" 
           alt="زدلنسر" 
           className="h-8 w-auto object-contain" 
         />

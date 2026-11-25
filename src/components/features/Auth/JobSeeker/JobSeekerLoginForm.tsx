@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
@@ -23,6 +23,12 @@ export function JobSeekerLoginForm() {
     defaultValues: { mobile: "", password: "" },
     mode: "onChange", 
   });
+
+  const location = useLocation();
+
+  const [showSuccessToast, setShowSuccessToast] = useState(
+    location.state?.passwordResetSuccess === true
+  );
 
   return (
     <>
@@ -56,7 +62,7 @@ export function JobSeekerLoginForm() {
         />
         
         <div className="flex justify-start">
-          <Link to="/jobseekerlogin/otp" className="text-label font-bold text-text-primary hover:underline">
+          <Link to="/jobseekerlogin/forgot-password" className="text-label font-bold text-text-primary hover:underline">
             فراموشی رمز
           </Link>
         </div>
@@ -76,6 +82,14 @@ export function JobSeekerLoginForm() {
           title="ورود انجام نشد"
           description={globalError || undefined}
           onClose={() => setShowToast(false)}
+        />
+      )}
+      {showSuccessToast && (
+        <Toast
+          title="رمز جدید ثبت شد"
+          description="از این به بعد میتوانی با شماره و رمز جدید وارد شوی."
+          variantClass="bg-surface-success border-status-success text-status-success"
+          onClose={() => setShowSuccessToast(false)}
         />
       )}
     </>

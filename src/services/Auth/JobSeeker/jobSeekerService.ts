@@ -2,6 +2,14 @@ import { apiClient } from "@/lib/apiClient";
 import type { SignupResponse, RegisterBasicInfo } from "@/types/Auth/jobSeekerRegister";
 import type { RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 import type { AuthResponse } from "@/types/Auth/authTypes";
+import type {
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  VerifyResetOtpRequest,
+  VerifyResetOtpResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+} from "@/types/Auth/authTypes";
 
 export interface OtpResponse {
   expires_in: number;
@@ -99,29 +107,38 @@ export const jobSeekerService = {
     return response.data;
   },
 
-  loginWithOtp: async (phone: string): Promise<OtpResponse> => {
-    const response = await apiClient.post<OtpResponse>("/job-seekers/otp", { phone, action: "login" });
+// reset password
+  forgotPassword: async (
+    data: ForgotPasswordRequest
+  ): Promise<ForgotPasswordResponse> => {
+    const response = await apiClient.post<ForgotPasswordResponse>(
+      "/job-seekers/forgot-password",
+      data
+    );
+
     return response.data;
   },
 
-  verifyLoginOtp: async (phone: string, code: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/job-seekers/verify-otp", { phone, otp: code });
-    if (response.data.accessToken) {
-      localStorage.setItem("accessToken", response.data.accessToken);
-    }
+  verifyResetOtp: async (
+    data: VerifyResetOtpRequest
+  ): Promise<VerifyResetOtpResponse> => {
+    const response = await apiClient.post<VerifyResetOtpResponse>(
+      "/job-seekers/verify-reset-otp",
+      data
+    );
+
     return response.data;
   },
 
-  forgotPassword: async (phone: string): Promise<OtpResponse> => {
-    const response = await apiClient.post<OtpResponse>("/job-seekers/forgot-password", { phone });
+  resetPassword: async (
+    data: ResetPasswordRequest
+  ): Promise<ResetPasswordResponse> => {
+    const response = await apiClient.post<ResetPasswordResponse>(
+      "/job-seekers/reset-password",
+      data
+    );
+
     return response.data;
   },
 
-  resetPassword: async (phone: string, code: string, newPassword: string): Promise<void> => {
-    await apiClient.post("/job-seekers/reset-password", {
-      phone,
-      otp: code,
-      new_password: newPassword,
-    });
-  },
 };
