@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { jobSeekerService } from "@/services/Auth/JobSeeker/jobSeekerService";
 
-import type { RegisterBasicInfo } from "@/types/Auth/register";
+import type { RegisterBasicInfo } from "@/types/Auth/jobSeekerRegister";
 import type { RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 
 interface SignupPayload {

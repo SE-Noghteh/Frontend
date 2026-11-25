@@ -12,6 +12,19 @@ export function JobSeekerRegisterForm() {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const navigate = useNavigate();
 
+  let isUnder18 = false;
+  const birthDateObj = formData.birthDateObj;
+  if (birthDateObj && birthDateObj.year && birthDateObj.month && birthDateObj.day) {
+    const { totalYears } = getDetailedAge(
+      birthDateObj.year.toString(),
+      birthDateObj.month.number.toString(),
+      birthDateObj.day.toString()
+    );
+    if (totalYears < 18) {
+      isUnder18 = true;
+    }
+  }
+
   const handleNextStep = (data: Record<string, any>) => {
     const updatedData = { ...formData, ...data };
     setFormData(updatedData);
@@ -95,6 +108,8 @@ export function JobSeekerRegisterForm() {
           onPrev={handlePrevStep}
           onDashboard={() => navigate("/dashboard")}
           parentPhone={formData.parentPhone}
+          parentInvitationCode={formData.parentInvitationCode}
+          isUnder18={isUnder18}
         />
       </div>
     </div>

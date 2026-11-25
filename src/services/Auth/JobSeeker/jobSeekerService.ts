@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import type { SignupResponse, RegisterBasicInfo } from "@/types/Auth/register";
+import type { SignupResponse, RegisterBasicInfo } from "@/types/Auth/jobSeekerRegister";
 import type { RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 import type { AuthResponse } from "@/types/Auth/authTypes";
 

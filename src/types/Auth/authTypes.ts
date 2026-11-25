@@ -7,7 +7,8 @@ export interface LoginFormValues {
 
 export interface AuthResponse {
   user: User;
-  accessToken: string;
+  accessToken?: string;
+  access_token?: string;
 }
 
 export interface OtpLoginFormValues {

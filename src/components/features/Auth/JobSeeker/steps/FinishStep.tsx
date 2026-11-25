@@ -4,13 +4,21 @@ interface FinishStepProps {
   onPrev: () => void;
   onDashboard: () => void;
   parentPhone?: string;
+  parentInvitationCode?: string; 
+  isUnder18: boolean; 
 }
 
-export function FinishStep({ onPrev, onDashboard, parentPhone }: FinishStepProps) {
-    const maskPhone = (phoneStr: string) => {
-        if (phoneStr.length !== 11) return phoneStr;
-        return `${phoneStr.slice(0, 4)} *** ${phoneStr.slice(7)}`;
-      };
+export function FinishStep({ 
+  onPrev, 
+  onDashboard, 
+  parentPhone, 
+  parentInvitationCode,
+  isUnder18 
+}: FinishStepProps) {
+  const maskPhone = (phoneStr: string) => {
+    if (phoneStr.length !== 11) return phoneStr;
+    return `${phoneStr.slice(7)} *** ${phoneStr.slice(0,4)}`;
+  };
     
   return (
     <div className="flex flex-col gap-6">
@@ -57,13 +65,37 @@ export function FinishStep({ onPrev, onDashboard, parentPhone }: FinishStepProps
             ویدیو و شناسنامه در صف بررسی
             <span className="text-caption text-text-disabled mr-2">بررسی دستی توسط تیم زدلنسر</span>
           </li>
-          <li className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-status-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
-            تأیید والد
-            <span className="text-caption text-text-disabled mr-2 block">
-              {parentPhone ? `دعوت‌نامه به ${maskPhone(parentPhone)} فرستاده شد` : "در انتظار تکمیل در پروفایل"}
-            </span>
-          </li>
+          
+          {isUnder18 && (
+            <li className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-status-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+                تأیید والد
+              </div>
+              
+              {parentInvitationCode ? (
+                <div className="mr-6 p-3 bg-surface-info rounded-md border border-border-decorative w-full max-w-sm">
+                  <span className="text-caption text-text-secondary block mb-1">
+                    کد دعوت‌نامه برای {maskPhone(parentPhone || "")}:
+                  </span>
+                  <span className="text-lg font-bold tracking-widest text-action-primary">
+                    {parentInvitationCode}
+                  </span>
+                  <span className="text-caption text-text-secondary block mt-2">
+                    این کد را به والد خود بدهید. اعتبار: ۷ روز
+                  </span>
+                </div>
+              ) : parentPhone ? (
+                <span className="text-caption text-status-success mr-6 block">
+                  والد با موفقیت متصل شد.
+                </span>
+              ) : (
+                <span className="text-caption text-text-disabled mr-6 block">
+                  در انتظار تکمیل در پروفایل
+                </span>
+              )}
+            </li>
+          )}
         </ul>
       </div>
 

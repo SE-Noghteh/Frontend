@@ -42,4 +42,32 @@ export interface SignupResponse {
   expires_in: number;
   message: string;
   resend_after: number;
+  accessToken?: string; 
+  access_token?: string; 
+}
+
+// parent step
+export interface ParentRegisteredPayload {
+  phone: string;
+}
+
+export interface ParentInvitePayload {
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
+
+export interface ParentRegisteredResponse {
+  message: string;
+}
+
+export interface ParentInviteResponse {
+  admin_approved: boolean;
+  admin_approved_parent: boolean;
+  expires_at: string;
+  invitation_code: string;
+  parent_approval_required: boolean;
+  parent_connected: boolean;
+  parent_id: number;
+  signup_status: string;
 }

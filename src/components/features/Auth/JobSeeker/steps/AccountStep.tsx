@@ -12,6 +12,8 @@ import { useJobSeekerSignup, useJobSeekerVerifyOtp, useJobSeekerResendOtp } from
 import { resolveErrorMessage, isNonBlockingOtpError } from "@/utils/resolveErrorMessage";
 import { Toast } from "@/components/ui/Toast"; 
 
+import { login as loginJobSeeker } from "@/services/Auth/JobSeeker/jobSeekerAuthService"; 
+
 interface AccountStepProps {
   onNext: (data: RegisterAccountFormValues) => void;
   onPrev: () => void;
@@ -39,7 +41,7 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
   const [modalError, setModalError] = useState<string | null>(null);
   const [sendCodeToastError, setSendCodeToastError] = useState<string | null>(null);
 
-  const { mutate: signup } = useJobSeekerSignup();
+  const { mutate: signup, isPending: isSigningUp } = useJobSeekerSignup();
   const { mutate: verifyOtp, isPending: isVerifying } = useJobSeekerVerifyOtp();
   const { mutate: resendOtp, isPending: isResending } = useJobSeekerResendOtp();
 
@@ -58,7 +60,10 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
     signup(
       { basicData, accountData: getValues() },
       {
-        onSuccess: () => {
+        onSuccess: (responseData: any) => {
+          const token = responseData?.accessToken || responseData?.access_token;
+          if (token) localStorage.setItem("accessToken", token);
+
           resendOtp(phone, {
             onSuccess: () => {
               setIsSendingCode(false);
@@ -68,7 +73,6 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
             onError: (err: any) => {
               setIsSendingCode(false);
               const rawMessage = err.response?.data?.message || err.message;
-
               if (isNonBlockingOtpError(rawMessage)) {
                 setIsCodeSent(false);
                 setIsModalOpen(true);
@@ -82,7 +86,6 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
         onError: (err: any) => {
           setIsSendingCode(false);
           const rawMessage = err.response?.data?.message || err.message;
-
           if (isNonBlockingOtpError(rawMessage)) {
             setIsCodeSent(false);
             setIsModalOpen(true);
@@ -99,10 +102,12 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
     verifyOtp(
       { phone, code },
       {
-        onSuccess: () => {
+        onSuccess: (responseData: any) => {
+          const token = responseData?.accessToken || responseData?.access_token;
+          if (token) localStorage.setItem("accessToken", token);
+          
           setIsCodeSent(true);
           setIsModalOpen(false);
-          onNext(getValues());
         },
         onError: (err: any) => {
           setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
@@ -124,13 +129,34 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
     });
   };
 
-  const onSubmitHandler = (data: RegisterAccountFormValues) => {
+  const onSubmitHandler = async (data: RegisterAccountFormValues) => {
     if (!isCodeSent) {
       setVerificationError("لطفاً ابتدا شماره همراه خود را با کد پیامکی تأیید کنید.");
       setIsModalOpen(true);
       return;
     }
-    onNext(data);
+
+    setIsSendingCode(true); 
+
+    try {
+      const authResponse = await loginJobSeeker({
+        mobile: data.phone,
+        password: data.password,
+      });
+
+      if (authResponse?.accessToken) {
+        localStorage.setItem("accessToken", authResponse.accessToken);
+      } else if ((authResponse as any)?.access_token) {
+        localStorage.setItem("accessToken", (authResponse as any).access_token);
+      }
+
+      onNext(data);
+
+    } catch (error: any) {
+      setSendCodeToastError("خطا در ورود به حساب. لطفاً دوباره تلاش کنید.");
+    } finally {
+      setIsSendingCode(false);
+    }
   };
 
   return (
@@ -159,8 +185,8 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
           isCodeSent={isCodeSent}
           helperText="ابتدا تمام موارد فرم را پر کنید سپس برای تایید شماره، روی ارسال کد کلیک کنید."
           autoComplete="off"
-          isSendCodeDisabled={!isValid || isCodeSent}
-          isSendingCode={isSendingCode}
+          isSendCodeDisabled={!isValid || isCodeSent || isSigningUp || isSendingCode}
+          isSendingCode={isSendingCode || isSigningUp}
         />
 
         <PasswordInput
@@ -209,17 +235,16 @@ export function AccountStep({ onNext, onPrev, defaultValues, basicData }: Accoun
             type="submit"
             variant="primary"
             className="flex-1 whitespace-nowrap"
-            disabled={!isValid || !isCodeSent}
+            disabled={!isValid || !isCodeSent || isSendingCode}
           >
-            <span className="inline sm:hidden">ادامه</span>
-            <span className="hidden sm:inline">ادامه: اطلاعات والد</span>
+            {isSendingCode ? "در حال ورود..." : "ادامه: اطلاعات والد"}
           </Button>
         </div>
       </form>
 
       {sendCodeToastError && (
         <Toast
-          title="خطا در ارسال کد"
+          title="خطا"
           description={sendCodeToastError}
           onClose={() => setSendCodeToastError(null)}
           duration={6000}
