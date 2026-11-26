@@ -19,4 +19,5 @@ export const COMPONENT_TESTS: ComponentTest[] = [
   { key: "calendar", title: "تقویم", component: lazy(() => import("./CalendarDemo")) },
   { key: "button", title: "دکمه", component: lazy(() => import("./ButtonDemo")) },
   { key: "sidebar", title: "سایدبار", component: lazy(() => import("./SidebarDemo")) },
+  { key: "form-pickers", title: "دراپ‌داون و تاریخ", component: lazy(() => import("./FormPickersDemo")) },
 ];

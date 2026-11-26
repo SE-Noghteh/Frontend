@@ -12,6 +12,9 @@
  *   --cal-accent-text    text on top of --cal-accent
  *   --cal-selected-bg    selected day cell background
  *   --cal-hover-bg       hover background for nav buttons and picker items
+ *   --cal-day-hover-bg   hover background of a day number (default: --cal-hover-bg)
+ *   --cal-day-hover-text hover text color of a day number
+ *   --cal-selected-text  day number color inside the selected cell
  *   --cal-radius         card corner radius
  *   --cal-selected-border  border of the selected day cell (default: none)
  *   --cal-padding        inner padding of the card
@@ -264,8 +267,14 @@
     transition: background-color 150ms ease;
   }
 
-  .cal__day:hover .cal__day-number {
-    background: var(--cal-hover-bg);
+  /* "Today" keeps its accent colors, so these two rules skip it. */
+  .cal__cell[data-selected] .cal__day-number:not([data-today]) {
+    color: var(--cal-selected-text, inherit);
+  }
+
+  .cal__day:hover .cal__day-number:not([data-today]) {
+    background: var(--cal-day-hover-bg, var(--cal-hover-bg));
+    color: var(--cal-day-hover-text, inherit);
   }
 
   .cal__day-number[data-today] {
