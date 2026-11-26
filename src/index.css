@@ -3,6 +3,7 @@
 @import "./styles/tokens.css";
 @import "./styles/global.css";
 @import "./styles/calendar.css";
+@import "./styles/dropdown.css";
 @import "./styles/button.css";
 
 #root {
