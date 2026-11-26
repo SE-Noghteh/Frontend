@@ -1,0 +1,275 @@
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { PhoneInput } from "@/components/ui/PhoneInput";
+import { PasswordInput } from "@/components/ui/PasswordInput";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Button } from "@/components/ui/Button";
+import { registerAccountSchema, type RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
+import { useState } from "react";
+import { PhoneVerificationModal } from "../PhoneVerificationModal";
+import { PasswordCriteria } from "@/components/features/Auth/JobSeeker/PasswordCriteria";
+import { useJobSeekerSignup, useJobSeekerVerifyOtp, useJobSeekerResendOtp } from "@/hooks/JobSeeker/useJobSeekerSignup";
+import { resolveErrorMessage, isNonBlockingOtpError } from "@/utils/resolveErrorMessage";
+import { Toast } from "@/components/ui/Toast"; 
+
+import { login as loginJobSeeker } from "@/services/Auth/JobSeeker/jobSeekerAuthService"; 
+
+interface AccountStepProps {
+  onNext: (data: RegisterAccountFormValues) => void;
+  onPrev: () => void;
+  defaultValues?: Partial<RegisterAccountFormValues>;
+  basicData: any;
+}
+
+export function AccountStep({ onNext, onPrev, defaultValues, basicData }: AccountStepProps) {
+  const { register, handleSubmit, trigger, getValues, watch, formState: { errors, touchedFields, isValid } } = useForm<RegisterAccountFormValues>({
+    resolver: yupResolver(registerAccountSchema),
+    mode: "onTouched",
+    defaultValues: {
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      termsAccepted: false,
+      ...defaultValues
+    }
+  });
+
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [sendCodeToastError, setSendCodeToastError] = useState<string | null>(null);
+
+  const { mutate: signup, isPending: isSigningUp } = useJobSeekerSignup();
+  const { mutate: verifyOtp, isPending: isVerifying } = useJobSeekerVerifyOtp();
+  const { mutate: resendOtp, isPending: isResending } = useJobSeekerResendOtp();
+
+  const password = watch("password", "");
+  const phone = watch("phone", "");
+
+  const handleSendCode = async () => {
+    const isPhoneValid = await trigger("phone");
+    if (!isPhoneValid) return;
+
+    setVerificationError(null);
+    setModalError(null);
+    setSendCodeToastError(null);
+    setIsSendingCode(true);
+
+    signup(
+      { basicData, accountData: getValues() },
+      {
+        onSuccess: (responseData: any) => {
+          const token = responseData?.accessToken || responseData?.access_token;
+          if (token) localStorage.setItem("accessToken", token);
+
+          resendOtp(phone, {
+            onSuccess: () => {
+              setIsSendingCode(false);
+              setIsCodeSent(true);
+              setIsModalOpen(true);
+            },
+            onError: (err: any) => {
+              setIsSendingCode(false);
+              const rawMessage = err.response?.data?.message || err.message;
+              if (isNonBlockingOtpError(rawMessage)) {
+                setIsCodeSent(false);
+                setIsModalOpen(true);
+                setModalError(resolveErrorMessage(rawMessage));
+              } else {
+                setSendCodeToastError(resolveErrorMessage(rawMessage));
+              }
+            }
+          });
+        },
+        onError: (err: any) => {
+          setIsSendingCode(false);
+          const rawMessage = err.response?.data?.message || err.message;
+          if (isNonBlockingOtpError(rawMessage)) {
+            setIsCodeSent(false);
+            setIsModalOpen(true);
+            setModalError(resolveErrorMessage(rawMessage));
+          } else {
+            setSendCodeToastError(resolveErrorMessage(rawMessage));
+          }
+        }
+      }
+    );
+  };
+
+  const handleVerifyCode = (code: string) => {
+    verifyOtp(
+      { phone, code },
+      {
+        onSuccess: (responseData: any) => {
+          const token = responseData?.accessToken || responseData?.access_token;
+          if (token) localStorage.setItem("accessToken", token);
+          
+          setIsCodeSent(true);
+          setIsModalOpen(false);
+        },
+        onError: (err: any) => {
+          setVerificationError(resolveErrorMessage(err.response?.data?.message || err.message));
+        }
+      }
+    );
+  };
+
+  const handleResendOtp = (onSuccessCallback: () => void) => {
+    resendOtp(phone, {
+      onSuccess: () => {
+        setVerificationError(null);
+        setModalError(null);
+        onSuccessCallback();
+      },
+      onError: (err: any) => {
+        setModalError(resolveErrorMessage(err.response?.data?.message || err.message));
+      },
+    });
+  };
+
+  const onSubmitHandler = async (data: RegisterAccountFormValues) => {
+    if (!isCodeSent) {
+      setVerificationError("لطفاً ابتدا شماره همراه خود را با کد پیامکی تأیید کنید.");
+      setIsModalOpen(true);
+      return;
+    }
+
+    setIsSendingCode(true); 
+
+    try {
+      const authResponse = await loginJobSeeker({
+        mobile: data.phone,
+        password: data.password,
+      });
+
+      if (authResponse?.accessToken) {
+        localStorage.setItem("accessToken", authResponse.accessToken);
+      } else if ((authResponse as any)?.access_token) {
+        localStorage.setItem("accessToken", (authResponse as any).access_token);
+      }
+
+      onNext(data);
+
+    } catch (error: any) {
+      setSendCodeToastError("خطا در ورود به حساب. لطفاً دوباره تلاش کنید.");
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSubmit(onSubmitHandler)} className="flex flex-col gap-6">
+        <div className="text-right mb-2">
+          <h2 className="text-card-title font-bold" style={{ color: "var(--color-text-primary)" }}>اطلاعات حساب</h2>
+          <p className="text-label text-text-secondary mt-2">شماره همراه و یک رمز مطمئن، کلید ورود تو به زدلنسر است.</p>
+        </div>
+
+        <PhoneInput
+          label="شماره همراه"
+          isRequired
+          placeholder="شماره همراه ۱۱ رقمی"
+          {...register("phone", {
+            onChange: () => {
+              setVerificationError(null);
+              setModalError(null);
+              setSendCodeToastError(null); 
+              setIsCodeSent(false);
+            }
+          })}
+          value={phone}
+          error={errors.phone?.message}
+          onSendCode={handleSendCode}
+          isCodeSent={isCodeSent}
+          helperText="ابتدا تمام موارد فرم را پر کنید سپس برای تایید شماره، روی ارسال کد کلیک کنید."
+          autoComplete="off"
+          isSendCodeDisabled={!isValid || isCodeSent || isSigningUp || isSendingCode}
+          isSendingCode={isSendingCode || isSigningUp}
+        />
+
+        <PasswordInput
+          label="رمز عبور"
+          isRequired
+          placeholder="رمز عبور را با دقت وارد کنید"
+          {...register("password")}
+          error={errors.password?.message}
+          autoComplete="new-password"
+        >
+          <PasswordCriteria password={password} isTouched={touchedFields.password} />
+        </PasswordInput>
+
+        <PasswordInput
+          label="تکرار رمز عبور"
+          isRequired
+          placeholder="رمز عبور را دوباره وارد کنید"
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
+          autoComplete="new-password"
+        />
+
+        <div className="flex flex-col gap-3 mt-2">
+          <Checkbox
+            label="قوانین زدلنسر و حریم خصوصی را می‌پذیرم. *"
+            hasError={!!errors.termsAccepted}
+            {...register("termsAccepted")}
+          />
+
+          <div className="flex items-center gap-4 pr-7">
+            <a href="#" className="text-label text-interface-secondary hover:underline">قوانین زدلنسر</a>
+            <a href="#" className="text-label text-interface-secondary hover:underline">حریم خصوصی</a>
+          </div>
+        </div>
+
+        <div className="flex gap-3 sm:gap-4 mt-6">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onPrev}
+            className="flex-1 whitespace-nowrap"
+          >
+            بازگشت
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            className="flex-1 whitespace-nowrap"
+            disabled={!isValid || !isCodeSent || isSendingCode}
+          >
+            {isSendingCode ? "در حال ورود..." : "ادامه: اطلاعات والد"}
+          </Button>
+        </div>
+      </form>
+
+      {sendCodeToastError && (
+        <Toast
+          title="خطا"
+          description={sendCodeToastError}
+          onClose={() => setSendCodeToastError(null)}
+          duration={6000}
+        />
+      )}
+
+      <PhoneVerificationModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalError(null);
+        }}
+        onEditPhone={() => {
+          setIsModalOpen(false);
+          setIsCodeSent(false);
+          setModalError(null);
+          setVerificationError(null);
+        }}
+        phone={phone}
+        onVerify={handleVerifyCode}
+        isLoading={isVerifying}
+        error={modalError || verificationError}
+        onResend={handleResendOtp}
+        isResending={isResending}
+      />
+    </>
+  );
+}

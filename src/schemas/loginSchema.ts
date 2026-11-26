@@ -1,19 +1,10 @@
-/**
- * SAMPLE FILE
- *
- * Validation schemas should be reusable and kept
- * outside React components.
- */
-
 import * as yup from "yup";
 
-export const loginSchema = yup.object({
-  email: yup
+export const loginSchema = yup.object().shape({
+  mobile: yup
     .string()
-    .email("Invalid email")
-    .required("Email is required"),
+    .required("شماره موبایل را وارد کن.")
+    .matches(/^09\d{9}$/, "شماره موبایل معتبر نیست. باید با ۰۹ شروع شود و ۱۱ رقم داشته باشد."),
 
-  password: yup
-    .string()
-    .required("Password is required"),
+  password: yup.string().required("رمز عبور را وارد کن."),
 });
