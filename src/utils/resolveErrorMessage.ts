@@ -18,6 +18,10 @@ export function resolveErrorMessage(errorString: string | null | undefined): str
     {
       return"کد ملی معتبر نیست."
     }
+    if(error.includes("province") && error.includes("invalid"))
+    {
+      return"کد پستی معتبر نیست."
+    }
     if (error.includes("password")) {
       return "رمز عبور معتبر نیست.";
     }

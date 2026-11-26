@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import type { SignupResponse, RegisterBasicInfo } from "@/types/Auth/jobSeekerRegister";
+import type { SignupResponse, RegisterBasicInfo, ProvincesResponse } from "@/types/Auth/jobSeekerRegister";
 import type { RegisterAccountFormValues } from "@/schemas/registerJobSeekerSchema";
 import type { AuthResponse } from "@/types/Auth/authTypes";
 import type {
@@ -42,17 +42,15 @@ export const jobSeekerService = {
     formData.append("first_name", toFormString(basicData.firstName));
     formData.append("last_name", toFormString(basicData.lastName));
     formData.append("national_code", toFormString(basicData.nationalCode));
+    formData.append("province", toFormString(basicData.province));
     formData.append("city", toFormString(basicData.city));
     formData.append("address", toFormString(basicData.address));
+    formData.append("postal_code", toFormString(basicData.postalCode)); 
 
     const birthDate = basicData.birthDateObj;
-    const birthYear = birthDate?.year ?? "";
-    const birthMonth = birthDate?.month?.number ?? "";
-    const birthDay = birthDate?.day ?? "";
-
-    formData.append("birth_year", toFormString(birthYear));
-    formData.append("birth_month", toFormString(birthMonth));
-    formData.append("birth_day", toFormString(birthDay));
+    formData.append("birth_year", String(Number(birthDate?.year || 0)));
+    formData.append("birth_month", String(Number(birthDate?.month?.number || 0)));
+    formData.append("birth_day", String(Number(birthDate?.day || 0)));
 
     const genderMap: Record<string, string> = {
       "مرد": "male",
@@ -69,19 +67,28 @@ export const jobSeekerService = {
       });
     }
 
-    formData.append("phone", toFormString(accountData.phone));
-    formData.append("password", toFormString(accountData.password));
+    const idCard = basicData.idCardImage;
+    if (!(idCard instanceof Blob)) {
+      throw new Error("فایل تصویر صفحه اول شناسنامه معتبر نیست.");
+    }
+    formData.append(
+      "identity_document",
+      idCard,
+      idCard instanceof File ? idCard.name : "identity-document"
+    );
 
     const video = basicData.identityVideo;
     if (!(video instanceof Blob)) {
       throw new Error("فایل ویدیوی تأیید هویت معتبر نیست.");
     }
-
     formData.append(
       "verification_video",
       video,
       video instanceof File ? video.name : "verification-video"
     );
+
+    formData.append("phone", toFormString(accountData.phone));
+    formData.append("password", toFormString(accountData.password));
 
     const response = await apiClient.post<SignupResponse>("/job-seekers/signup", formData, {
       headers: { "Content-Type": undefined },
@@ -107,7 +114,19 @@ export const jobSeekerService = {
     return response.data;
   },
 
-// reset password
+  getProvinces: async (): Promise<ProvincesResponse> => {
+    const response = await apiClient.get<ProvincesResponse>("/provinces");
+    return response.data;
+  },
+
+  getCities: async (province: string): Promise<any> => {
+    const response = await apiClient.get("/cities", {
+      params: { province }
+    });
+    return response.data;
+  },
+
+  // reset password
   forgotPassword: async (
     data: ForgotPasswordRequest
   ): Promise<ForgotPasswordResponse> => {
@@ -115,7 +134,6 @@ export const jobSeekerService = {
       "/job-seekers/forgot-password",
       data
     );
-
     return response.data;
   },
 
@@ -126,7 +144,6 @@ export const jobSeekerService = {
       "/job-seekers/verify-reset-otp",
       data
     );
-
     return response.data;
   },
 
@@ -137,8 +154,6 @@ export const jobSeekerService = {
       "/job-seekers/reset-password",
       data
     );
-
     return response.data;
   },
-
 };

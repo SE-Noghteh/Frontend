@@ -51,3 +51,19 @@ export function useSignupOptions() {
     staleTime: 1000 * 60 * 60,
   });
 }
+
+export function useProvinces() {
+  return useQuery({
+    queryKey: ["provinces"],
+    queryFn: () => jobSeekerService.getProvinces(),
+    staleTime: 1000 * 60 * 60, 
+  });
+}
+
+export function useCities(province: string) {
+  return useQuery({
+    queryKey: ["cities", province],
+    queryFn: () => jobSeekerService.getCities(province),
+    enabled: !!province, 
+  });
+}

@@ -1,31 +1,4 @@
-export const genderOptions = [
-  { label: "زن", value: "female" },
-  { label: "مرد", value: "male" },
-];
-  
-  export const provinceOptions = [
-    { label: "تهران", value: "tehran" },
-    { label: "البرز", value: "alborz" },
-    { label: "خراسان رضوی", value: "razavi-khorasan" },
-  ];
-  
-  export const cityOptions: Record<string, { label: string; value: string }[]> = {
-    tehran: [
-      { label: "تهران", value: "tehran" },
-      { label: "شهریار", value: "shahriyar" },
-      { label: "اسلامشهر", value: "eslamshahr" },
-    ],
-    alborz: [
-      { label: "کرج", value: "karaj" },
-      { label: "فردیس", value: "fardis" },
-    ],
-    "razavi-khorasan": [
-      { label: "مشهد", value: "mashhad" },
-      { label: "نیشابور", value: "neyshabur" },
-    ],
-  };
-  
-  //Date of birth
+ //Date of birth
   export const dayOptions = Array.from({ length: 31 }, (_, i) => {
     const day = (i + 1).toString().padStart(2, "0");
     return { label: day, value: day };

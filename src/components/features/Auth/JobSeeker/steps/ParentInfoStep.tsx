@@ -160,7 +160,7 @@ export function ParentInfoStep({
 
         <div className="flex flex-col gap-3 mt-4">
           <div className="flex gap-3 sm:gap-4">
-            <Button
+            {/* <Button
               type="button"
               variant="secondary"
               onClick={onPrev}
@@ -168,7 +168,7 @@ export function ParentInfoStep({
               disabled={isSubmitting}
             >
               بازگشت
-            </Button>
+            </Button> */}
             <Button
               type="submit"
               variant="primary"

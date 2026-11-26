@@ -26,8 +26,10 @@ export interface SignupBackendPayload {
   first_name: string;
   last_name: string;
   national_code: string;
+  province: string; 
   city: string;
   address: string;
+  postal_code: string;
   birth_year: number;
   birth_month: number;
   birth_day: number;
@@ -35,8 +37,15 @@ export interface SignupBackendPayload {
   interests: string[]; 
   phone: string;
   password: string;
+  identity_document: File;
   verification_video: File; 
 }
+
+export interface ProvinceItem {
+  id: number | string;
+  name: string;
+}
+export type ProvincesResponse = ProvinceItem[]; 
 
 export interface SignupResponse {
   expires_in: number;

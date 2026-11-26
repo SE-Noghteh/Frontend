@@ -9,9 +9,9 @@ import { SkillsSelector } from "../SkillsSelector";
 import { IdentityInstructionsBox } from "../IdentityInstructionsBox"; 
 import { VideoUploadBox } from "../VideoUploadBox"; 
 import { registerBasicSchema, type RegisterBasicFormValues } from "@/schemas/registerJobSeekerSchema";
-import { provinceOptions, monthOptions } from "@/data/registerData";
+import { monthOptions } from "@/data/registerData";
 import { useEffect, useRef } from "react";
-import { useSignupOptions } from "@/hooks/JobSeeker/useJobSeekerSignup";
+import { useSignupOptions, useProvinces, useCities } from "@/hooks/JobSeeker/useJobSeekerSignup";
 import { FormBirthDateInput } from "@/components/features/Auth/JobSeeker/FormBirthDateInput";
 import { DateObject } from "react-multi-date-picker"; 
 
@@ -22,6 +22,7 @@ interface BasicInfoStepProps {
 
 export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   const { data: options, isLoading: isLoadingOptions } = useSignupOptions();
+  const { data: provinceList, isLoading: isLoadingProvinces } = useProvinces();
 
   const methods = useForm<RegisterBasicFormValues>({
     resolver: yupResolver(registerBasicSchema),
@@ -42,6 +43,8 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   const identityVideo = watch("identityVideo");
   const selectedProvince = watch("province");
 
+  const { data: citiesList, isLoading: isLoadingCities } = useCities(selectedProvince);
+
   const firstName = watch("firstName");
   const lastName = watch("lastName");
   
@@ -58,11 +61,27 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
   )?.label;
 
   const birthDate = birthDay && monthName && birthYear ? `${birthDay} ${monthName} ${birthYear}` : "";
-  const cityOptions = options?.cities.map(city => ({ label: city, value: city })) || [];
+  const rawCityList = Array.isArray(citiesList) 
+  ? citiesList 
+  : (citiesList as any)?.data || (citiesList as any)?.cities || [];
+
+  const cityOptions = rawCityList.map((city: any) => 
+    typeof city === "string" ? { label: city, value: city } : { label: city.name ?? city.title ?? String(city), value: city.name ?? city.title ?? String(city) }
+  );
   const genderOptions = options?.genders.map(gender => ({ 
     label: gender === "male" ? "مرد" : "زن", 
     value: gender 
   })) || [];
+
+  const rawProvinceList = Array.isArray(provinceList) 
+  ? provinceList 
+  : (provinceList as any)?.data || (provinceList as any)?.provinces || [];
+
+  const provinceOptions = rawProvinceList.map((p: any) =>
+    typeof p === "string"
+      ? { label: p, value: p }
+      : { label: p.name ?? p.title ?? String(p), value: p.name ?? p.title ?? String(p) }
+  );
 
   const isFirstRender = useRef(true);
 
@@ -79,7 +98,7 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
     if (defaultValues?.identityVideo) setValue("identityVideo", defaultValues.identityVideo);
   }, [defaultValues, setValue]);
 
-  if (isLoadingOptions) {
+  if (isLoadingOptions || isLoadingProvinces) {
     return <div className="text-center p-4">در حال دریافت اطلاعات...</div>; 
   }
 
@@ -104,7 +123,7 @@ export function BasicInfoStep({ onNext, defaultValues }: BasicInfoStepProps) {
       <p className="text-caption text-text-secondary -mt-2 text-right">با تغییر استان، شهر ناسازگار پاک می‌شود.</p>
 
       <Input label="نشانی کامل محل سکونت" isRequired {...register("address")} error={errors.address?.message} helperText="نشانی خصوصی است و در پروفایل عمومی نمایش داده نمی‌شود." />
-      <Input label="کد پستی" isRequired placeholder="**********" {...register("postalCode")} error={errors.postalCode?.message} />
+      <Input label="کد پستی" isRequired placeholder="**********" {...register("postalCode")} error={errors.postalCode?.message} helperText="عدد انگلیسی وارد شود"/>
       <Input label="کد ملی" isRequired placeholder="کد ملی ۱۰ رقمی" {...register("nationalCode")} error={errors.nationalCode?.message} helperText="بدون خط تیره و فاصله" />
 
       <FormBirthDateInput />

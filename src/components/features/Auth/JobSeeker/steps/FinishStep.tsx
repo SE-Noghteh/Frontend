@@ -100,9 +100,9 @@ export function FinishStep({
       </div>
 
       <div className="flex gap-3 mt-4">
-        <Button variant="secondary" onClick={onPrev} className="flex-1">
+        {/* <Button variant="secondary" onClick={onPrev} className="flex-1">
           ویرایش اطلاعات
-        </Button>
+        </Button> */}
         <Button variant="primary" onClick={onDashboard} className="flex-1">
           رفتن به داشبورد
         </Button>
