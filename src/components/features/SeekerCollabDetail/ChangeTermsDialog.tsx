@@ -21,11 +21,12 @@ type FieldErrors = Partial<Record<"deadline" | "amount" | "deliverables" | "reas
 interface ChangeTermsDialogProps {
   isOpen: boolean;
   collab: SeekerCollab;
+  onSubmitted: () => void;
   onClose: () => void;
 }
 
-/** Ask to change the agreed terms (deadline, amount, deliverables). The parent approves first. */
-export function ChangeTermsDialog({ isOpen, collab, onClose }: ChangeTermsDialogProps) {
+/** Ask the employer to revise the proposed terms. Parent approval follows the final agreement. */
+export function ChangeTermsDialog({ isOpen, collab, onSubmitted, onClose }: ChangeTermsDialogProps) {
   const [deadline, setDeadline] = useState(toPersianDigits(collab.deliveryDate));
   const [amount, setAmount] = useState(toPersianDigits(collab.amount.toLocaleString("en-US").replace(/,/g, "٬")));
   const [deliverables, setDeliverables] = useState<string[]>(DEFAULT_DELIVERABLES);
@@ -38,7 +39,6 @@ export function ChangeTermsDialog({ isOpen, collab, onClose }: ChangeTermsDialog
   const validate = (): FieldErrors => {
     const next: FieldErrors = {};
     if (deadline.trim() === "") next.deadline = "مهلت را وارد کن.";
-    // Accepts Persian or Latin digits and thousands separators.
     const digits = amount.replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))).replace(/[^\d]/g, "");
     if (digits === "" || Number(digits) <= 0) next.amount = "مبلغ را درست وارد کن.";
     if (deliverables.length === 0) next.deliverables = "حداقل یک خروجی انتخاب کن.";
@@ -56,9 +56,14 @@ export function ChangeTermsDialog({ isOpen, collab, onClose }: ChangeTermsDialog
     await new Promise((resolve) => setTimeout(resolve, MOCK_REQUEST_DELAY_MS));
     setIsSending(false);
 
+    onSubmitted();
     setReason("");
     onClose();
-    showToast({ tone: "success", title: "درخواست تغییر ثبت شد", description: "اول والدت تأیید می‌کند." });
+    showToast({
+      tone: "success",
+      title: "درخواست تغییر ثبت شد",
+      description: "درخواست برای بررسی به کارفرما ارسال شد؛ پس از توافق نهایی، در صورت نیاز تأیید والد انجام می‌شود.",
+    });
   };
 
   const toggleDeliverable = (item: string) => {
@@ -164,7 +169,7 @@ export function ChangeTermsDialog({ isOpen, collab, onClose }: ChangeTermsDialog
 
         <p className="flex items-center gap-2 rounded-xl bg-error-soft px-3 py-3 text-caption text-text-primary">
           <ShieldCheck size={16} aria-hidden="true" className="shrink-0 text-error" />
-          اول والدت تأیید می‌کند، بعد برای کارفرما می‌رود
+          درخواست تغییر ابتدا برای کارفرما ارسال می‌شود. پس از توافق نهایی، قرارداد برای تأیید والد فرستاده خواهد شد.
         </p>
 
         <Button type="submit" loading={isSending} className="w-full md:w-auto md:self-start">

@@ -1,4 +1,4 @@
-/** Job-seeker dashboard: one request, its progress, the parent's decision and the next actions. */
+/** Job-seeker dashboard: one request, its progress and the next actions. */
 
 import { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -6,13 +6,11 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { CancelRequestDialog } from "@/components/features/SeekerRequestDetail/CancelRequestDialog";
 import { EditRequestDialog } from "@/components/features/SeekerRequestDetail/EditRequestDialog";
 import { MyMessageCard } from "@/components/features/SeekerRequestDetail/MyMessageCard";
-import { ParentApprovalCard } from "@/components/features/SeekerRequestDetail/ParentApprovalCard";
 import { RequestActions } from "@/components/features/SeekerRequestDetail/RequestActions";
 import { RequestAdCard } from "@/components/features/SeekerRequestDetail/RequestAdCard";
 import { RequestTimelineCard } from "@/components/features/SeekerRequestDetail/RequestTimelineCard";
 import { RequestStatusChip } from "@/components/features/SeekerRequests/RequestStatusChips";
 import { PageHeader } from "@/components/shared/PageHeader/PageHeader";
-import { mockParent } from "@/data/mockSeeker";
 import { useSeekerStore } from "@/store/seeker/useSeekerStore";
 import { useToastStore } from "@/store/ui/useToastStore";
 import type { SeekerRequest } from "@/types/Seeker/seeker";
@@ -20,10 +18,10 @@ import { buildRequestTimeline } from "@/utils/buildRequestTimeline";
 
 function getBanner(request: SeekerRequest): { tone: "success" | "error"; text: string } | undefined {
   if (request.employerStatus === "accepted") {
-    return { tone: "success", text: "کارفرما درخواستت را پذیرفت؛ شرایط همکاری را بررسی کن" };
+    return { tone: "success", text: "کارفرما درخواستت را پذیرفت؛ حالا شرایط همکاری را نهایی کنید" };
   }
-  if (request.employerStatus === "rejectedByParent") {
-    return { tone: "error", text: "والدت این درخواست را تأیید نکرد؛ می‌توانی متن را اصلاح کنی و دوباره بفرستی" };
+  if (request.employerStatus === "rejectedByEmployer") {
+    return { tone: "error", text: "کارفرما درخواستت را نپذیرفت؛ می‌توانی آگهی‌های مشابه را بررسی کنی" };
   }
   return undefined;
 }
@@ -59,12 +57,11 @@ export default function SeekerRequestDetailPage() {
 
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-5">
         <div className="flex flex-col gap-4">
-          <RequestTimelineCard steps={buildRequestTimeline(request, mockParent)} banner={getBanner(request)} />
+          <RequestTimelineCard steps={buildRequestTimeline(request)} banner={getBanner(request)} />
           <MyMessageCard message={request.message} />
         </div>
 
         <div className="flex flex-col gap-4">
-          <ParentApprovalCard parent={mockParent} status={request.parentStatus} note={request.parentNote} />
           <RequestAdCard ad={ad} />
           <RequestActions request={request} onEdit={() => setIsEditOpen(true)} onCancel={() => setIsCancelOpen(true)} />
         </div>

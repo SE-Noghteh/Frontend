@@ -2,28 +2,38 @@ import { Wallet } from "lucide-react";
 
 import { SectionCard } from "@/components/ui/SectionCard";
 import type { SeekerAd } from "@/types/Seeker/seeker";
-import { formatToman, formatJalaliDate } from "@/utils/formatToman";
+import { formatJalaliDate, formatToman } from "@/utils/formatToman";
 import { toPersianDigits } from "@/utils/toPersianDigits";
 
-interface AdConditionsCardProps {
-  ad: SeekerAd;
+interface ConditionRow {
+  label: string;
+  value: string;
 }
 
-export function AdConditionsCard({ ad }: AdConditionsCardProps) {
-  const isWork = ad.kind === "work";
-  const amountLabel = isWork ? "بودجه" : "کمک‌هزینه";
-  const amountValue = isWork
-    ? formatToman(ad.budget ?? 0)
-    : ad.stipend
-      ? `${formatToman(ad.stipend)} / ماه`
-      : "بدون کمک‌هزینه";
+interface AdConditionsCardProps {
+  ad?: SeekerAd;
+  rows?: ConditionRow[];
+}
 
-  const rows = [
-    { label: amountLabel, value: amountValue },
-    { label: "مهلت درخواست", value: formatJalaliDate(ad.deadline) },
-    { label: "مدت همکاری", value: ad.collabDuration },
-    { label: "درخواست‌ها", value: `${toPersianDigits(ad.applicantsCount)} نفر` },
-  ];
+export function AdConditionsCard({ ad, rows: customRows }: AdConditionsCardProps) {
+  let rows = customRows ?? [];
+
+  if (!customRows && ad) {
+    const isWork = ad.kind === "work";
+    const amountLabel = isWork ? "بودجه" : "کمک‌هزینه";
+    const amountValue = isWork
+      ? formatToman(ad.budget ?? 0)
+      : ad.stipend
+        ? `${formatToman(ad.stipend)} / ماه`
+        : "بدون کمک‌هزینه";
+
+    rows = [
+      { label: amountLabel, value: amountValue },
+      { label: "مهلت درخواست", value: formatJalaliDate(ad.deadline) },
+      { label: "مدت همکاری", value: ad.collabDuration },
+      { label: "درخواست‌ها", value: `${toPersianDigits(ad.applicantsCount)} نفر` },
+    ];
+  }
 
   return (
     <SectionCard title="شرایط" icon={<Wallet size={15} aria-hidden="true" />}>
@@ -31,7 +41,7 @@ export function AdConditionsCard({ ad }: AdConditionsCardProps) {
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-4">
             <dt className="text-text-secondary">{row.label}</dt>
-            <dd className="font-bold text-text-primary">{row.value}</dd>
+            <dd className="text-start font-bold text-text-primary">{row.value}</dd>
           </div>
         ))}
       </dl>

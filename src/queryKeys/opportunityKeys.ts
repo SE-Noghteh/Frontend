@@ -4,6 +4,7 @@ export const opportunityKeys = {
   all: ["opportunities"] as const,
   list: (filters: OpportunityFilters) =>
     [...opportunityKeys.all, "list", filters] as const,
+  detail: (id: string) => [...opportunityKeys.all, "detail", id] as const,
   categories: () => [...opportunityKeys.all, "categories"] as const,
   trendingSearches: () => [...opportunityKeys.all, "trending-searches"] as const,
 };

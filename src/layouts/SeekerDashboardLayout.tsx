@@ -20,7 +20,12 @@ import { useSidebar } from "@/hooks/useSidebar";
 /** Which sidebar item the current URL belongs to. */
 function getActiveKey(pathname: string): string {
   if (pathname.startsWith("/seeker/requests")) return "requests";
-  if (pathname.startsWith("/seeker/ads")) return "ads";
+  if (
+    pathname.startsWith("/seeker/ads") ||
+    pathname.startsWith("/seeker/opportunities")
+  ) {
+    return "ads";
+  }
   if (pathname.startsWith("/seeker/collabs")) return "collabs";
   return "home";
 }

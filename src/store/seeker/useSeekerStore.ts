@@ -11,10 +11,8 @@ import type { SeekerAd, SeekerRequest } from "@/types/Seeker/seeker";
 interface SeekerState {
   ads: SeekerAd[];
   requests: SeekerRequest[];
-
   toggleSaved: (adId: string) => void;
-  /** Creates a request for the ad. `needsParent` is false for adult seekers. */
-  submitApplication: (adId: string, message: string, needsParent: boolean) => string;
+  submitApplication: (adId: string, message: string) => string;
   editRequest: (requestId: string, message: string) => void;
   cancelRequest: (requestId: string) => void;
 }
@@ -30,7 +28,7 @@ export const useSeekerStore = create<SeekerState>((set, get) => ({
       ads: state.ads.map((ad) => (ad.id === adId ? { ...ad, saved: !ad.saved } : ad)),
     })),
 
-  submitApplication: (adId, message, needsParent) => {
+  submitApplication: (adId, message) => {
     const ad = get().ads.find((item) => item.id === adId);
     if (!ad) return "";
 
@@ -42,8 +40,7 @@ export const useSeekerStore = create<SeekerState>((set, get) => ({
       employerName: ad.employerName,
       sentAt: TODAY,
       message,
-      parentStatus: needsParent ? "pending" : "notRequired",
-      employerStatus: needsParent ? "waitingParent" : "reviewing",
+      employerStatus: "reviewing",
       timeline: { sent: `${TODAY} · ۱۰:۲۰` },
       kind: ad.kind,
       budget: ad.budget,
@@ -53,10 +50,9 @@ export const useSeekerStore = create<SeekerState>((set, get) => ({
 
     set((state) => ({
       requests: [request, ...state.requests],
-      ads: state.ads.map((item) =>
-        item.id === adId ? { ...item, application: needsParent ? "pendingParent" : "sentToEmployer" } : item,
-      ),
+      ads: state.ads.map((item) => (item.id === adId ? { ...item, application: "sentToEmployer" } : item)),
     }));
+
     return id;
   },
 
@@ -67,10 +63,9 @@ export const useSeekerStore = create<SeekerState>((set, get) => ({
           ? {
               ...request,
               message,
-              // Editing cancels the previous parent approval.
-              parentStatus: request.parentStatus === "notRequired" ? "notRequired" : "pending",
-              employerStatus: request.parentStatus === "notRequired" ? "reviewing" : "waitingParent",
-              parentNote: undefined,
+              sentAt: TODAY,
+              employerStatus: "reviewing",
+              timeline: { sent: `${TODAY} · ۱۰:۲۰` },
             }
           : request,
       ),

@@ -28,7 +28,7 @@ import { WorkStagesCard } from "@/components/features/SeekerCollabDetail/WorkSta
 import { AdKindTag } from "@/components/features/SeekerAds/AdKindTag";
 import { PageHeader } from "@/components/shared/PageHeader/PageHeader";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { mockParent } from "@/data/mockSeeker";
+import { mockParent, mockProfile } from "@/data/mockSeeker";
 import { useCollabStore } from "@/store/seeker/useCollabStore";
 import { useToastStore } from "@/store/ui/useToastStore";
 import type { CollabActionId, CollabBlock, SeekerCollab } from "@/types/Seeker/collab";
@@ -38,6 +38,7 @@ import { getCollabView } from "@/utils/getCollabView";
 type OpenDialog = "stage" | "delivery" | "cancel" | "terms" | null;
 
 const DAYS_LEFT = 4;
+const ADULT_AGE = 18;
 
 const PAYOUT_STEPS: TimelineStep[] = [
   { label: "تأیید کارفرما", state: "done", date: "۱۴۰۵/۰۹/۱۲" },
@@ -62,6 +63,7 @@ export default function SeekerCollabDetailPage() {
 
   const collab = useCollabStore((state) => state.collabs.find((item) => item.id === collabId));
   const setCollabState = useCollabStore((state) => state.setState);
+  const acceptTerms = useCollabStore((state) => state.acceptTerms);
   const showToast = useToastStore((state) => state.showToast);
 
   if (!collab) return <Navigate to="/seeker/collabs" replace />;
@@ -72,10 +74,18 @@ export default function SeekerCollabDetailPage() {
 
   const handleAction = (id: CollabActionId) => {
     switch (id) {
-      case "acceptTerms":
-        setCollabState(collab.id, "paymentWaiting");
-        showToast({ tone: "success", title: "شرایط پذیرفته شد", description: "منتظر پرداخت کارفرما هستیم." });
+      case "acceptTerms": {
+        const requiresParentApproval = mockProfile.age < ADULT_AGE;
+        acceptTerms(collab.id, requiresParentApproval);
+        showToast({
+          tone: "success",
+          title: "شرایط پذیرفته شد",
+          description: requiresParentApproval
+            ? "قرارداد برای تأیید والد ارسال شد؛ پس از تأیید، مرحله پرداخت فعال می‌شود."
+            : "توافق نهایی شد؛ منتظر پرداخت کارفرما هستیم.",
+        });
         break;
+      }
       case "startWork":
         setCollabState(collab.id, "workInProgress");
         showToast({ tone: "success", title: "کار شروع شد", description: "پیشرفت را مرحله‌به‌مرحله ثبت کن." });
@@ -204,7 +214,13 @@ export default function SeekerCollabDetailPage() {
         collabId={collab.id}
         onClose={closeDialog}
       />
-      <ChangeTermsDialog key={`terms-${collab.id}`} isOpen={openDialog === "terms"} collab={collab} onClose={closeDialog} />
+      <ChangeTermsDialog
+        key={`terms-${collab.id}`}
+        isOpen={openDialog === "terms"}
+        collab={collab}
+        onSubmitted={() => setCollabState(collab.id, "agreementChangeRequested")}
+        onClose={closeDialog}
+      />
       <CancelCollabDialog isOpen={openDialog === "cancel"} onConfirm={confirmCancel} onClose={closeDialog} />
     </div>
   );

@@ -1,13 +1,16 @@
 import type { AdApplicationState } from "@/types/Seeker/seeker";
 
-/** Values accepted by the `?state=` query parameter to preview a state of the ad page. */
+/**
+ * Old `pending` and `no-parent` preview links remain backward-compatible:
+ * both now lead to the direct-to-employer application flow.
+ */
 export type AdPreviewState = "pending" | "sent" | "expired" | "no-parent" | "network-error" | "adult" | null;
 
 const PREVIEW_TO_STATE: Partial<Record<Exclude<AdPreviewState, null>, AdApplicationState>> = {
-  pending: "pendingParent",
+  pending: "sentToEmployer",
   sent: "sentToEmployer",
   expired: "expired",
-  "no-parent": "noParent",
+  "no-parent": "open",
 };
 
 export function parseAdPreviewState(value: string | null): AdPreviewState {

@@ -18,6 +18,11 @@ export interface OpportunityCategory {
   requiresSpecialReview: boolean;
 }
 
+export interface OpportunityAttachment {
+  name: string;
+  meta: string;
+}
+
 export interface Opportunity {
   id: string;
   title: string;
@@ -39,6 +44,17 @@ export interface Opportunity {
   skills: string[];
   postedDaysAgo: number;
   requiresNoExperience: boolean;
+
+  /**
+   * Optional detail fields. Current mock search data does not provide these yet.
+   * They can be populated when the search/detail API returns the full opportunity.
+   */
+  description?: string;
+  deliverables?: string;
+  deliveryFormat?: string;
+  files?: OpportunityAttachment[];
+  employerInitial?: string;
+  employerCollabsCount?: number;
 }
 
 export interface OpportunityFilters {

@@ -14,13 +14,9 @@ import { AdSkillsCard } from "@/components/features/SeekerAdDetail/AdSkillsCard"
 import { ApplyDialog } from "@/components/features/SeekerAdDetail/ApplyDialog";
 import { PageHeader } from "@/components/shared/PageHeader/PageHeader";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { mockParent, mockProfile } from "@/data/mockSeeker";
 import { useSeekerStore } from "@/store/seeker/useSeekerStore";
-import { useToastStore } from "@/store/ui/useToastStore";
 import { parseAdPreviewState, resolveAdState } from "@/utils/resolveAdState";
 import { formatJalaliDate } from "@/utils/formatToman";
-
-const ADULT_AGE = 18;
 
 export default function SeekerAdDetailPage() {
   const { adId } = useParams();
@@ -30,13 +26,11 @@ export default function SeekerAdDetailPage() {
   const ad = useSeekerStore((state) => state.ads.find((item) => item.id === adId));
   const request = useSeekerStore((state) => state.requests.find((item) => item.adId === adId && !item.demoOnly));
   const toggleSaved = useSeekerStore((state) => state.toggleSaved);
-  const showToast = useToastStore((state) => state.showToast);
 
   if (!ad) return <Navigate to="/seeker/ads" replace />;
 
   const preview = parseAdPreviewState(searchParams.get("state"));
   const state = resolveAdState(ad.application, preview);
-  const isAdult = preview === "adult" || mockProfile.age >= ADULT_AGE;
   const isClosed = state === "expired";
 
   return (
@@ -77,9 +71,6 @@ export default function SeekerAdDetailPage() {
             requestId={request?.id}
             onApply={() => setIsApplyOpen(true)}
             onToggleSave={() => toggleSaved(ad.id)}
-            onAddParent={() =>
-              showToast({ tone: "success", title: "افزودن والد", description: "این بخش بعداً اضافه می‌شود" })
-            }
           />
         </div>
       </div>
@@ -87,8 +78,6 @@ export default function SeekerAdDetailPage() {
       <ApplyDialog
         isOpen={isApplyOpen}
         ad={ad}
-        parentName={isAdult ? undefined : mockParent.name}
-        needsParent={!isAdult}
         shouldFail={preview === "network-error"}
         onClose={() => setIsApplyOpen(false)}
       />

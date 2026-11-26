@@ -1,4 +1,4 @@
-import { Check, CircleCheck, Clock, ShieldCheck, TriangleAlert, X } from "lucide-react";
+import { Check, CircleCheck, Clock, ShieldCheck, X } from "lucide-react";
 
 import { StatusChip } from "@/components/ui/StatusChip";
 import type { RequestEmployerStatus, RequestParentStatus } from "@/types/Seeker/seeker";
@@ -14,26 +14,18 @@ export function RequestStatusChip({ status }: { status: RequestEmployerStatus })
           پذیرفته شد
         </StatusChip>
       );
-    case "waitingParent":
-      return (
-        <StatusChip tone="warning" icon={<TriangleAlert size={ICON} aria-hidden="true" />}>
-          منتظر تأیید والد
-        </StatusChip>
-      );
     case "reviewing":
       return (
         <StatusChip tone="info" icon={<Clock size={ICON} aria-hidden="true" />}>
           در بررسی کارفرما
         </StatusChip>
       );
-    case "rejectedByParent":
-      return <StatusChip tone="error">ردشده توسط والد</StatusChip>;
     case "rejectedByEmployer":
       return <StatusChip tone="neutral">رد شده توسط کارفرما</StatusChip>;
   }
 }
 
-/** The parent's decision on a request. */
+/** Parent approval chip is retained for the collaboration/contract screens only. */
 export function ParentStatusChip({ status }: { status: RequestParentStatus }) {
   switch (status) {
     case "approved":
@@ -57,7 +49,7 @@ export function ParentStatusChip({ status }: { status: RequestParentStatus }) {
     case "notRequired":
       return (
         <StatusChip tone="neutral" icon={<ShieldCheck size={ICON} aria-hidden="true" />}>
-          بدون نیاز به والد
+          بدون نیاز به تأیید والد
         </StatusChip>
       );
   }

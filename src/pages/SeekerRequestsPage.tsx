@@ -14,7 +14,6 @@ import { toPersianDigits } from "@/utils/toPersianDigits";
 
 const TABS: { value: RequestTab; label: string }[] = [
   { value: "all", label: "همه" },
-  { value: "waitingParent", label: "منتظر والد" },
   { value: "reviewing", label: "بررسی کارفرما" },
   { value: "accepted", label: "پذیرفته" },
   { value: "rejected", label: "ردشده" },
@@ -22,7 +21,6 @@ const TABS: { value: RequestTab; label: string }[] = [
 
 const TAB_SUFFIX: Record<RequestTab, string> = {
   all: "",
-  waitingParent: " منتظر والد",
   reviewing: " در بررسی کارفرما",
   accepted: " پذیرفته‌شده",
   rejected: " ردشده",
@@ -32,14 +30,12 @@ function matchesTab(request: SeekerRequest, tab: RequestTab): boolean {
   switch (tab) {
     case "all":
       return true;
-    case "waitingParent":
-      return request.employerStatus === "waitingParent";
     case "reviewing":
       return request.employerStatus === "reviewing";
     case "accepted":
       return request.employerStatus === "accepted";
     case "rejected":
-      return request.employerStatus === "rejectedByParent" || request.employerStatus === "rejectedByEmployer";
+      return request.employerStatus === "rejectedByEmployer";
   }
 }
 
@@ -48,7 +44,6 @@ export default function SeekerRequestsPage() {
   const [tab, setTab] = useState<RequestTab>("all");
   const allRequests = useSeekerStore((state) => state.requests);
 
-  // `?state=empty` previews the first-time (no requests yet) screen.
   const isEmptyPreview = searchParams.get("state") === "empty";
   const requests = isEmptyPreview ? [] : allRequests.filter((request) => !request.demoOnly);
   const visible = requests.filter((request) => matchesTab(request, tab));

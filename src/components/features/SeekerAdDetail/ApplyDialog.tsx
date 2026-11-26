@@ -14,16 +14,12 @@ const MOCK_REQUEST_DELAY_MS = 1200;
 interface ApplyDialogProps {
   isOpen: boolean;
   ad: SeekerAd;
-  /** Parent who approves first. Not needed for adult seekers. */
-  parentName?: string;
-  needsParent: boolean;
-  /** Preview switch: make the mock request fail with a network error. */
   shouldFail?: boolean;
   onClose: () => void;
 }
 
-/** Form that sends an application for an ad (message to the employer). */
-export function ApplyDialog({ isOpen, ad, parentName, needsParent, shouldFail = false, onClose }: ApplyDialogProps) {
+/** Form that sends an application directly to the employer. */
+export function ApplyDialog({ isOpen, ad, shouldFail = false, onClose }: ApplyDialogProps) {
   const [message, setMessage] = useState("");
   const [hasError, setHasError] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -49,11 +45,11 @@ export function ApplyDialog({ isOpen, ad, parentName, needsParent, shouldFail = 
       return;
     }
 
-    submitApplication(ad.id, message.trim(), needsParent);
+    submitApplication(ad.id, message.trim());
     showToast({
       tone: "success",
       title: "درخواست ثبت شد",
-      description: needsParent ? "برای تأیید به والدت ارسال شد" : "برای کارفرما ارسال شد",
+      description: "درخواستت مستقیماً برای کارفرما ارسال شد",
     });
   };
 
@@ -92,13 +88,11 @@ export function ApplyDialog({ isOpen, ad, parentName, needsParent, shouldFail = 
 
         <p className="mt-4 flex items-center gap-2 rounded-xl bg-error-soft px-3 py-3 text-caption text-text-primary">
           <ShieldCheck size={16} aria-hidden="true" className="shrink-0 text-error" />
-          {needsParent
-            ? `بعد از ارسال، درخواست اول برای تأیید به والدت${parentName ? ` (${parentName})` : ""} می‌رود`
-            : "درخواست مستقیم برای کارفرما ارسال می‌شود"}
+          درخواست بعد از ارسال مستقیماً برای کارفرما فرستاده می‌شود. تأیید والد در مرحله نهایی‌شدن قرارداد انجام می‌شود.
         </p>
 
         <Button type="submit" loading={isSending} className="mt-4 w-full md:w-auto">
-          {isSending ? "در حال ارسال..." : needsParent ? "ارسال برای تأیید والد" : "ارسال درخواست"}
+          {isSending ? "در حال ارسال..." : "ارسال درخواست"}
         </Button>
       </form>
     </Dialog>

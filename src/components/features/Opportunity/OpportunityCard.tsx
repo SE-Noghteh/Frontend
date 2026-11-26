@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import {
+  ArrowLeft,
   BadgeCheck,
   Bookmark,
   Clock,
@@ -10,8 +11,8 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
+import { ButtonLink } from "@/components/ui/Button";
 import { EASE_OUT } from "@/constants/motion";
 import {
   OPPORTUNITY_TYPE_LABEL,
@@ -45,13 +46,6 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       transition={{ duration: 0.45, ease: EASE_OUT }}
       className="group relative flex flex-col overflow-hidden rounded-[20px] border border-border-decorative bg-surface-card shadow-[0_1px_0_rgba(29,53,87,.04),0_8px_24px_-12px_rgba(29,53,87,.14)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(29,53,87,.04),0_18px_36px_-16px_rgba(29,53,87,.22)]"
     >
-      {/* TODO: link to the opportunity details page when it exists. */}
-      <Link
-        to={`/search?cat=${opportunity.categoryId}`}
-        className="absolute inset-0 z-10"
-        aria-label={opportunity.title}
-      />
-
       <div className="relative aspect-[16/6] overflow-hidden sm:aspect-[16/8]">
         <CategoryIllustration
           categoryId={opportunity.categoryId}
@@ -61,13 +55,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
           <span className="rounded-full bg-white/90 px-2 py-0.5 text-caption font-semibold text-text-primary backdrop-blur sm:px-2.5 sm:py-1 sm:text-caption">
             {OPPORTUNITY_TYPE_LABEL[opportunity.type]}
           </span>
-          {/* TODO: replace with the shared Button component. */}
           <button
             type="button"
             onClick={() => setIsSaved((previous) => !previous)}
             aria-label="ذخیره"
             aria-pressed={isSaved}
-            className="relative z-20 grid size-7 place-items-center rounded-full bg-white/90 text-text-primary backdrop-blur transition-colors hover:bg-white sm:size-8"
+            className="relative z-10 grid size-7 place-items-center rounded-full bg-white/90 text-text-primary backdrop-blur transition-colors hover:bg-white sm:size-8"
           >
             <Bookmark className={`size-4 transition-all ${isSaved ? "fill-blue" : ""}`} />
           </button>
@@ -130,6 +123,17 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             {toPersianDigits(opportunity.applicantsCount)} درخواست
           </div>
         </div>
+
+        <ButtonLink
+          to={`/seeker/opportunities/${opportunity.id}`}
+          variant="secondary"
+          size="sm"
+          fullWidth
+          endIcon={<ArrowLeft className="size-4" />}
+          aria-label={`مشاهده جزئیات آگهی ${opportunity.title}`}
+        >
+          مشاهده
+        </ButtonLink>
       </div>
     </motion.article>
   );

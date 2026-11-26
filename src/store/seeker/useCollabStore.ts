@@ -11,8 +11,9 @@ import type { SeekerAdFile } from "@/types/Seeker/seeker";
 
 interface CollabStoreState {
   collabs: SeekerCollab[];
-
   setState: (collabId: string, state: CollabState) => void;
+  /** Final acceptance sends the agreement to a parent only when approval is required. */
+  acceptTerms: (collabId: string, requiresParentApproval: boolean) => void;
   addStage: (collabId: string, stage: Omit<CollabWorkStage, "id" | "date">) => void;
   submitDelivery: (collabId: string, files: SeekerAdFile[]) => void;
 }
@@ -25,6 +26,21 @@ export const useCollabStore = create<CollabStoreState>((set) => ({
   setState: (collabId, state) =>
     set((current) => ({
       collabs: current.collabs.map((collab) => (collab.id === collabId ? { ...collab, state } : collab)),
+    })),
+
+  acceptTerms: (collabId, requiresParentApproval) =>
+    set((current) => ({
+      collabs: current.collabs.map((collab) =>
+        collab.id === collabId
+          ? {
+              ...collab,
+              state: requiresParentApproval ? "agreementWaitingParent" : "paymentWaiting",
+              parentStatus: requiresParentApproval ? "pending" : "notRequired",
+              parentSentAt: requiresParentApproval ? TODAY : "",
+              parentNote: undefined,
+            }
+          : collab,
+      ),
     })),
 
   addStage: (collabId, stage) =>

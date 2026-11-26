@@ -11,6 +11,7 @@ import SeekerAdDetailPage from "@/pages/SeekerAdDetailPage";
 import SeekerAdsPage from "@/pages/SeekerAdsPage";
 import SeekerCollabDetailPage from "@/pages/SeekerCollabDetailPage";
 import SeekerCollabsPage from "@/pages/SeekerCollabsPage";
+import SeekerOpportunityDetailPage from "@/pages/SeekerOpportunityDetailPage";
 import SeekerRequestDetailPage from "@/pages/SeekerRequestDetailPage";
 import SeekerRequestsPage from "@/pages/SeekerRequestsPage";
 import SupportPage from "@/pages/SupportPage";
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/seeker/ads" replace /> },
       { path: "ads", element: <SeekerAdsPage /> },
       { path: "ads/:adId", element: <SeekerAdDetailPage /> },
+      { path: "opportunities/:opportunityId", element: <SeekerOpportunityDetailPage /> },
       { path: "requests", element: <SeekerRequestsPage /> },
       { path: "collabs", element: <SeekerCollabsPage /> },
       { path: "collabs/:collabId", element: <SeekerCollabDetailPage /> },

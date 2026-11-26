@@ -12,13 +12,16 @@ interface CollabTermsCardProps {
   onAction: () => void;
 }
 
-/** "شرایط توافق‌شده": amount, delivery date, deliverables and the parent's approval. */
+/** "شرایط توافق‌شده": amount, delivery date, deliverables and parent approval when applicable. */
 export function CollabTermsCard({ collab, action, onAction }: CollabTermsCardProps) {
   const rows = [
     { label: "مبلغ قرارداد", value: formatToman(collab.amount) },
     { label: "تحویل", value: formatJalaliDate(collab.deliveryDate) },
     { label: "خروجی‌ها", value: collab.deliverables },
   ];
+
+  // Before the seeker accepts the employer's terms, parent approval has not been requested yet.
+  const showParentStatus = collab.state !== "agreementReview" && collab.state !== "agreementChangeRequested";
 
   return (
     <SectionCard title="شرایط توافق‌شده" icon={<FileText size={15} aria-hidden="true" />}>
@@ -29,12 +32,14 @@ export function CollabTermsCard({ collab, action, onAction }: CollabTermsCardPro
             <dd className="font-bold text-text-primary">{row.value}</dd>
           </div>
         ))}
-        <div className="flex items-center justify-between gap-4">
-          <dt className="text-text-secondary">تأیید والد</dt>
-          <dd>
-            <ParentStatusChip status={collab.parentStatus === "approved" ? "approved" : collab.parentStatus} />
-          </dd>
-        </div>
+        {showParentStatus ? (
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-text-secondary">تأیید والد</dt>
+            <dd>
+              <ParentStatusChip status={collab.parentStatus} />
+            </dd>
+          </div>
+        ) : null}
       </dl>
 
       {action ? (

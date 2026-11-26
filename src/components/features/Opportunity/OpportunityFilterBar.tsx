@@ -1,4 +1,4 @@
-import { Sprout, X, Zap } from "lucide-react";
+import { X } from "lucide-react";
 
 import {
   AGE_GROUP_LABEL,
@@ -27,7 +27,6 @@ import { toPersianDigits } from "@/utils/toPersianDigits";
 import { BudgetFilterContent } from "./BudgetFilterContent";
 import { FilterChip } from "./FilterChip";
 import { FilterOption } from "./FilterOption";
-import { FilterToggle } from "./FilterToggle";
 
 interface OpportunityFilterBarProps {
   filters: OpportunityFilters;
@@ -43,7 +42,7 @@ function toggleItem<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((entry) => entry !== item) : [...list, item];
 }
 
-/** Horizontally scrollable bar of every opportunity filter. */
+/** Horizontally scrollable bar of the main opportunity filters. */
 export function OpportunityFilterBar({ filters, onChange }: OpportunityFilterBarProps) {
   const { data: categories = [] } = useOpportunityCategories();
   const activeCount = countActiveFilters(filters);
@@ -148,23 +147,6 @@ export function OpportunityFilterBar({ filters, onChange }: OpportunityFilterBar
           </FilterOption>
         ))}
       </FilterChip>
-
-      <span className="mx-1 h-5 w-px shrink-0 bg-border-decorative" />
-
-      <FilterToggle
-        isOn={filters.isUrgent}
-        onToggle={() => update({ isUrgent: !filters.isUrgent })}
-        icon={<Zap className="size-3.5" />}
-      >
-        مهلت نزدیک
-      </FilterToggle>
-      <FilterToggle
-        isOn={filters.requiresNoExperience}
-        onToggle={() => update({ requiresNoExperience: !filters.requiresNoExperience })}
-        icon={<Sprout className="size-3.5" />}
-      >
-        بدون نیاز به تجربه
-      </FilterToggle>
 
       {activeCount > 0 && (
         // TODO: replace with the shared Button component (ghost variant).

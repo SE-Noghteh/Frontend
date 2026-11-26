@@ -15,20 +15,15 @@ import type {
 } from "@/types/Seeker/collab";
 
 export const COLLAB_STEP_LABELS = ["توافق", "پرداخت", "انجام کار", "تحویل", "واریز"] as const;
-
 export const PLATFORM_FEE_RATE = 0.1;
 
 export interface CollabView {
   chip: { tone: StatusTone; label: string };
-  /** One status per step of `COLLAB_STEP_LABELS`. */
   steps: CollabStepStatus[];
   banner?: { tone: CollabBannerTone; text: string };
   main: CollabBlock[];
-  /** Buttons shown in their own card under the main cards. */
   actions: CollabActionConfig[];
-  /** Button under the agreed-terms card ("درخواست تغییر شرایط"). */
   termsAction?: { label: string; isDisabled?: boolean };
-  /** Cancelled before work started: no agreed-terms card. */
   hideTerms?: boolean;
 }
 
@@ -46,13 +41,13 @@ export function getCollabView(collab: SeekerCollab): CollabView {
     agreementWaitingParent: {
       chip: { tone: "warning", label: "منتظر تأیید والد" },
       steps: [C, U, U, U, U],
-      banner: { tone: "warning", text: `شرایط همکاری برای تأیید به ${parentName} رفته است` },
+      banner: { tone: "warning", text: `شرایط نهایی همکاری برای تأیید به ${parentName} ارسال شده است` },
       main: ["parent", "earnings"],
       actions: [],
-      termsAction: { ...CHANGE_TERMS, isDisabled: true },
+      termsAction: { label: "در انتظار تأیید والد", isDisabled: true },
     },
     agreementReview: {
-      chip: { tone: "info", label: "در حال همکاری" },
+      chip: { tone: "info", label: "در انتظار توافق" },
       steps: [C, U, U, U, U],
       banner: { tone: "info", text: "کارفرما شرایط همکاری را فرستاده؛ بررسی و تأیید کن" },
       main: ["earnings"],
@@ -61,10 +56,21 @@ export function getCollabView(collab: SeekerCollab): CollabView {
         { id: "requestContractEdit", label: "درخواست ویرایش قرارداد", variant: "secondary" },
       ],
     },
+    agreementChangeRequested: {
+      chip: { tone: "warning", label: "منتظر پاسخ کارفرما" },
+      steps: [C, U, U, U, U],
+      banner: {
+        tone: "warning",
+        text: "درخواست تغییر شرایط برای کارفرما ارسال شد؛ پس از اصلاح قرارداد، دوباره آن را بررسی کن",
+      },
+      main: ["earnings"],
+      actions: [],
+      termsAction: { label: "در انتظار پاسخ کارفرما", isDisabled: true },
+    },
     agreementParentRejected: {
       chip: { tone: "error", label: "ردشده توسط والد" },
       steps: [F, U, U, U, U],
-      banner: { tone: "error", text: "والدت شرایط این همکاری را تأیید نکرد" },
+      banner: { tone: "error", text: "والدت شرایط این همکاری را تأیید نکرد؛ می‌توانی درخواست اصلاح بدهی یا همکاری را لغو کنی" },
       main: ["parentMessage"],
       actions: [],
     },
@@ -198,7 +204,6 @@ export function getCollabView(collab: SeekerCollab): CollabView {
   return views[collab.state];
 }
 
-/** Platform fee and what the seeker gets for a contract amount (tomans). */
 export function getEarnings(amount: number) {
   const fee = Math.round(amount * PLATFORM_FEE_RATE);
   return { amount, fee, net: amount - fee };

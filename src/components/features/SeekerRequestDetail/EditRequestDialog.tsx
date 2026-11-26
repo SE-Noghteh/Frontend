@@ -1,4 +1,3 @@
-import { ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -16,7 +15,7 @@ interface EditRequestDialogProps {
   onClose: () => void;
 }
 
-/** Edit the message of a request. Editing sends it back to the parent for a new approval. */
+/** Edit the request message and send the updated request back to the employer. */
 export function EditRequestDialog({ isOpen, request, onClose }: EditRequestDialogProps) {
   const [message, setMessage] = useState(request.message);
   const [hasError, setHasError] = useState(false);
@@ -24,7 +23,6 @@ export function EditRequestDialog({ isOpen, request, onClose }: EditRequestDialo
 
   const editRequest = useSeekerStore((state) => state.editRequest);
   const showToast = useToastStore((state) => state.showToast);
-  const needsParent = request.parentStatus !== "notRequired";
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -41,8 +39,8 @@ export function EditRequestDialog({ isOpen, request, onClose }: EditRequestDialo
     onClose();
     showToast({
       tone: "success",
-      title: "درخواست دوباره ارسال شد",
-      description: needsParent ? "برای تأیید به والدت رفت" : "برای کارفرما ارسال شد",
+      title: "درخواست به‌روزرسانی شد",
+      description: "درخواست دوباره برای بررسی به کارفرما ارسال شد",
     });
   };
 
@@ -50,7 +48,7 @@ export function EditRequestDialog({ isOpen, request, onClose }: EditRequestDialo
     <Dialog isOpen={isOpen} title="ویرایش درخواست" onClose={onClose} isDismissible={!isSaving}>
       <form onSubmit={handleSubmit} noValidate>
         <p className="text-caption text-text-secondary">
-          {needsParent ? "بعد از ویرایش، دوباره برای تأیید والدت می‌رود." : "بعد از ویرایش، دوباره برای کارفرما می‌رود."}
+          بعد از ویرایش، درخواست دوباره برای بررسی به کارفرما ارسال می‌شود.
         </p>
 
         <label htmlFor="edit-message" className="mt-4 mb-1.5 block text-label font-bold text-text-primary">
@@ -73,13 +71,6 @@ export function EditRequestDialog({ isOpen, request, onClose }: EditRequestDialo
         {hasError ? (
           <p role="alert" className="mt-1 text-caption text-error">
             متن پیام را بنویس.
-          </p>
-        ) : null}
-
-        {needsParent ? (
-          <p className="mt-4 flex items-center gap-2 rounded-xl bg-error-soft px-3 py-3 text-caption text-text-primary">
-            <ShieldCheck size={16} aria-hidden="true" className="shrink-0 text-error" />
-            تأیید قبلی والد لغو می‌شود و باید دوباره تأیید کند
           </p>
         ) : null}
 

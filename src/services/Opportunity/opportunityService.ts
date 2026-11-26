@@ -6,9 +6,7 @@
  * components need no change.
  */
 
-import {
-  MOCK_OPPORTUNITIES,
-  } from "@/data/mockOpportunities";
+import { MOCK_OPPORTUNITIES } from "@/data/mockOpportunities";
 import {
   MOCK_OPPORTUNITY_CATEGORIES,
   MOCK_TRENDING_SEARCHES,
@@ -29,6 +27,13 @@ export function getOpportunities(
   );
 
   return Promise.resolve(sortOpportunities(matched, filters.sort));
+}
+
+/** Returns one opportunity by the same ID used by the search results. */
+export function getOpportunityById(id: string): Promise<Opportunity | null> {
+  // TODO: replace with a real API request, e.g. GET /opportunities/{id}.
+  const opportunity = MOCK_OPPORTUNITIES.find((item) => item.id === id);
+  return Promise.resolve(opportunity ?? null);
 }
 
 export function getOpportunityCategories(): Promise<OpportunityCategory[]> {

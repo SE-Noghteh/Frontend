@@ -1,4 +1,4 @@
-import { ParentStatusChip, RequestStatusChip } from "@/components/features/SeekerRequests/RequestStatusChips";
+import { RequestStatusChip } from "@/components/features/SeekerRequests/RequestStatusChips";
 import { ButtonLink } from "@/components/ui/Button";
 import type { SeekerRequest } from "@/types/Seeker/seeker";
 import { formatJalaliDate } from "@/utils/formatToman";
@@ -8,8 +8,6 @@ interface RequestListItemProps {
 }
 
 export function RequestListItem({ request }: RequestListItemProps) {
-  const isWaitingParent = request.employerStatus === "waitingParent";
-
   return (
     <article className="rounded-2xl border border-border-soft bg-white p-4 shadow-[0_2px_10px_rgba(38,35,33,0.04)] md:px-5">
       <div className="flex items-start justify-between gap-3">
@@ -22,10 +20,9 @@ export function RequestListItem({ request }: RequestListItemProps) {
         <RequestStatusChip status={request.employerStatus} />
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-        <ParentStatusChip status={request.parentStatus} />
+      <div className="mt-3 flex justify-end">
         <ButtonLink to={`/seeker/requests/${request.id}`} variant="secondary" size="sm" className="min-w-28">
-          {isWaitingParent ? "مشاهده و یادآوری" : "مشاهده"}
+          مشاهده
         </ButtonLink>
       </div>
     </article>

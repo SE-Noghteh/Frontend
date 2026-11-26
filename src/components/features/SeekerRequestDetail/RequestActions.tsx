@@ -9,7 +9,7 @@ interface RequestActionsProps {
   onCancel: () => void;
 }
 
-/** Buttons under the side cards. Which ones appear depends on how far the request got. */
+/** Buttons under the side cards. Which ones appear depends on the employer's decision. */
 export function RequestActions({ request, onEdit, onCancel }: RequestActionsProps) {
   const { employerStatus } = request;
 
@@ -26,32 +26,17 @@ export function RequestActions({ request, onEdit, onCancel }: RequestActionsProp
         آگهی‌های مشابه
       </ButtonLink>
     );
-  } else if (employerStatus === "rejectedByParent") {
-    content = (
-      <>
-        <Button fullWidth startIcon={<Pencil size={14} aria-hidden="true" />} onClick={onEdit}>
-          ویرایش و ارسال دوباره
-        </Button>
-        <Button variant="text" size="sm" onClick={onCancel}>
-          حذف درخواست
-        </Button>
-      </>
-    );
   } else {
-    // waiting for the parent, or already with the employer
-    const canEdit = employerStatus === "waitingParent" || request.parentStatus === "notRequired";
     content = (
       <>
-        {canEdit ? (
-          <Button
-            variant="secondary"
-            fullWidth
-            startIcon={<Pencil size={14} aria-hidden="true" />}
-            onClick={onEdit}
-          >
-            ویرایش درخواست
-          </Button>
-        ) : null}
+        <Button
+          variant="secondary"
+          fullWidth
+          startIcon={<Pencil size={14} aria-hidden="true" />}
+          onClick={onEdit}
+        >
+          ویرایش درخواست
+        </Button>
         <Button color="error" fullWidth onClick={onCancel}>
           انصراف از درخواست
         </Button>
