@@ -1,0 +1,86 @@
+/*
+  Styles shared by the public pages (landing, search, FAQ, support).
+  Colors come from the design tokens in tokens.css.
+*/
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Soft marker underline for key words in headings */
+.text-highlight {
+  background: linear-gradient(transparent 64%, var(--color-green-6) 64%);
+  padding-inline: 0.1em;
+}
+.text-highlight-peach {
+  background: linear-gradient(transparent 64%, var(--color-peach-5) 64%);
+  padding-inline: 0.1em;
+}
+.text-highlight-ocean {
+  background: linear-gradient(transparent 64%, var(--color-ocean-7) 64%);
+  padding-inline: 0.1em;
+}
+
+.hero-dot-grid {
+  background-image: radial-gradient(var(--color-blue-8) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-popover-in {
+  animation: popover-in 0.16s ease-out;
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Testimonials marquee: the list is rendered twice, so one loop is half the width. */
+@keyframes marquee-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+.marquee-track {
+  animation: marquee-right 70s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}

@@ -1,0 +1,350 @@
+/**
+ * Button styles (used by `components/ui/Button.tsx`).
+ *
+ * Structure:
+ *   - `data-variant`  → primary | secondary | text      (shape/fill language)
+ *   - `data-size`     → md | sm | icon                  (dimensions)
+ *   - `data-color`    → blue | ocean | green | peach | error   (palette preset)
+ *   - `data-tone`     → on-dark (white-on-dark look, for dark/colored section backgrounds)
+ *
+ * Color is fully driven by CSS variables, so any palette can be used without touching the
+ * variants. The roles are:
+ *   --btn-color       main color (primary fill, secondary/text label)
+ *   --btn-on-color    text on top of the primary fill
+ *   --btn-hover       primary fill on hover
+ *   --btn-pressed     primary fill on press
+ *   --btn-tint        faint tint (secondary/text hover background, secondary border)
+ *   --btn-tint-strong stronger tint (secondary/text pressed background)
+ *   --btn-muted       disabled foreground
+ *   --btn-muted-bg    disabled primary background
+ *
+ * `data-state="hover|pressed"` forces those looks (used by the components test page only).
+ *
+ * Custom color (no preset): set only `--btn-color` (e.g. `style={{ "--btn-color": "#7c3aed" }}`);
+ * the other roles are derived from it with color-mix.
+ */
+
+@layer components {
+  .btn {
+    /* ---- derived defaults (used when no preset / custom --btn-color) ---- */
+    --btn-color: var(--color-blue);
+    --btn-on-color: var(--color-white);
+    --btn-hover: color-mix(in oklab, var(--btn-color) 72%, white);
+    --btn-pressed: color-mix(in oklab, var(--btn-color) 55%, black);
+    --btn-tint: color-mix(in oklab, var(--btn-color) 9%, white);
+    --btn-tint-strong: color-mix(in oklab, var(--btn-color) 18%, white);
+    --btn-muted: color-mix(in oklab, var(--btn-color) 35%, white);
+    --btn-muted-bg: color-mix(in oklab, var(--btn-color) 16%, white);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease,
+      transform 120ms ease;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--btn-color);
+    outline-offset: 2px;
+  }
+
+  .btn:is(:active, [data-state="pressed"]):not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn[data-loading="true"] {
+    cursor: progress;
+  }
+
+  .btn[data-full-width="true"] {
+    display: flex;
+    width: 100%;
+  }
+
+  .btn > svg {
+    flex-shrink: 0;
+  }
+
+  /* ============ Sizes ============ */
+
+  .btn[data-size="md"] {
+    min-height: 48px;
+    padding-inline: 1.5rem;
+    font-size: var(--text-body);
+  }
+
+  .btn[data-size="md"] > svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .btn[data-size="sm"] {
+    min-height: 36px;
+    padding-inline: 1rem;
+    border-radius: 10px;
+    font-size: var(--text-caption);
+    gap: 0.375rem;
+  }
+
+  .btn[data-size="sm"] > svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .btn[data-size="icon"] {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .btn[data-size="icon"] > svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* ============ Primary ============ */
+
+  .btn[data-variant="primary"] {
+    background-color: var(--btn-color);
+    color: var(--btn-on-color);
+    box-shadow:
+      0 6px 16px -4px color-mix(in oklab, var(--btn-color) 45%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 18%, transparent);
+  }
+
+  .btn[data-variant="primary"]:is(:hover, [data-state="hover"]):not(:disabled) {
+    background-color: var(--btn-hover);
+    box-shadow:
+      0 8px 22px -4px color-mix(in oklab, var(--btn-hover) 55%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 22%, transparent);
+  }
+
+  .btn[data-variant="primary"]:is(:active, [data-state="pressed"]):not(:disabled) {
+    background-color: var(--btn-pressed);
+    box-shadow:
+      0 2px 6px -2px color-mix(in oklab, var(--btn-pressed) 50%, transparent),
+      inset 0 2px 4px color-mix(in oklab, black 30%, transparent);
+  }
+
+  .btn[data-variant="primary"]:disabled {
+    background-color: var(--btn-muted-bg);
+    color: var(--btn-muted);
+  }
+
+  /* ============ Secondary ============ */
+
+  .btn[data-variant="secondary"] {
+    background-color: var(--color-white);
+    border-color: var(--btn-tint-strong);
+    color: var(--btn-color);
+    box-shadow: 0 2px 8px -2px color-mix(in oklab, var(--btn-color) 18%, transparent);
+  }
+
+  .btn[data-variant="secondary"]:is(:hover, [data-state="hover"]):not(:disabled) {
+    background-color: var(--btn-tint);
+    border-color: color-mix(in oklab, var(--btn-color) 40%, white);
+    box-shadow: 0 6px 16px -4px color-mix(in oklab, var(--btn-color) 28%, transparent);
+  }
+
+  .btn[data-variant="secondary"]:is(:active, [data-state="pressed"]):not(:disabled) {
+    background-color: var(--btn-tint-strong);
+    border-color: color-mix(in oklab, var(--btn-color) 55%, white);
+    box-shadow: inset 0 2px 4px color-mix(in oklab, var(--btn-color) 22%, transparent);
+  }
+
+  .btn[data-variant="secondary"]:disabled {
+    background-color: var(--btn-tint);
+    border-color: var(--btn-tint-strong);
+    color: var(--btn-muted);
+  }
+
+  /* ============ Text ============ */
+
+  .btn[data-variant="text"] {
+    background-color: transparent;
+    color: var(--btn-color);
+  }
+
+  .btn[data-variant="text"]:is(:hover, [data-state="hover"]):not(:disabled) {
+    background-color: var(--btn-tint);
+  }
+
+  .btn[data-variant="text"]:is(:active, [data-state="pressed"]):not(:disabled) {
+    background-color: var(--btn-tint-strong);
+  }
+
+  .btn[data-variant="text"]:disabled {
+    color: var(--btn-muted);
+  }
+
+  /* ============ Color presets ============ */
+
+  .btn[data-color="blue"] {
+    --btn-color: var(--color-blue);
+    --btn-on-color: var(--color-white);
+    --btn-hover: var(--color-blue-5);
+    --btn-pressed: var(--color-blue-2);
+    --btn-tint: color-mix(in oklab, var(--color-blue-8) 45%, white);
+    --btn-tint-strong: var(--color-blue-8);
+    --btn-muted: var(--color-blue-7);
+    --btn-muted-bg: var(--color-blue-8);
+  }
+
+  .btn[data-color="ocean"] {
+    --btn-color: var(--color-ocean-blue);
+    --btn-on-color: var(--color-white);
+    --btn-hover: var(--color-ocean-5);
+    --btn-pressed: var(--color-ocean-3);
+    --btn-tint: color-mix(in oklab, var(--color-ocean-8) 45%, white);
+    --btn-tint-strong: var(--color-ocean-8);
+    --btn-muted: var(--color-ocean-6);
+    --btn-muted-bg: var(--color-ocean-8);
+  }
+
+  .btn[data-color="green"] {
+    --btn-color: var(--color-green);
+    --btn-on-color: var(--color-green-1);
+    --btn-hover: var(--color-green-4);
+    --btn-pressed: var(--color-green-3);
+    --btn-tint: var(--color-green-8);
+    --btn-tint-strong: var(--color-green-7);
+    --btn-muted: var(--color-green-5);
+    --btn-muted-bg: var(--color-green-7);
+  }
+
+  .btn[data-color="peach"] {
+    --btn-color: var(--color-brand-peach);
+    --btn-on-color: var(--color-charcoal);
+    --btn-hover: var(--color-peach-4);
+    --btn-pressed: var(--color-peach-3);
+    --btn-tint: var(--color-peach-8);
+    --btn-tint-strong: var(--color-peach-7);
+    --btn-muted: var(--color-peach-5);
+    --btn-muted-bg: var(--color-peach-7);
+  }
+
+  .btn[data-color="error"] {
+    --btn-color: var(--color-error);
+    --btn-on-color: var(--color-white);
+    --btn-hover: var(--color-error-hover);
+    --btn-pressed: var(--color-error-pressed);
+    --btn-tint: var(--color-error-soft);
+    --btn-tint-strong: color-mix(in oklab, var(--color-error) 16%, white);
+    --btn-muted: color-mix(in oklab, var(--color-error) 40%, white);
+    --btn-muted-bg: color-mix(in oklab, var(--color-error) 14%, white);
+  }
+
+  /* ============ Tone: on dark backgrounds ============ */
+
+  .btn[data-tone="on-dark"] {
+    --btn-color: var(--color-white);
+    --btn-tint: color-mix(in oklab, white 10%, transparent);
+    --btn-tint-strong: color-mix(in oklab, white 18%, transparent);
+    --btn-muted: color-mix(in oklab, white 40%, transparent);
+    outline-color: var(--color-white);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="primary"] {
+    background-color: var(--color-white);
+    color: var(--btn-on-ink, var(--color-blue));
+    box-shadow: 0 6px 16px -4px color-mix(in oklab, black 35%, transparent);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="primary"]:is(:hover, [data-state="hover"]):not(:disabled) {
+    background-color: var(--color-blue-8);
+    box-shadow: 0 8px 22px -4px color-mix(in oklab, black 40%, transparent);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="primary"]:is(:active, [data-state="pressed"]):not(:disabled) {
+    background-color: var(--color-blue-7);
+    box-shadow: inset 0 2px 4px color-mix(in oklab, black 18%, transparent);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="primary"]:disabled {
+    background-color: color-mix(in oklab, white 25%, transparent);
+    color: var(--btn-muted);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="secondary"] {
+    background-color: transparent;
+    border-color: color-mix(in oklab, white 30%, transparent);
+    color: var(--color-white);
+    box-shadow: none;
+  }
+
+  .btn[data-tone="on-dark"][data-variant="secondary"]:is(:hover, [data-state="hover"]):not(:disabled) {
+    background-color: var(--btn-tint);
+    border-color: color-mix(in oklab, white 55%, transparent);
+    box-shadow: none;
+  }
+
+  .btn[data-tone="on-dark"][data-variant="secondary"]:is(:active, [data-state="pressed"]):not(:disabled) {
+    background-color: var(--btn-tint-strong);
+    border-color: color-mix(in oklab, white 70%, transparent);
+    box-shadow: none;
+  }
+
+  .btn[data-tone="on-dark"][data-variant="secondary"]:disabled {
+    background-color: transparent;
+    border-color: var(--btn-tint-strong);
+    color: var(--btn-muted);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="text"] {
+    color: var(--color-white);
+  }
+
+  .btn[data-tone="on-dark"][data-variant="text"]:disabled {
+    color: var(--btn-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+
+    .btn:is(:active, [data-state="pressed"]):not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-spinner {
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-spinner {
+    animation-duration: 2s;
+  }
+}
