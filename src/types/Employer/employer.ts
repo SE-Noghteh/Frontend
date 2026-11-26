@@ -42,7 +42,6 @@ export interface EmployerAd {
   budget?: number;
   collaborationMode?: string;
   ageRange?: string;
-  parentConsent?: boolean;
   internshipDuration?: string;
   weeklyHours?: string;
   hasAllowance?: boolean;

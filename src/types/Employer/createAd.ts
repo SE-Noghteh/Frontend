@@ -16,7 +16,6 @@ export interface CreateAdForm {
   budget: string;
   collaborationMode: string;
   ageRange: string;
-  parentConsent: boolean;
 
   internshipDuration: string;
   weeklyHours: string;
@@ -46,7 +45,6 @@ export const INITIAL_CREATE_AD_FORM: CreateAdForm = {
   budget: "",
   collaborationMode: "",
   ageRange: "",
-  parentConsent: false,
 
   internshipDuration: "",
   weeklyHours: "",

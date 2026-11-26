@@ -117,7 +117,6 @@ export default function EmployerCreateAdPage() {
 
         collaborationMode: form.collaborationMode,
         ageRange: form.ageRange,
-        parentConsent: form.parentConsent,
 
         internshipDuration: form.internshipDuration,
         weeklyHours: form.weeklyHours,

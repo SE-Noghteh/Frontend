@@ -13,17 +13,85 @@ import type {
 
 import {
   validateAdDates,
+  isValidISODate,
 } from "@/utils/dateValidation";
 
-export function useCreateEmployerAd() {
+export function useCreateEmployerAd(
+  initialForm: CreateAdForm = INITIAL_CREATE_AD_FORM,
+  isEdit = false,
+) {
   const [step, setStep] = useState<CreateAdStep>(1);
 
+  const [originalForm] = useState<CreateAdForm>(
+    () => ({
+      ...initialForm,
+      skills: [...initialForm.skills],
+    }),
+  );
+
   const [form, setForm] = useState<CreateAdForm>(
-    INITIAL_CREATE_AD_FORM,
+    () => ({
+      ...initialForm,
+      skills: [...initialForm.skills],
+    }),
   );
 
   const [errors, setErrors] =
     useState<CreateAdErrors>({});
+
+  // Date validation for create and edit modes
+
+  function validateFormDates(
+    currentForm: CreateAdForm,
+  ) {
+    const isInternship =
+      currentForm.kind === "internship";
+
+    const dateErrors = validateAdDates(
+      currentForm.deadline,
+      currentForm.deliveryDate,
+      isInternship,
+    );
+
+    if (isEdit) {
+      // Allow unchanged existing deadlines
+
+      if (
+        currentForm.deadline === originalForm.deadline &&
+        dateErrors.deadline?.includes("قبل از امروز")
+      ) {
+        delete dateErrors.deadline;
+      }
+
+      // Allow unchanged existing delivery dates
+
+      if (
+        currentForm.deliveryDate ===
+          originalForm.deliveryDate &&
+        dateErrors.deliveryDate?.includes("قبل از امروز")
+      ) {
+        delete dateErrors.deliveryDate;
+      }
+
+      // Always validate the chronological order
+
+      if (
+        !dateErrors.deadline &&
+        !dateErrors.deliveryDate &&
+        isValidISODate(currentForm.deadline) &&
+        isValidISODate(currentForm.deliveryDate) &&
+        currentForm.deliveryDate <= currentForm.deadline
+      ) {
+        dateErrors.deliveryDate = isInternship
+          ? "تاریخ شروع دوره باید بعد از مهلت درخواست باشد"
+          : "مهلت تحویل باید بعد از مهلت درخواست باشد";
+      }
+    }
+
+    return dateErrors;
+  }
+
+  // Update form fields
 
   function updateField<K extends keyof CreateAdForm>(
     key: K,
@@ -43,15 +111,12 @@ export function useCreateEmployerAd() {
       };
 
       // Revalidate both dates when either changes
+
       if (
         key === "deadline" ||
         key === "deliveryDate"
       ) {
-        const dateErrors = validateAdDates(
-          nextForm.deadline,
-          nextForm.deliveryDate,
-          nextForm.kind === "internship",
-        );
+        const dateErrors = validateFormDates(nextForm);
 
         nextErrors.deadline = nextForm.deadline
           ? dateErrors.deadline
@@ -66,20 +131,24 @@ export function useCreateEmployerAd() {
     });
   }
 
+  // Validate the current step
+
   function validateStep(): boolean {
     const nextErrors: CreateAdErrors = {};
 
     // Step 1: Ad type
 
     if (step === 1 && !form.kind) {
-      nextErrors.kind = "نوع آگهی را انتخاب کنید";
+      nextErrors.kind =
+        "نوع آگهی را انتخاب کنید";
     }
 
     // Step 2: Ad details
 
     if (step === 2) {
       if (!form.title.trim()) {
-        nextErrors.title = "عنوان آگهی الزامی است";
+        nextErrors.title =
+          "عنوان آگهی الزامی است";
       }
 
       if (!form.category) {
@@ -103,11 +172,7 @@ export function useCreateEmployerAd() {
 
       Object.assign(
         nextErrors,
-        validateAdDates(
-          form.deadline,
-          form.deliveryDate,
-          isInternship,
-        ),
+        validateFormDates(form),
       );
 
       // Budget validation
@@ -144,10 +209,22 @@ export function useCreateEmployerAd() {
       // Internship-specific validation
 
       if (isInternship) {
-        if (!form.internshipDuration) {
+        const duration = Number(
+          form.internshipDuration,
+        );
+
+        // Duration in weeks
+
+        if (
+          !/^[0-9]+$/.test(form.internshipDuration) ||
+          !Number.isSafeInteger(duration) ||
+          duration <= 0
+        ) {
           nextErrors.internshipDuration =
-            "مدت دوره را انتخاب کنید";
+            "تعداد هفته باید یک عدد صحیح مثبت باشد";
         }
+
+        // Weekly working hours
 
         if (!form.weeklyHours) {
           nextErrors.weeklyHours =
@@ -168,13 +245,19 @@ export function useCreateEmployerAd() {
     return Object.keys(nextErrors).length === 0;
   }
 
+  // Navigate to the next step
+
   function nextStep() {
     if (!validateStep()) return;
 
+    const maxStep = isEdit ? 4 : 5;
+
     setStep((previous) =>
-      Math.min(previous + 1, 5) as CreateAdStep,
+      Math.min(previous + 1, maxStep) as CreateAdStep,
     );
   }
+
+  // Navigate to the previous step
 
   function previousStep() {
     setErrors({});
@@ -183,6 +266,8 @@ export function useCreateEmployerAd() {
       Math.max(previous - 1, 1) as CreateAdStep,
     );
   }
+
+  // Navigate to a completed step
 
   function goToStep(target: CreateAdStep) {
     if (target >= step) return;

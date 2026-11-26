@@ -41,7 +41,6 @@ export const mockEmployerAds: EmployerAd[] = [
     budget: 2500000,
     collaborationMode: "دورکاری",
     ageRange: "۱۸ سال به بالا",
-    parentConsent: false,
   },
 
   {
@@ -82,7 +81,6 @@ export const mockEmployerAds: EmployerAd[] = [
     budget: 3500000,
     collaborationMode: "دورکاری",
     ageRange: "۱۸ سال به بالا",
-    parentConsent: false,
   },
 
   {
@@ -123,9 +121,8 @@ export const mockEmployerAds: EmployerAd[] = [
     budget: 1500000,
     collaborationMode: "ترکیبی",
     ageRange: "۱۸ سال به بالا",
-    parentConsent: false,
 
-    internshipDuration: "دو ماه",
+    internshipDuration: "8",
     weeklyHours: "۲۰ ساعت",
     hasAllowance: true,
   },
@@ -164,7 +161,6 @@ export const mockEmployerAds: EmployerAd[] = [
     budget: 6000000,
     collaborationMode: "دورکاری",
     ageRange: "۱۸ سال به بالا",
-    parentConsent: false,
   },
 
   {
@@ -206,6 +202,5 @@ export const mockEmployerAds: EmployerAd[] = [
     budget: 2000000,
     collaborationMode: "دورکاری",
     ageRange: "۱۸ سال به بالا",
-    parentConsent: false,
   },
 ];

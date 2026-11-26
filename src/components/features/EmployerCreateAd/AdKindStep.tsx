@@ -1,5 +1,4 @@
-
-import { BookOpen, Briefcase } from "lucide-react";
+import { BookOpen, Briefcase, Lock } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import type { EmployerAdKind } from "@/types/Employer/employer";
@@ -7,6 +6,7 @@ import type { EmployerAdKind } from "@/types/Employer/employer";
 interface AdKindStepProps {
   value: EmployerAdKind | "";
   onChange: (value: EmployerAdKind) => void;
+  disabled?: boolean;
 }
 
 const OPTIONS = [
@@ -27,6 +27,7 @@ const OPTIONS = [
 export function AdKindStep({
   value,
   onChange,
+  disabled = false,
 }: AdKindStepProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -45,21 +46,38 @@ export function AdKindStep({
             <label
               key={option.value}
               className={cn(
-                "flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors",
+                "flex items-center gap-3 rounded-xl border p-4 transition-colors",
+
+                disabled
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer",
+
                 selected
                   ? "border-green-3 bg-green-7"
                   : "border-border-soft bg-white",
+
+                disabled && !selected &&
+                  "bg-gray-50 opacity-50",
               )}
             >
 
-              <input
-                type="radio"
-                name="ad-kind"
-                value={option.value}
-                checked={selected}
-                onChange={() => onChange(option.value)}
-                className="accent-blue"
-              />
+              {disabled && selected ? (
+                <Lock
+                  size={17}
+                  className="shrink-0 text-green-2"
+                  aria-label="نوع آگهی قفل شده است"
+                />
+              ) : (
+                <input
+                  type="radio"
+                  name="ad-kind"
+                  value={option.value}
+                  checked={selected}
+                  disabled={disabled}
+                  onChange={() => onChange(option.value)}
+                  className="accent-blue"
+                />
+              )}
 
               <div className="min-w-0 flex-1">
 
@@ -82,6 +100,21 @@ export function AdKindStep({
         })}
 
       </div>
+
+      {disabled && (
+        <div className="mt-2 flex items-center gap-3 rounded-xl border border-border-soft bg-background-page px-4 py-3">
+
+          <Lock
+            size={18}
+            className="shrink-0 text-text-secondary"
+          />
+
+          <p className="text-label font-bold text-text-secondary">
+            نوع آگهی پس از انتشار قابل تغییر نیست.
+          </p>
+
+        </div>
+      )}
 
     </div>
   );

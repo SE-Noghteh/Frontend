@@ -49,6 +49,7 @@ import type {
   EmployerAdStatus,
 } from "@/types/Employer/employer";
 
+
 const STATUS_LABELS: Record<EmployerAdStatus, string> = {
   published: "منتشرشده",
   collaboration: "در حال همکاری",

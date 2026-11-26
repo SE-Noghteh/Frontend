@@ -22,6 +22,7 @@ import EmployerAdsPage from "@/pages/EmployerAdsPage";
 import EmployerCreateAdPage from "@/pages/EmployerCreateAdPage";
 import EmployerAdPublishedPage from "@/pages/EmployerAdPublishedPage";
 import EmployerAdDetailPage from "@/pages/EmployerAdDetailPage";
+import EmployerEditAdPage from "@/pages/EmployerEditAdPage";
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
     {
   path: "ads/:adId",
   element: <EmployerAdDetailPage />,
+},
+{
+  path: "ads/:adId/edit",
+  element: <EmployerEditAdPage />,
 },
   ],
 },

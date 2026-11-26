@@ -236,7 +236,9 @@ export function AdOverview({
       ? [
           {
             label: "مدت دوره",
-            value: ad.internshipDuration,
+            value: ad.internshipDuration
+  ? `${Number(ad.internshipDuration).toLocaleString("fa-IR")} هفته`
+  : "—",
           },
           {
             label: "ساعت کار هفتگی",
@@ -267,15 +269,7 @@ export function AdOverview({
       label: "بازه سنی",
       value: ad.ageRange,
     },
-    {
-      label: "رضایت والد",
-      value:
-        ad.parentConsent == null
-          ? "—"
-          : ad.parentConsent
-            ? "با تأیید والد"
-            : "بدون نیاز به تأیید",
-    },
+    
   ];
 
   return (

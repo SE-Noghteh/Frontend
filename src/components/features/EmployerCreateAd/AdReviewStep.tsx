@@ -84,16 +84,13 @@ export function AdReviewStep({
       "بازه سنی",
       form.ageRange,
     ],
-    [
-      "رضایت والد",
-      form.parentConsent ? "بله" : "خیر",
-    ],
+    
     ...(isInternship
       ? [
           [
-            "مدت دوره",
-            form.internshipDuration,
-          ],
+  "مدت دوره",
+  `${Number(form.internshipDuration).toLocaleString("fa-IR")} هفته`,
+],
           [
             "ساعت هفتگی",
             form.weeklyHours,

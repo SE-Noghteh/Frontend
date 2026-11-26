@@ -15,18 +15,23 @@ const STEPS = [
 interface CreateAdStepperProps {
   step: CreateAdStep;
   onSelect: (step: CreateAdStep) => void;
+  isEdit?: boolean;
 }
 
 export function CreateAdStepper({
   step,
   onSelect,
+  isEdit = false,
 }: CreateAdStepperProps) {
+  const steps = isEdit
+    ? STEPS.slice(0, 4)
+    : STEPS;
   return (
     <div className="rounded-2xl border border-border-soft bg-white p-4 lg:p-6">
 
       <div className="flex items-start">
 
-        {STEPS.map((label, index) => {
+        {steps.map((label, index) => {
           const number = index + 1;
           const completed = number < step;
           const active = number === step;
@@ -37,7 +42,7 @@ export function CreateAdStepper({
               className="relative flex min-w-0 flex-1 flex-col items-center"
             >
 
-              {index < STEPS.length - 1 && (
+              {index < steps.length - 1 && (
                 <div
                   className={cn(
                     "absolute start-1/2 top-4 h-px w-full",

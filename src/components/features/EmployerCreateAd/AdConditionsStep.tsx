@@ -103,20 +103,17 @@ export function AdConditionsStep({
         <div className="grid gap-4 md:grid-cols-2">
 
           <AdFormField
-            label="مدت دوره"
-            type="select"
-            options={[
-              "یک ماه",
-              "دو ماه",
-              "سه ماه",
-              "شش ماه",
-            ]}
-            value={form.internshipDuration}
-            onChange={(value) =>
-              updateField("internshipDuration", value)
-            }
-            error={errors.internshipDuration}
-          />
+  label="مدت دوره (هفته)"
+  type="number"
+  min={1}
+  step={1}
+  placeholder="تعداد هفته را وارد کنید"
+  value={form.internshipDuration}
+  onChange={(value) =>
+    updateField("internshipDuration", value)
+  }
+  error={errors.internshipDuration}
+/>
 
           <AdFormField
             label="ساعت کار در هفته"
@@ -186,23 +183,7 @@ export function AdConditionsStep({
 
       </div>
 
-      <label className="flex items-center gap-3 text-label">
-
-        <input
-          type="checkbox"
-          checked={form.parentConsent}
-          onChange={(event) =>
-            updateField(
-              "parentConsent",
-              event.target.checked,
-            )
-          }
-          className="size-4 accent-blue"
-        />
-
-        رضایت والد برای افراد زیر ۱۸ سال
-
-      </label>
+      
 
     </div>
   );
