@@ -12,4 +12,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
+  server: {
+    proxy: {
+      "/v1": {
+        target: "https://senoghteh.fpna.ir", 
+        changeOrigin: true,
+        secure: false, 
+      },
+    },
+  },
 });

@@ -1,3 +1,6 @@
+import { JobSeekerLoginPage } from "@/pages/JobSeekerLoginPage";
+import { JobSeekerForgotPasswordPage } from "@/pages/JobSeekerForgotPasswordPage";
+import { JobSeekerResetPasswordPage } from "@/pages/JobSeekerResetPasswordPage";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import PublicLayout from "@/layouts/PublicLayout";
@@ -28,6 +31,18 @@ export const router = createBrowserRouter([
       { path: "/faq", element: <FaqPage /> },
       { path: "/support", element: <SupportPage /> },
     ],
+  },
+  {
+    path: "/jobseekerlogin",
+    element: <JobSeekerLoginPage />, 
+  },
+  {
+    path: "/jobseekerlogin/forgot-password",
+    element: <JobSeekerForgotPasswordPage />,
+  },
+  {
+    path: "/jobseekerlogin/reset-password",
+    element: <JobSeekerResetPasswordPage />,
   },
   {
     path: "/seeker",

@@ -1,14 +1,13 @@
-
 import { useId, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 
-import {
-  ChevronDown,
-  Search,
-  X,
-} from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
+import { DropdownSearch } from "@/components/ui/DropdownSearch";
+import type { DropdownColors } from "@/types/Dropdown/dropdown";
 import { cn } from "@/utils/cn";
+import { getDropdownStyle } from "@/utils/getDropdownStyle";
+import { matchesSearch } from "@/utils/matchesSearch";
 
 interface MultiSelectDropdownProps {
   id?: string;
@@ -18,16 +17,10 @@ interface MultiSelectDropdownProps {
   placeholder?: string;
   disabled?: boolean;
   error?: boolean;
-}
-
-function normalizeText(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/ي/g, "ی")
-    .replace(/ك/g, "ک")
-    .replace(/\u200c/g, "")
-    .replace(/\s+/g, "")
-    .trim();
+  searchPlaceholder?: string;
+  emptyText?: string;
+  className?: string;
+  colors?: DropdownColors;
 }
 
 export function MultiSelectDropdown({
@@ -38,6 +31,10 @@ export function MultiSelectDropdown({
   placeholder = "انتخاب کنید",
   disabled = false,
   error = false,
+  searchPlaceholder,
+  emptyText = "موردی پیدا نشد",
+  className,
+  colors,
 }: MultiSelectDropdownProps) {
   const generatedId = useId();
   const triggerId = id ?? generatedId;
@@ -45,12 +42,10 @@ export function MultiSelectDropdown({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filteredOptions = options.filter(
-    (option) =>
-      normalizeText(option).includes(
-        normalizeText(query),
-      ),
+  const filteredOptions = options.filter((option) =>
+    matchesSearch(option, query),
   );
+  const style = getDropdownStyle(colors);
 
   function toggleOption(option: string) {
     if (disabled) return;
@@ -81,7 +76,7 @@ export function MultiSelectDropdown({
   }
 
   return (
-    <div dir="rtl" className="flex min-w-0 flex-col gap-3">
+    <div dir="rtl" style={style} className="dd flex min-w-0 flex-col gap-3">
 
       <Popover.Root
         open={open}
@@ -95,23 +90,19 @@ export function MultiSelectDropdown({
             type="button"
             disabled={disabled}
             aria-invalid={error}
+            style={style}
             className={cn(
-              "flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2.5 text-label transition-colors",
+              "dd dd-trigger flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-label transition-colors",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              error
-                ? "border-error"
-                : "border-ocean-blue",
-              open && !error && "border-blue",
+              className,
             )}
           >
 
             <span
               className={cn(
                 "min-w-0 flex-1 truncate text-start",
-                value.length > 0
-                  ? "text-text-primary"
-                  : "text-text-secondary",
+                value.length === 0 && "dd-placeholder",
               )}
             >
               {value.length > 0
@@ -123,7 +114,7 @@ export function MultiSelectDropdown({
               size={18}
               aria-hidden="true"
               className={cn(
-                "shrink-0 text-text-secondary transition-transform duration-200",
+                "dd-icon shrink-0 transition-transform duration-200",
                 open && "rotate-180",
               )}
             />
@@ -141,8 +132,9 @@ export function MultiSelectDropdown({
             sideOffset={6}
             collisionPadding={12}
             aria-label="انتخاب چند گزینه"
+            style={style}
             className={cn(
-              "z-50 flex flex-col overflow-y-auto rounded-xl border border-border-soft bg-white p-2 shadow-lg outline-none",
+              "dd dd-menu z-50 flex flex-col overflow-y-auto rounded-xl border p-2 shadow-lg outline-none",
               "w-[var(--radix-popover-trigger-width)]",
               "max-h-[var(--radix-popover-content-available-height)]",
             )}
@@ -150,26 +142,11 @@ export function MultiSelectDropdown({
 
             {/* Search */}
 
-            <div className="relative mb-2 shrink-0">
-
-              <Search
-                size={17}
-                aria-hidden="true"
-                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-text-secondary"
-              />
-
-              <input
-                type="search"
-                value={query}
-                onChange={(event) =>
-                  setQuery(event.target.value)
-                }
-                placeholder="جست‌وجو..."
-                aria-label="جست‌وجوی گزینه‌ها"
-                className="h-11 w-full rounded-lg border border-border-soft bg-white ps-10 pe-3 text-label outline-none focus:border-blue"
-              />
-
-            </div>
+            <DropdownSearch
+              value={query}
+              onChange={setQuery}
+              placeholder={searchPlaceholder}
+            />
 
             {/* Options */}
 
@@ -181,8 +158,8 @@ export function MultiSelectDropdown({
 
               {filteredOptions.length === 0 ? (
 
-                <div className="px-3 py-8 text-center text-label text-text-secondary">
-                  موردی پیدا نشد
+                <div className="dd-icon px-3 py-8 text-center text-label">
+                  {emptyText}
                 </div>
 
               ) : (
@@ -194,13 +171,8 @@ export function MultiSelectDropdown({
                   return (
                     <label
                       key={option}
-                      className={cn(
-                        "flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-label text-text-primary",
-                        "transition-colors duration-150",
-                        "hover:bg-green-7",
-                        "focus-within:bg-green-7",
-                        selected && "bg-green-7",
-                      )}
+                      data-selected={selected || undefined}
+                      className="dd-option flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-label transition-colors duration-150"
                     >
 
                       <span className="min-w-0 break-words">
@@ -213,7 +185,7 @@ export function MultiSelectDropdown({
                         onChange={() =>
                           toggleOption(option)
                         }
-                        className="size-4 shrink-0 cursor-pointer accent-blue"
+                        className="dd-checkbox size-4 shrink-0 cursor-pointer"
                       />
 
                     </label>
@@ -226,9 +198,9 @@ export function MultiSelectDropdown({
 
             {/* Footer */}
 
-            <div className="mt-2 flex shrink-0 items-center justify-between gap-3 border-t border-border-soft px-2 pt-2">
+            <div className="mt-2 flex shrink-0 items-center justify-between gap-3 border-t border-(--dd-menu-border) px-2 pt-2">
 
-              <span className="text-caption text-text-secondary">
+              <span className="dd-icon text-caption">
                 {value.length.toLocaleString("fa-IR")}
                 {" مورد انتخاب شده"}
               </span>
@@ -237,7 +209,7 @@ export function MultiSelectDropdown({
 
                 <button
                   type="button"
-                  className="rounded-lg bg-green-7 px-4 py-2 text-label font-bold text-blue hover:opacity-80"
+                  className="dd-confirm rounded-lg px-4 py-2 text-label font-bold hover:opacity-80"
                 >
                   تأیید
                 </button>
@@ -261,7 +233,7 @@ export function MultiSelectDropdown({
 
             <span
               key={option}
-              className="inline-flex max-w-full items-center gap-2 rounded-lg bg-green-7 px-3 py-1.5 text-caption text-text-primary"
+              className="dd-chip inline-flex max-w-full items-center gap-2 rounded-lg px-3 py-1.5 text-caption"
             >
 
               <span className="break-words">
@@ -275,7 +247,7 @@ export function MultiSelectDropdown({
                 onClick={() =>
                   removeOption(option)
                 }
-                className="shrink-0 rounded p-0.5 transition-colors hover:bg-green-6"
+                className="shrink-0 rounded p-0.5 transition-colors"
               >
                 <X size={14} aria-hidden="true" />
               </button>

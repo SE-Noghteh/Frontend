@@ -1,9 +1,9 @@
-
 import { useState, type CSSProperties } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { CalendarDays } from "lucide-react";
 
 import { Calendar } from "@/components/ui/Calendar/Calendar";
+import type { DatePickerColors } from "@/types/DatePicker/datePicker";
 
 import {
   parseCalendarDate,
@@ -11,6 +11,7 @@ import {
 } from "@/utils/jalali";
 
 import { cn } from "@/utils/cn";
+import { getDatePickerStyles } from "@/utils/getDatePickerStyles";
 
 interface JalaliDatePickerProps {
   id?: string;
@@ -19,6 +20,8 @@ interface JalaliDatePickerProps {
   error?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  className?: string;
+  colors?: DatePickerColors;
 }
 
 function toISODate(date: Date): string {
@@ -68,8 +71,11 @@ export function JalaliDatePicker({
   error = false,
   disabled = false,
   placeholder = "انتخاب تاریخ",
+  className,
+  colors,
 }: JalaliDatePickerProps) {
   const [open, setOpen] = useState(false);
+  const styles = getDatePickerStyles(colors);
 
   const initialDate = value
     ? parseCalendarDate(value)
@@ -89,22 +95,18 @@ export function JalaliDatePicker({
           dir="rtl"
           disabled={disabled}
           aria-invalid={error}
+          style={styles.trigger}
           className={cn(
-            "flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2.5 text-label transition-colors",
+            "dd dd-trigger flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-label transition-colors",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            error
-              ? "border-error"
-              : "border-ocean-blue",
-            open && !error && "border-blue",
+            className,
           )}
         >
           <span
             className={cn(
               "min-w-0 flex-1 text-start",
-              value
-                ? "text-text-primary"
-                : "text-text-secondary",
+              !value && "dd-placeholder",
             )}
           >
             {value
@@ -115,7 +117,7 @@ export function JalaliDatePicker({
           <CalendarDays
             size={18}
             aria-hidden="true"
-            className="shrink-0 text-text-secondary"
+            className="dd-icon shrink-0"
           />
         </button>
       </Popover.Trigger>
@@ -135,6 +137,7 @@ export function JalaliDatePicker({
             boxSizing: "border-box",
             overflowX: "hidden",
             overflowY: "auto",
+            ...styles.content,
           }}
           className="z-50 rounded-xl border border-border-soft bg-white p-2 shadow-lg outline-none"
         >
@@ -148,7 +151,7 @@ export function JalaliDatePicker({
               compactBelow={1000}
               fixedCells
               dayPopup="none"
-              style={calendarStyle}
+              style={{ ...calendarStyle, ...styles.calendar }}
               onSelectDate={(date) => {
                 onChange(toISODate(date));
                 setOpen(false);
