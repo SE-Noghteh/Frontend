@@ -41,23 +41,23 @@ import {
   useToastStore,
 } from "@/store/ui/useToastStore";
 
-const STATUS_LABELS: Record<string, string> = {
+import {
+  mockEmployerApplicants,
+} from "@/data/mockEmployerApplicants";
+
+import type {
+  EmployerAdStatus,
+} from "@/types/Employer/employer";
+
+const STATUS_LABELS: Record<EmployerAdStatus, string> = {
   published: "منتشرشده",
-  active: "فعال",
   collaboration: "در حال همکاری",
-  in_progress: "در حال همکاری",
   expired: "منقضی‌شده",
   closed: "بسته‌شده",
-  draft: "پیش‌نویس",
-  pending: "در انتظار بررسی",
-  rejected: "ردشده",
-  completed: "تکمیل‌شده",
 };
 
 export default function EmployerAdDetailPage() {
-  const { adId } = useParams<{
-    adId: string;
-  }>();
+  const { adId } = useParams<{ adId: string }>();
 
   const navigate = useNavigate();
 
@@ -83,11 +83,9 @@ export default function EmployerAdDetailPage() {
     (item) => String(item.id) === adId,
   );
 
-  // Applicant details will be connected
-  // after checking the existing applicant type.
-  const applicants: AdApplicant[] = [];
+  const applicants: AdApplicant[] =
+    mockEmployerApplicants[adId ?? ""] ?? [];
 
-  // Version history will be connected later.
   const versions: AdVersion[] = [];
 
   if (!ad) {
@@ -115,9 +113,7 @@ export default function EmployerAdDetailPage() {
         </p>
 
         <Button
-          onClick={() =>
-            navigate("/employer/ads")
-          }
+          onClick={() => navigate("/employer/ads")}
         >
           بازگشت به آگهی‌ها
         </Button>
@@ -132,8 +128,7 @@ export default function EmployerAdDetailPage() {
   const newApplicantsCount =
     ad.newApplicantsCount ?? 0;
 
-  const statusLabel =
-    STATUS_LABELS[ad.status] ?? ad.status;
+  const statusLabel = STATUS_LABELS[ad.status];
 
   function handleCloseAd() {
     if (!ad || ad.status === "closed") {
@@ -154,9 +149,7 @@ export default function EmployerAdDetailPage() {
   }
 
   function handleOpenCloseModal() {
-    if (!ad || ad.status === "closed") {
-      return;
-    }
+    if (!ad || ad.status === "closed") return;
 
     setCloseModalOpen(true);
   }
@@ -169,26 +162,18 @@ export default function EmployerAdDetailPage() {
 
       <AdDetailHeader
         title={ad.title}
-        kind={
-          ad.kind === "internship"
-            ? "internship"
-            : "work"
-        }
+        kind={ad.kind}
         statusLabel={statusLabel}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onBack={() =>
-          navigate("/employer/ads")
-        }
+        onBack={() => navigate("/employer/ads")}
         onEdit={() =>
-          navigate(
-            `/employer/ads/${ad.id}/edit`,
-          )
+          navigate(`/employer/ads/${ad.id}/edit`)
         }
         onClose={handleOpenCloseModal}
       />
 
-      {/* Overview tab */}
+      {/* Overview */}
 
       {activeTab === "overview" && (
 
@@ -203,46 +188,18 @@ export default function EmployerAdDetailPage() {
 
       )}
 
-      {/* Applicants tab */}
+      {/* Applicants */}
 
       {activeTab === "applicants" && (
 
-        <>
-
-          {applicantsCount > 0 &&
-            applicants.length === 0 ? (
-
-            <div className="rounded-xl border border-border-soft bg-white p-6 text-center">
-
-              <p className="text-label font-medium">
-                {applicantsCount.toLocaleString("fa-IR")}
-                {" درخواست برای این آگهی ثبت شده است."}
-              </p>
-
-              <p className="mt-2 text-caption text-text-secondary">
-                اطلاعات جزئی متقاضیان هنوز متصل نشده است.
-              </p>
-
-            </div>
-
-          ) : (
-
-            <AdApplicants
-              applicants={applicants}
-              onViewApplicant={(applicantId) =>
-                navigate(
-                  `/employer/ads/${ad.id}/applicants/${applicantId}`,
-                )
-              }
-            />
-
-          )}
-
-        </>
+        <AdApplicants
+          key={ad.id}
+          applicants={applicants}
+        />
 
       )}
 
-      {/* Versions tab */}
+      {/* Versions */}
 
       {activeTab === "versions" && (
 
@@ -257,14 +214,12 @@ export default function EmployerAdDetailPage() {
 
       )}
 
-      {/* Close ad confirmation */}
+      {/* Close ad dialog */}
 
       <CloseAdModal
         open={closeModalOpen}
         title={ad.title}
-        onCancel={() =>
-          setCloseModalOpen(false)
-        }
+        onCancel={() => setCloseModalOpen(false)}
         onConfirm={handleCloseAd}
       />
 

@@ -1,7 +1,11 @@
 
-import { ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-import type { EmployerAdsSort } from "@/types/Employer/employer";
+import { Dropdown } from "@/components/ui/Dropdown";
+
+import type {
+  EmployerAdsSort,
+} from "@/types/Employer/employer";
 
 const SORT_OPTIONS: {
   value: EmployerAdsSort;
@@ -37,12 +41,27 @@ export function EmployerAdsToolbar({
   sort,
   onSortChange,
 }: EmployerAdsToolbarProps) {
+  const selectedSortLabel =
+    SORT_OPTIONS.find(
+      (option) => option.value === sort,
+    )?.label ?? "";
+
+  function handleSortChange(label: string) {
+    const selectedOption = SORT_OPTIONS.find(
+      (option) => option.label === label,
+    );
+
+    if (selectedOption) {
+      onSortChange(selectedOption.value);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3 md:flex-row-reverse md:items-end">
 
       {/* Sort */}
 
-      <div className="md:w-44">
+      <div className="min-w-0 md:w-44">
 
         <label
           htmlFor="employer-ads-sort"
@@ -51,35 +70,16 @@ export function EmployerAdsToolbar({
           مرتب‌سازی
         </label>
 
-        <div className="relative">
-
-          <select
-            id="employer-ads-sort"
-            value={sort}
-            onChange={(event) =>
-              onSortChange(
-                event.target.value as EmployerAdsSort,
-              )
-            }
-            className={`${FIELD} appearance-none ps-9 pe-3`}
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <ChevronDown
-            size={14}
-            aria-hidden="true"
-            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-text-secondary"
-          />
-
-        </div>
+        <Dropdown
+          id="employer-ads-sort"
+          value={selectedSortLabel}
+          options={SORT_OPTIONS.map(
+            (option) => option.label,
+          )}
+          onChange={handleSortChange}
+          placeholder="مرتب‌سازی"
+          className="h-10 min-h-10 rounded-xl border-border-soft px-3 py-0"
+        />
 
       </div>
 

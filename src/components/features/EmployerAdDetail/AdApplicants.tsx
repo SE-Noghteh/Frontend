@@ -3,12 +3,14 @@ import { useState } from "react";
 
 import {
   Search,
-  UserRound,
   UsersRound,
   ChevronLeft,
+  CalendarDays,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { InitialAvatar } from "@/components/ui/InitialAvatar";
+import { Dialog } from "@/components/ui/Dialog";
 import { cn } from "@/utils/cn";
 
 export type ApplicantStatus =
@@ -29,7 +31,6 @@ export interface AdApplicant {
 
 interface AdApplicantsProps {
   applicants: AdApplicant[];
-  onViewApplicant: (id: string) => void;
 }
 
 type ApplicantFilter = "all" | ApplicantStatus;
@@ -53,21 +54,33 @@ const STATUS_LABELS: Record<ApplicantStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<ApplicantStatus, string> = {
-  new: "bg-blue-50 text-blue",
+  new: "bg-success-soft text-success",
   reviewing: "bg-amber-50 text-amber-700",
   accepted: "bg-green-7 text-green-800",
   rejected: "bg-red-50 text-red-700",
 };
 
+function normalizeSearch(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/ي/g, "ی")
+    .replace(/ك/g, "ک")
+    .replace(/\u200c/g, " ");
+}
+
 export function AdApplicants({
   applicants,
-  onViewApplicant,
 }: AdApplicantsProps) {
   const [query, setQuery] = useState("");
+
   const [filter, setFilter] =
     useState<ApplicantFilter>("all");
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const [selectedApplicant, setSelectedApplicant] =
+    useState<AdApplicant | null>(null);
+
+  const normalizedQuery = normalizeSearch(query);
 
   const filteredApplicants = applicants.filter(
     (applicant) => {
@@ -75,13 +88,13 @@ export function AdApplicants({
         filter === "all" ||
         applicant.status === filter;
 
-      const searchableText = [
-        applicant.name,
-        applicant.title,
-        ...applicant.skills,
-      ]
-        .join(" ")
-        .toLowerCase();
+      const searchableText = normalizeSearch(
+        [
+          applicant.name,
+          applicant.title,
+          ...applicant.skills,
+        ].join(" "),
+      );
 
       return (
         matchesStatus &&
@@ -93,28 +106,34 @@ export function AdApplicants({
   return (
     <section
       dir="rtl"
-      className="flex min-w-0 flex-col gap-5"
+      className="flex min-w-0 flex-col gap-4"
     >
-      <div className="flex flex-col gap-4 rounded-xl border border-border-soft bg-white p-4">
 
-        <div className="flex items-center justify-between gap-3">
+      {/* Toolbar */}
 
-          <h2 className="text-card-title font-bold">
+      <div className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border-soft bg-white p-4 lg:p-5">
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+
+          <h2 className="text-card-title font-bold text-text-primary">
             متقاضیان آگهی
           </h2>
 
-          <span className="text-caption text-text-secondary">
+          <span className="rounded-lg bg-green-7 px-3 py-1.5 text-caption font-medium">
             {applicants.length.toLocaleString("fa-IR")}
             {" متقاضی"}
           </span>
 
         </div>
 
-        <div className="relative">
+        {/* Search */}
+
+        <div className="relative w-full lg:max-w-sm">
 
           <Search
             size={18}
-            className="absolute start-3 top-1/2 -translate-y-1/2 text-text-secondary"
+            aria-hidden="true"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-text-secondary"
           />
 
           <input
@@ -125,39 +144,57 @@ export function AdApplicants({
             }
             placeholder="جست‌وجوی نام یا مهارت متقاضی"
             aria-label="جست‌وجوی متقاضیان"
-            className="min-h-11 w-full rounded-lg border border-border-soft bg-white ps-10 pe-3 text-label outline-none focus:border-blue"
+            className="h-11 w-full rounded-xl border border-border-soft bg-white ps-10 pe-3 text-label outline-none transition-colors focus:border-blue"
           />
 
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* Status filters */}
 
-          {FILTERS.map((item) => (
+        <div className="flex flex-wrap items-center gap-2">
 
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={filter === item.id}
-              onClick={() => setFilter(item.id)}
-              className={cn(
-                "rounded-lg border px-3 py-2 text-caption transition-colors",
-                filter === item.id
-                  ? "border-blue bg-blue text-white"
-                  : "border-border-soft bg-white hover:bg-green-7",
-              )}
-            >
-              {item.label}
-            </button>
+          {FILTERS.map((item) => {
+            const count =
+              item.id === "all"
+                ? applicants.length
+                : applicants.filter(
+                    (applicant) =>
+                      applicant.status === item.id,
+                  ).length;
 
-          ))}
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={filter === item.id}
+                onClick={() => setFilter(item.id)}
+                className={cn(
+                  "flex min-h-10 items-center gap-2 rounded-xl border px-3 py-2 text-caption transition-colors",
+                  filter === item.id
+                    ? "border-blue bg-blue font-bold text-white"
+                    : "border-border-soft bg-white text-text-primary hover:bg-green-7",
+                )}
+              >
+
+                {item.label}
+
+                <span>
+                  ({count.toLocaleString("fa-IR")})
+                </span>
+
+              </button>
+            );
+          })}
 
         </div>
 
       </div>
 
+      {/* Empty state */}
+
       {filteredApplicants.length === 0 ? (
 
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border-soft bg-white p-6 text-center">
+        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-border-soft bg-white p-6 text-center">
 
           <div className="flex size-16 items-center justify-center rounded-full bg-green-7">
 
@@ -168,7 +205,7 @@ export function AdApplicants({
 
           </div>
 
-          <h3 className="font-bold">
+          <h3 className="font-bold text-text-primary">
             {applicants.length === 0
               ? "هنوز متقاضی ثبت نشده است"
               : "متقاضی موردنظر پیدا نشد"}
@@ -180,6 +217,19 @@ export function AdApplicants({
               : "عبارت جست‌وجو یا فیلتر انتخابی را تغییر دهید."}
           </p>
 
+          {applicants.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setQuery("");
+                setFilter("all");
+              }}
+            >
+              حذف فیلترها
+            </Button>
+          )}
+
         </div>
 
       ) : (
@@ -190,10 +240,12 @@ export function AdApplicants({
 
             <article
               key={applicant.id}
-              className="flex min-w-0 flex-col gap-4 rounded-xl border border-border-soft bg-white p-4"
+              className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border-soft bg-white p-4 transition-shadow hover:shadow-sm lg:p-5"
             >
 
-              <div className="flex items-start gap-3">
+              {/* Applicant information */}
+
+              <div className="flex flex-wrap items-start gap-3">
 
                 {applicant.avatar ? (
 
@@ -205,20 +257,17 @@ export function AdApplicants({
 
                 ) : (
 
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-green-7">
-
-                    <UserRound
-                      size={24}
-                      className="text-blue"
-                    />
-
-                  </div>
+                  <InitialAvatar
+                    name={applicant.name}
+                    role="seeker"
+                    className="size-12 bg-green-7! text-lg text-text-primary!"
+                  />
 
                 )}
 
                 <div className="min-w-0 flex-1">
 
-                  <h3 className="break-words font-bold">
+                  <h3 className="wrap-break-word font-bold text-text-primary">
                     {applicant.name}
                   </h3>
 
@@ -230,7 +279,7 @@ export function AdApplicants({
 
                 <span
                   className={cn(
-                    "shrink-0 rounded-lg px-2 py-1 text-caption",
+                    "shrink-0 rounded-lg px-2.5 py-1 text-caption font-medium",
                     STATUS_CLASSES[applicant.status],
                   )}
                 >
@@ -239,13 +288,15 @@ export function AdApplicants({
 
               </div>
 
+              {/* Skills */}
+
               <div className="flex flex-wrap gap-2">
 
                 {applicant.skills.map((skill) => (
 
                   <span
                     key={skill}
-                    className="rounded-lg bg-green-7 px-2.5 py-1 text-caption"
+                    className="rounded-lg bg-green-7 px-3 py-1.5 text-caption text-text-primary"
                   >
                     {skill}
                   </span>
@@ -254,17 +305,26 @@ export function AdApplicants({
 
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-soft pt-3">
+              {/* Footer */}
 
-                <span className="text-caption text-text-secondary">
+              <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border-soft pt-4">
+
+                <span className="inline-flex items-center gap-1.5 text-caption text-text-secondary">
+
+                  <CalendarDays
+                    size={15}
+                    aria-hidden="true"
+                  />
+
                   {applicant.appliedAt}
+
                 </span>
 
                 <Button
-                  variant="text"
+                  variant="secondary"
                   size="sm"
                   onClick={() =>
-                    onViewApplicant(applicant.id)
+                    setSelectedApplicant(applicant)
                   }
                 >
                   مشاهده درخواست
@@ -280,6 +340,115 @@ export function AdApplicants({
         </div>
 
       )}
+
+      {/* Applicant details dialog */}
+
+      <Dialog
+        isOpen={selectedApplicant !== null}
+        title="جزئیات درخواست"
+        onClose={() => setSelectedApplicant(null)}
+      >
+
+        {selectedApplicant && (
+
+          <div
+            dir="rtl"
+            className="flex min-w-0 flex-col gap-5"
+          >
+
+            <div className="flex items-center gap-3">
+
+              <InitialAvatar
+                name={selectedApplicant.name}
+                role="seeker"
+                className="size-14 bg-green-7! text-xl text-text-primary!"
+              />
+
+              <div className="min-w-0">
+
+                <h3 className="font-bold text-text-primary">
+                  {selectedApplicant.name}
+                </h3>
+
+                <p className="mt-1 text-caption text-text-secondary">
+                  {selectedApplicant.title}
+                </p>
+
+              </div>
+
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-xl border border-border-soft bg-background-page p-4">
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-label">
+
+                <span className="text-text-secondary">
+                  تاریخ ارسال درخواست
+                </span>
+
+                <strong>
+                  {selectedApplicant.appliedAt}
+                </strong>
+
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-label">
+
+                <span className="text-text-secondary">
+                  وضعیت درخواست
+                </span>
+
+                <span
+                  className={cn(
+                    "rounded-lg px-3 py-1 text-caption",
+                    STATUS_CLASSES[selectedApplicant.status],
+                  )}
+                >
+                  {STATUS_LABELS[selectedApplicant.status]}
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="flex flex-col gap-3">
+
+              <h4 className="font-bold text-text-primary">
+                مهارت‌ها
+              </h4>
+
+              <div className="flex flex-wrap gap-2">
+
+                {selectedApplicant.skills.map((skill) => (
+
+                  <span
+                    key={skill}
+                    className="rounded-lg bg-green-7 px-3 py-1.5 text-caption"
+                  >
+                    {skill}
+                  </span>
+
+                ))}
+
+              </div>
+
+            </div>
+
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() =>
+                setSelectedApplicant(null)
+              }
+            >
+              بستن
+            </Button>
+
+          </div>
+
+        )}
+
+      </Dialog>
 
     </section>
   );

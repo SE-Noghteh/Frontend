@@ -193,6 +193,7 @@ export function AdOverview({
   onViewApplicants,
 }: AdOverviewProps) {
   const isInternship = ad.kind === "internship";
+  console.log("Employer Ad Data:", ad);
 
   const remainingDays = getRemainingDays(
     ad.deadline,

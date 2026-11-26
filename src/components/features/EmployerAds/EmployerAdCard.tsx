@@ -72,10 +72,10 @@ export function EmployerAdCard({
                     className={index > 0 ? "-ms-2" : ""}
                   >
                     <InitialAvatar
-                      name={applicant.name}
-                      role="seeker"
-                      className="size-8 border-2 border-white text-caption"
-                    />
+  name={applicant.name}
+  role="seeker"
+  className="size-8 border-2 border-white text-caption bg-green-7! text-text-primary!"
+/>
                   </div>
                 ),
               )}
