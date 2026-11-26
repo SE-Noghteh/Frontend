@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate  } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
@@ -25,6 +25,7 @@ export function JobSeekerLoginForm() {
   });
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [showSuccessToast, setShowSuccessToast] = useState(
     location.state?.passwordResetSuccess === true
@@ -32,7 +33,13 @@ export function JobSeekerLoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit((values) => login(values))} className="flex flex-col gap-6 w-full text-right font-vazirmatn" dir="rtl" noValidate>
+      <form onSubmit={handleSubmit(async (values) => {
+        const isSuccess = await login(values); 
+        
+        if (isSuccess) {
+          navigate("/jobseekerlogin/review"); 
+        }
+      })} className="flex flex-col gap-6 w-full text-right font-vazirmatn" dir="rtl" noValidate>
         <div>
           <h2 className="text-card-title font-bold "
           style={{ color: "var(--color-text-primary)" }}>ورود به زدلنسر</h2>

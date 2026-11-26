@@ -19,9 +19,16 @@ export function useAuth() {
 
     try {
       const response = await loginService(values);
+      const token = response.accessToken || response.access_token;
+      if (token) {
+        localStorage.setItem("accessToken", token);
+      }
+      
       setUser(response.user);
+      return true;
     } catch (error) {
       setGlobalError(resolveLoginErrorMessage(error));
+      return false;
     } finally {
       setLoading(false);
     }
