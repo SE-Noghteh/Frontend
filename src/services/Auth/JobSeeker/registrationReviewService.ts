@@ -11,4 +11,14 @@ export const registrationReviewService = {
     const response = await apiClient.get("/job-seekers/parent-approval/request");
     return response.data;
   },
+
+  getVideoLink: async (): Promise<{ expires_in: number; url: string }> => {
+    const response = await apiClient.get("/job-seekers/documents/video");
+    return response.data;
+  },
+
+  getSkills: async (): Promise<{ skills: string[] }> => {
+    const response = await apiClient.get("/job-seekers/me/skills");
+    return response.data;
+  }
 };

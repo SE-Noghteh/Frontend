@@ -8,7 +8,10 @@ interface Props {
 export function RegistrationReviewStatusCard({ data, parentApprovalData }: Props) {
   const isPending = data.admin_approval_status === "pending";
   const isApproved = data.admin_approval_status === "approved";
-  const isNeedsCorrection = data.admin_approval_status === "needs_correction";
+  const isNeedsCorrection = 
+    data.admin_approval_status === "needs_correction" || 
+    data.admin_approval_status === "rejected"; 
+  const isCancelled = data.admin_approval_status === "cancelled"; // 👈 حالت جدید
   const isUnder18 = data.parent_approval_required;
 
   const formatDate = (dateStr: string | null) => {
@@ -50,39 +53,68 @@ export function RegistrationReviewStatusCard({ data, parentApprovalData }: Props
               نیازمند اصلاح
             </span>
           )}
+          {isCancelled && (
+            <span className="flex items-center gap-1.5 text-caption font-medium text-status-error bg-surface-error px-3 py-1 rounded-full">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              ثبت‌نام لغو شد
+            </span>
+          )}
         </div>
 
         <h2 className="text-page-title font-bold text-text-primary leading-tight">
           {isPending && "پرونده‌ات در صف بررسی ادمین است"}
           {isApproved && "خوش آمدی؛ می‌توانی وارد حسابت شوی"}
           {isNeedsCorrection && "موردی از اطلاعات نیاز به اصلاح دارد"}
+          {isCancelled && "ثبت‌نام این پرونده لغو شد"} {/* 👈 عنوان حالت لغو */}
         </h2>
 
         <p className="text-label text-text-secondary">
           {isPending && "تا اعلام نتیجه لازم نیست کاری انجام بدهی، هر وقت خواستی به حساب کاربری‌ات برگرد."}
           {isApproved && "اطلاعات و مدارک هویتی تو با موفقیت بررسی و تایید شد."}
           {isNeedsCorrection && "لطفاً موارد مشخص شده را اصلاح کنید و مجدداً ارسال نمایید."}
+          {isCancelled && "به دلیل استفاده از تمام فرصت‌های اصلاح، پرونده شما بسته شده است."} {/* 👈 توضیح حالت لغو */}
         </p>
       </div>
 
-      <div className="border border-border-decorative rounded-lg p-5 bg-surface-card mt-2">
-        <div className="flex justify-between items-center py-2 border-b border-border-decorative/50">
-          <span className="text-label text-text-secondary">تاریخ ثبت</span>
-          <span className="text-label text-text-primary font-medium">{formatDate(data.created_at)}</span>
+      {isCancelled && (
+        <div className="bg-surface-warning border border-status-warning/30 rounded-lg p-5 mt-2">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-label font-bold text-status-error">فرصت‌های اصلاح پرونده</span>
+            <span className="text-label font-bold text-status-error">ثبت‌نام لغو شد</span>
+          </div>
+          
+          <div className="flex gap-2 mb-3">
+            {[1, 2, 3, 4, 5].map((step) => (
+              <div key={step} className="h-2 flex-1 bg-status-error rounded-full"></div>
+            ))}
+          </div>
+          
+          <p className="text-caption text-text-secondary leading-relaxed">
+            هر ۵ نوبت اصلاح مصرف شد و ادمین پرونده را تایید نکرد؛ ثبت‌نام لغو شده است.
+          </p>
         </div>
-        {isApproved && (
-          <div className="flex justify-between items-center py-2">
-            <span className="text-label text-text-secondary">تاریخ تایید</span>
-            <span className="text-label text-text-primary font-medium">{formatDate(data.admin_reviewed_at)}</span>
+      )}
+
+      {!isCancelled && !isNeedsCorrection && (
+        <div className="border border-border-decorative rounded-lg p-5 bg-surface-card mt-2">
+          <div className="flex justify-between items-center py-2 border-b border-border-decorative/50">
+            <span className="text-label text-text-secondary">تاریخ ثبت</span>
+            <span className="text-label text-text-primary font-medium">{formatDate(data.created_at)}</span>
           </div>
-        )}
-        {isPending && (
-          <div className="flex justify-between items-center py-2">
-            <span className="text-label text-text-secondary">نوبت بررسی در صف</span>
-            <span className="text-label text-text-primary font-medium">اول از ۵</span>
-          </div>
-        )}
-      </div>
+          {isApproved && (
+            <div className="flex justify-between items-center py-2">
+              <span className="text-label text-text-secondary">تاریخ تایید</span>
+              <span className="text-label text-text-primary font-medium">{formatDate(data.admin_reviewed_at)}</span>
+            </div>
+          )}
+          {isPending && (
+            <div className="flex justify-between items-center py-2">
+              <span className="text-label text-text-secondary">نوبت بررسی در صف</span>
+              <span className="text-label text-text-primary font-medium">اول از ۵</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {(isPending || isApproved) && (
         <div className="border border-border-decorative rounded-lg p-6 bg-surface-card flex flex-col gap-6 mt-2">
@@ -160,7 +192,6 @@ export function RegistrationReviewStatusCard({ data, parentApprovalData }: Props
                     در حال دریافت اطلاعات والد...
                   </span>
                 )}
-                
               </div>
             </div>
           )}
@@ -170,7 +201,20 @@ export function RegistrationReviewStatusCard({ data, parentApprovalData }: Props
               بررسی معمولاً ۲۴ تا ۴۸ ساعت کاری طول می‌کشد. در این مدت امکان ورود به حساب کارجویی نیست.
             </p>
           )}
+        </div>
+      )}
 
+      {isCancelled && (
+        <div className="bg-surface-info border border-border-decorative rounded-lg p-4 mt-2">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-status-info shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+            <div className="flex flex-col">
+              <span className="text-label font-bold text-action-primary">می‌توانی دوباره ثبت‌نام کنی</span>
+              <span className="text-caption text-text-secondary mt-1 leading-relaxed">
+                با ثبت‌نام مجدد، یک پرونده جدید با اطلاعات جدید ایجاد می‌شود و روند بررسی از ابتدا آغاز خواهد شد.
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -4,9 +4,10 @@ import type { AdminApprovalStatus } from "@/types/Auth/jobSeeker_registrationRev
 
 interface Props {
   status: AdminApprovalStatus; 
+  onEdit?: () => void;
 }
 
-export function RegistrationReviewActions({ status }: Props) {
+export function RegistrationReviewActions({ status, onEdit }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -23,9 +24,15 @@ export function RegistrationReviewActions({ status }: Props) {
         </Button>
       )}
 
-      {status === "needs_correction" && (
-        <Button variant="primary" fullWidth onClick={() => navigate("/jobseekerlogin/edit-profile")}>
-          شروع اصلاح اطلاعات: نوبت ۱ از ۵
+      {(status === "needs_correction" || status === "rejected") && (
+        <Button variant="primary" fullWidth onClick={onEdit}>
+          شروع اصلاح اطلاعات
+        </Button>
+      )}
+
+      {status === "cancelled" && (
+        <Button variant="primary" fullWidth onClick={() => navigate("/jobseekerlogin?mode=signup")}>
+          شروع ثبت‌نام جدید
         </Button>
       )}
 
@@ -34,7 +41,9 @@ export function RegistrationReviewActions({ status }: Props) {
       </Button>
 
       <Button variant="secondary" fullWidth onClick={() => {
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("hasSeenApprovalToast");
+        localStorage.removeItem("hasSeenCancelledToast");
+        localStorage.removeItem("accessToken"); 
         navigate("/jobseekerlogin");
       }}>
         خروج از پرونده

@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 
 interface VideoUploadBoxProps {
-  value?: File | null;
+  value?: File | string | null; 
   onChange?: (file: File | null) => void;
   error?: string;
 }
@@ -17,8 +17,11 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [recordTime, setRecordTime] = useState(0); 
 
+  const isUrlValue = typeof value === "string";
+  const isFileValue = value instanceof File;
+
   useEffect(() => {
-    if (value && !previewUrl) {
+    if (value instanceof File && !previewUrl) {
       const url = URL.createObjectURL(value);
       setPreviewUrl(url);
       return () => URL.revokeObjectURL(url);
@@ -104,9 +107,7 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
     };
 
     recorder.onstop = () => {
-      // استفاده از نوع خروجی ضبط شده
       const blob = new Blob(chunks, { type: selectedMimeType });
-      // پسوند فایل را بر اساس فرمت تعیین می‌کنیم
       const extension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
       const file = new File([blob], `recorded-video.${extension}`, { type: selectedMimeType });
       const url = URL.createObjectURL(blob);
@@ -153,12 +154,14 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
     };
   }, [mediaStream]);
 
+  const displayPreviewUrl = isUrlValue ? value : previewUrl;
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className={`relative flex flex-col items-center justify-center p-6 rounded-lg border-2 transition-colors ${
         error 
           ? "border-status-error bg-surface-card" 
-          : value 
+          : (isUrlValue || isFileValue)
             ? "border-border-decorative bg-surface-card" 
             : "border-dashed border-border-decorative bg-surface-card"
       }`}>
@@ -170,20 +173,24 @@ export function VideoUploadBox({ value, onChange, error }: VideoUploadBoxProps) 
           onChange={handleFileChange}
         />
 
-        {value && previewUrl ? (
+        {(isUrlValue || isFileValue) && displayPreviewUrl ? (
           <div className="flex flex-col items-center gap-6 w-full">
             <div className="flex items-center gap-4 w-full justify-center">
               <div className="w-32 h-24 rounded-md overflow-hidden border border-border-decorative bg-black relative flex-shrink-0">
-                <video src={previewUrl} className="w-full h-full object-cover" controls />
+                <video src={displayPreviewUrl} className="w-full h-full object-cover" controls />
               </div>
               
               <div className="flex flex-col text-right">
                 <span className="text-label text-text-primary font-medium truncate max-w-[200px]">
-                  {value.name}
+                  {isUrlValue ? "ویدیوی تایید هویت (آپلود شده قبلی)" : (value as File)?.name}
                 </span>
-                <span className="text-caption text-text-secondary">
-                  {(value.size / (1024 * 1024)).toFixed(1)} مگابایت
-                </span>
+                
+                {!isUrlValue && (
+                  <span className="text-caption text-text-secondary">
+                    {((value as File)?.size / (1024 * 1024)).toFixed(1)} مگابایت
+                  </span>
+                )}
+                
                 <span className="text-caption text-status-success flex items-center gap-1 mt-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                   بارگذاری شد. در انتظار بررسی هویت

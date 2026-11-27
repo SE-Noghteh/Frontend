@@ -16,3 +16,17 @@ export function useParentApprovalRequest(enabled: boolean = false) {
     enabled,
   });
 }
+
+export function useVideoLink() {
+  return useQuery({
+    queryKey: ["jobSeeker", "video"],
+    queryFn: registrationReviewService.getVideoLink,
+  });
+}
+
+export function useJobSeekerSkills() {
+  return useQuery({
+    queryKey: ["jobSeeker", "skills"],
+    queryFn: registrationReviewService.getSkills,
+  });
+}

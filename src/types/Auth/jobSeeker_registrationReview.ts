@@ -1,4 +1,4 @@
-export type AdminApprovalStatus = "pending" | "approved" | "needs_correction" | "rejected";
+export type AdminApprovalStatus = "pending" | "approved" | "needs_correction" | "rejected" | "cancelled";
 
 export interface JobSeekerMeResponse {
   data: {
