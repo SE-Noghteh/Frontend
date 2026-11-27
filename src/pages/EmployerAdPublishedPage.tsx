@@ -33,11 +33,11 @@ export default function EmployerAdPublishedPage() {
             to: "/employer/ads",
           },
           {
-            label: local ? "تکمیل مرحله انتشار" : "انتشار موفق",
+            label: local ? "ثبت آگهی" : "انتشار موفق",
           },
         ]}
-        title={local ? "مرحله انتشار تکمیل شد" : "آگهی منتشر شد"}
-        subtitle={local ? "پرداخت و انتشار در نسخه فعلی محلی است." : "آگهی شما با موفقیت ثبت شده است."}
+        title={local ? (draftId !== undefined ? "پیش‌نویس ذخیره شد" : "ثبت آگهی") : "آگهی منتشر شد"}
+        subtitle={local ? undefined : "آگهی شما با موفقیت ثبت شده است."}
         action={
           <ButtonLink to="/employer/ads">
             بازگشت به آگهی‌ها
@@ -45,15 +45,17 @@ export default function EmployerAdPublishedPage() {
         }
       />
 
-      <div className="flex items-center gap-3 rounded-xl bg-success-soft p-4 text-success">
+      {(!local || draftId !== undefined) && <div className="flex items-center gap-3 rounded-xl bg-success-soft p-4 text-success">
 
         <CheckCircle size={20} />
 
         <p className="text-label">
-          {local ? (draftId !== undefined ? `پیش‌نویس با شناسه ${draftId.toLocaleString("fa-IR")} در سرور ثبت شده است. انتشار واقعی هنوز انجام نشده است.` : "آگهی در فرانت‌اند ثبت شده است. انتشار واقعی هنوز انجام نشده است.") : "آگهی شما منتشر شد و کارجویان می‌توانند آن را مشاهده کنند."}
+          {local ? "پیش‌نویس آگهی شما ذخیره شد." : "آگهی شما منتشر شد و کارجویان می‌توانند آن را مشاهده کنند."}
         </p>
 
-      </div>
+      </div>}
+
+      {draftId !== undefined && <ButtonLink to={`/employer/ads/drafts?kind=${ad.kind}&id=${draftId}`} variant="secondary">مشاهده پیش‌نویس</ButtonLink>}
 
       <section className="flex flex-col gap-4 rounded-2xl border border-border-soft bg-white p-5">
 
@@ -63,7 +65,7 @@ export default function EmployerAdPublishedPage() {
             {ad.title}
           </h2>
 
-          {local ? <span className="rounded-lg bg-green-7 px-2 py-1 text-caption">{draftId !== undefined ? "پیش‌نویس سرور" : "ثبت محلی"}</span> : <EmployerAdStatus status={ad.status} />}
+          {local ? <span className="rounded-lg bg-green-7 px-2 py-1 text-caption">{draftId !== undefined ? "پیش‌نویس" : "منتشر نشده"}</span> : <EmployerAdStatus status={ad.status} />}
 
         </div>
 

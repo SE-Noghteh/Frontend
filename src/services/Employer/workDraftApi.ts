@@ -30,12 +30,14 @@ export interface WorkDraftInput {
     budget_toman: number;
     deliverables: string[];
     delivery_formats: string[];
+    duration_days?: number;
+    skill_level?: "beginner" | "intermediate" | "advanced";
   };
 }
 export interface InternshipDraftInput {
   title: string;
   description: string;
-  details: Omit<WorkDraftInput["details"], "opportunity_type" | "delivery_deadline" | "budget_toman" | "deliverables" | "delivery_formats"> & {
+  details: Omit<WorkDraftInput["details"], "opportunity_type" | "delivery_deadline" | "budget_toman" | "deliverables" | "delivery_formats" | "duration_days"> & {
     opportunity_type: "internship";
     internship: {
       duration_months: number;
@@ -46,6 +48,7 @@ export interface InternshipDraftInput {
       start_date: string;
       has_monthly_stipend: boolean;
       monthly_stipend_toman: number;
+      issues_certificate?: boolean;
     };
   };
 }
@@ -112,7 +115,7 @@ const modes: Record<string, WorkDraftInput["details"]["work_mode"]> = {"آنلا
 const ages: Record<string, readonly [number, number]> = {"۱۵ تا ۱۸ سال":[15,18], "۱۸ سال به بالا":[18,100], "همه افراد واجد شرایط":[14,100]};
 const lines = (s: string) => s.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
 const formats = (s: string) => s.split(/[\n،,]+/).map(x => x.trim()).filter(Boolean);
-export function workDraftInput(form: CreateAdForm): WorkDraftInput {
+export function workDraftInput(form: CreateAdForm, original?: CreateAdForm): WorkDraftInput {
   if (form.kind !== "work") throw new Error("در این مرحله فقط آگهی کاری به سرور ارسال می‌شود.");
   const title = form.title.trim(), description = form.description.trim(), category = form.category.trim();
   if (!title || [...title].length > 255 || !category || [...category].length > 200) throw new Error("عنوان و دسته‌بندی را بررسی کنید (حداکثر ۲۵۵ و ۲۰۰ نویسه).");
@@ -124,6 +127,9 @@ export function workDraftInput(form: CreateAdForm): WorkDraftInput {
   const age = ages[form.ageRange], mode = modes[form.collaborationMode];
   if (!age || !mode) throw new Error("بازه سنی و نحوه همکاری را بررسی کنید.");
   const dateErrors = validateAdDates(form.deadline, form.deliveryDate, false);
+  if (original && form.deadline === original.deadline && dateErrors.deadline?.includes("قبل از امروز")) delete dateErrors.deadline;
+  if (original && form.deliveryDate === original.deliveryDate && dateErrors.deliveryDate?.includes("قبل از امروز")) delete dateErrors.deliveryDate;
+  if (original && form.deliveryDate && form.deadline && form.deliveryDate <= form.deadline) throw new Error("تاریخ تحویل یا شروع دوره باید بعد از مهلت درخواست باشد.");
   if (dateErrors.deadline || dateErrors.deliveryDate) throw new Error(dateErrors.deadline ?? dateErrors.deliveryDate);
   const attachmentError = validateAttachments(form.attachments);
   if (attachmentError) throw new Error(attachmentError);
@@ -131,7 +137,7 @@ export function workDraftInput(form: CreateAdForm): WorkDraftInput {
   // Per-skill levels have no corresponding field; do not collapse them into skill_level.
   return {title, description, details:{opportunity_type:"work", category, skills, work_mode:mode, minimum_age:age[0], maximum_age:age[1], accept_under_18:age[0]<18, requires_parent_approval:age[0]<18, apply_deadline:form.deadline, delivery_deadline:form.deliveryDate, budget_toman:Number(budget), deliverables:lines(form.deliverables), delivery_formats:formats(form.deliveryFormat)}};
 }
-export function internshipDraftInput(form: CreateAdForm): InternshipDraftInput {
+export function internshipDraftInput(form: CreateAdForm, original?: CreateAdForm): InternshipDraftInput {
   if (form.kind !== "internship") throw new Error("نوع آگهی کارآموزی نیست.");
   const title = form.title.trim(), description = form.description.trim(), category = form.category.trim();
   if (!title || [...title].length > 255 || !category || [...category].length > 200) throw new Error("عنوان و دسته‌بندی را بررسی کنید (حداکثر ۲۵۵ و ۲۰۰ نویسه).");
@@ -141,6 +147,9 @@ export function internshipDraftInput(form: CreateAdForm): InternshipDraftInput {
   const age = ages[form.ageRange], mode = modes[form.collaborationMode];
   if (!age || !mode) throw new Error("بازه سنی و نحوه همکاری را بررسی کنید.");
   const dateErrors = validateAdDates(form.deadline, form.deliveryDate, true);
+  if (original && form.deadline === original.deadline && dateErrors.deadline?.includes("قبل از امروز")) delete dateErrors.deadline;
+  if (original && form.deliveryDate === original.deliveryDate && dateErrors.deliveryDate?.includes("قبل از امروز")) delete dateErrors.deliveryDate;
+  if (original && form.deliveryDate && form.deadline && form.deliveryDate <= form.deadline) throw new Error("تاریخ تحویل یا شروع دوره باید بعد از مهلت درخواست باشد.");
   if (dateErrors.deadline || dateErrors.deliveryDate) throw new Error(dateErrors.deadline ?? dateErrors.deliveryDate);
   const duration = digits(form.internshipDuration).trim();
   if (!/^\d+$/.test(duration) || Number(duration) < 1 || Number(duration) > 24) throw new Error("مدت دوره باید عدد صحیح بین ۱ تا ۲۴ ماه باشد.");
@@ -151,9 +160,9 @@ export function internshipDraftInput(form: CreateAdForm): InternshipDraftInput {
   if (!form.acceptedTerms) throw new Error("اطلاعات آگهی را تأیید کنید.");
   return {title, description, details:{opportunity_type:"internship", category, skills, work_mode:mode, minimum_age:age[0], maximum_age:age[1], accept_under_18:age[0]<18, requires_parent_approval:age[0]<18, apply_deadline:form.deadline, internship:{duration_months:Number(duration), hours_per_week:Number(normalizeWeeklyHours(form.weeklyHours)), learning_outcomes:form.deliverables.trim(), responsibilities:description, prerequisites:form.deliveryFormat.trim(), start_date:form.deliveryDate, has_monthly_stipend:form.hasAllowance, monthly_stipend_toman:Number(stipend)}}};
 }
-export function draftInput(form: CreateAdForm): DraftInput {
-  if (form.kind === "work") return workDraftInput(form);
-  if (form.kind === "internship") return internshipDraftInput(form);
+export function draftInput(form: CreateAdForm, original?: CreateAdForm): DraftInput {
+  if (form.kind === "work") return workDraftInput(form, original);
+  if (form.kind === "internship") return internshipDraftInput(form, original);
   throw new Error("نوع آگهی را انتخاب کنید.");
 }
 function collection(kind: DraftRef["kind"]) {
@@ -186,4 +195,27 @@ export async function replaceWorkAttachments(s: EmployerSession, ref: DraftRef, 
     body.append("attachments", file.type ? file : new Blob([file],{type:mime}), file.name);
   }
   await request<void>(`${draftPath(ref)}/attachments`, {method:"PUT",body},s);
+}
+
+
+export interface ServerAttachment { name: string; content_type: string; size: number; url: string; }
+export interface DraftReview {
+  id: number;
+  title: string;
+  description: string;
+  details: DraftInput["details"];
+  status: string;
+  created_at: string;
+  updated_at: string;
+  attachments: ServerAttachment[];
+}
+export async function getDraft(s: EmployerSession, ref: DraftRef): Promise<DraftReview> {
+  if (ownerKey(s) !== ref.owner) throw new Error("پیش‌نویس متعلق به نشست فعلی نیست.");
+  const r = await request<DraftReview>(draftPath(ref), {}, s);
+  if (!r || r.id !== ref.id || r.details?.opportunity_type !== ref.kind || typeof r.title !== "string" || typeof r.description !== "string" || typeof r.status !== "string" || !r.details) throw new Error("پاسخ جزئیات پیش‌نویس معتبر نیست.");
+  return {...r, attachments: Array.isArray(r.attachments) ? r.attachments : []};
+}
+export async function deleteDraft(s: EmployerSession, ref: DraftRef) {
+  if (ownerKey(s) !== ref.owner) throw new Error("پیش‌نویس متعلق به نشست فعلی نیست.");
+  await request<void>(draftPath(ref), {method:"DELETE"}, s);
 }

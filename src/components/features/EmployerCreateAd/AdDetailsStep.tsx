@@ -15,6 +15,7 @@ import type {
 
 interface AdDetailsStepProps {
   form: CreateAdForm;
+  hideAttachments?: boolean;
   errors: CreateAdErrors;
   updateField: <K extends keyof CreateAdForm>(
     key: K,
@@ -35,6 +36,7 @@ export function AdDetailsStep({
   form,
   errors,
   updateField,
+  hideAttachments = false,
 }: AdDetailsStepProps) {
   const isInternship = form.kind === "internship";
   const [attachmentError, setAttachmentError] = useState("");
@@ -186,7 +188,7 @@ export function AdDetailsStep({
         }
       />
 
-      {!isInternship && (
+      {!isInternship && !hideAttachments && (
         <div className="flex min-w-0 flex-col gap-2">
           <p className="text-label font-bold">پیوست‌های آگهی (اختیاری)</p>
           <label

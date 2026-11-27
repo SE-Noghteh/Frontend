@@ -66,6 +66,8 @@ export default function EmployerAdsPage() {
         title="آگهی‌ها"
         subtitle={`${allAds.length.toLocaleString("fa-IR")} آگهی ثبت‌شده`}
         action={
+          <div className="flex flex-wrap gap-2">
+          <ButtonLink to="/employer/ads/drafts" variant="secondary">پیش‌نویس‌ها</ButtonLink>
           <ButtonLink
             to="/employer/ads/create"
             startIcon={<Plus size={18} />}
@@ -74,6 +76,7 @@ export default function EmployerAdsPage() {
           >
             آگهی جدید
           </ButtonLink>
+          </div>
         }
       />
 

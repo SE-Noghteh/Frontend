@@ -43,7 +43,7 @@ export default function EmployerAdDetailPage() {
     <AdDetailHeader title={ad.title} kind={ad.kind} status={status} activeTab={activeTab} onTabChange={setActiveTab}
       onBack={() => navigate("/employer/ads")} onEdit={() => navigate(`/employer/ads/${ad.id}/edit`)} onClose={() => setCloseModalOpen(true)}
       republishTo={republishPath(ad.id)} collaborationTo={collaborationPath(ad.id)} />
-    {!isOpen && activeTab === "overview" && <p role="status" className="rounded-xl border border-border-soft bg-white p-4 text-label text-text-secondary">پذیرش درخواست جدید متوقف شده است. آمار درخواست‌ها مربوط به سوابق قبلی است.</p>}
+    {!isOpen && activeTab === "overview" && <p role="status" className="rounded-xl border border-[#D9E5F2] bg-[#F4F8FD] px-4 py-3 text-sm text-[#355070]">پذیرش درخواست جدید متوقف شده است. آمار درخواست‌ها مربوط به سوابق قبلی است.</p>}
     {activeTab === "overview" && <AdOverview ad={currentAd} applicantsCount={ad.applicantsCount} newApplicantsCount={ad.newApplicantsCount} onViewApplicants={() => setActiveTab("applicants")} />}
     {activeTab === "applicants" && <AdApplicants key={ad.id} applicants={applicants} readOnly={!isOpen}
       onStatusChange={(id, nextStatus) => {

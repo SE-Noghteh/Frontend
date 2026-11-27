@@ -24,6 +24,7 @@ import {
   draftErrorMessage, loginEmployer, logoutEmployer, ownerKey, readEmployerSession,
   replaceWorkAttachments, updateDraft, draftInput,
 } from "@/services/Employer/workDraftApi";
+import { rememberDraft } from "@/services/Employer/draftRegistry";
 import type { DraftRef, EmployerType } from "@/services/Employer/workDraftApi";
 
 export default function EmployerCreateAdPage() {
@@ -88,21 +89,11 @@ function CreateForm({ source, preview }: { source?: EmployerAd; preview: string 
     finally { setPassword(""); saving.current = false; setLoading(false); }
   }
 
-  async function handleLogout() {
-    if (saving.current || loading || !session || draftRef.current) return;
-    saving.current = true; setLoading(true); setDraftError("");
-    try { await logoutEmployer(session); setSession(null); }
-    catch (error) {
-      if (error instanceof DraftApiError && error.status === 401) { clearEmployerSession(); setSession(null); }
-      else setDraftError(draftErrorMessage(error));
-    } finally { saving.current = false; setLoading(false); }
-  }
-
   async function continueToPayment() {
     if (saving.current || loading || step !== 4 || !validateStep()) return;
     setDraftError("");
     if (!saveToBackend) { nextStep(); return; }
-    if (unknownCreation) { setDraftError("وضعیت ثبت قبلی نامشخص است. قبل از ثبت دوباره با تیم بک‌اند بررسی کنید."); return; }
+    if (unknownCreation) { setDraftError("وضعیت ثبت قبلی نامشخص است. لطفاً قبل از ثبت دوباره با پشتیبانی تماس بگیرید."); return; }
     const activeSession = readEmployerSession();
     if (!session || !activeSession || ownerKey(activeSession) !== ownerKey(session)) {
       setSession(null); setDraftError("ابتدا با حساب کارفرما وارد شوید."); return;
@@ -121,18 +112,19 @@ function CreateForm({ source, preview }: { source?: EmployerAd; preview: string 
       } else {
         await updateDraft(activeSession, ref, input);
       }
+      rememberDraft(ref, form.skillLevels);
       if (ref.kind === "work" && (form.attachments.length || uploadedAttachments.current)) {
         uploadedAttachments.current = true;
         await replaceWorkAttachments(activeSession, ref, form.attachments);
       }
-      showToast({tone:"success", title:"پیش‌نویس ذخیره شد", description:`شناسه سرور: ${ref.id.toLocaleString("fa-IR")}`});
+      showToast({tone:"success", title:"پیش‌نویس ذخیره شد", description:"اطلاعات آگهی ذخیره شد."});
       nextStep();
     } catch (error) {
       if (error instanceof DraftApiError && error.status === 401) { clearEmployerSession(); setSession(null); }
       // No idempotency key in Swagger: never blindly repeat an ambiguous POST.
       const uncertain = creating && !(error instanceof DraftApiError && error.status >= 400 && error.status < 500 && error.status !== 408);
       if (uncertain) setUnknownCreation(true);
-      setDraftError(draftErrorMessage(error) + (uncertain ? " وضعیت ایجاد پیش‌نویس نامشخص است؛ قبل از ثبت مجدد با بک‌اند بررسی کنید." : ""));
+      setDraftError(draftErrorMessage(error) + (uncertain ? " وضعیت ثبت پیش‌نویس نامشخص است؛ لطفاً قبل از ثبت مجدد با پشتیبانی تماس بگیرید." : ""));
     } finally { saving.current = false; setLoading(false); }
   }
 
@@ -160,7 +152,7 @@ function CreateForm({ source, preview }: { source?: EmployerAd; preview: string 
         ...(kind === "work" ? { internshipDuration: undefined, weeklyHours: undefined, hasAllowance: undefined } : {}),
       }, source?.id);
       if (!success) { setPublishError("انتشار انجام نشد. موجودی کیف پول، تاریخ‌ها و وضعیت آگهی را بررسی کنید."); return; }
-      showToast({ tone: "success", title: "مرحله انتشار تکمیل شد", description: saveToBackend ? "آگهی در سرور پیش‌نویس است؛ پرداخت و انتشار فعلاً محلی است." : "ثبت و انتشار فعلاً محلی است." });
+      if (saveToBackend) showToast({ tone: "success", title: "پیش‌نویس ذخیره شد", description: "اطلاعات آگهی ذخیره شد." });
       navigate(`/employer/ads/${id}/published`, { replace: true, state: { localPublication: true, backendDraftId: saveToBackend ? draftRef.current?.id : undefined } });
     } catch {
       setPublishError("خطایی در انتشار آگهی رخ داد. دوباره تلاش کنید.");
@@ -179,26 +171,18 @@ function CreateForm({ source, preview }: { source?: EmployerAd; preview: string 
       {step === 3 && <AdConditionsStep form={form} errors={errors} updateField={updateField} />}
       {step === 4 && <>
         <AdReviewStep form={form} error={errors.acceptedTerms} onAccept={value => { if (!loading) updateField("acceptedTerms", value); }} onEdit={target => { if (!loading) goToStep(target); }} />
-        {saveToBackend && <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border-soft bg-background-page p-4">
-          {session ? <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-label">حساب کارفرما متصل است. {draftId !== null && `شناسه پیش‌نویس: ${draftId.toLocaleString("fa-IR")}`}</p>
-            {!draftId && <Button variant="secondary" size="sm" disabled={loading} onClick={handleLogout}>تغییر حساب</Button>}
-          </div> : <>
-            <h3 className="text-label font-bold">ورود کارفرما برای ثبت پیش‌نویس</h3>
+        {saveToBackend && !session && <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border-soft bg-background-page p-4">
+            <h3 className="text-label font-bold">ورود به حساب کارفرما</h3>
             <div className="grid gap-3 md:grid-cols-2">
               <Dropdown value={employerType === "individual" ? "حقیقی" : "حقوقی"} options={["حقیقی", "حقوقی"]} onChange={value => setEmployerType(value === "حقیقی" ? "individual" : "legal")} disabled={loading} />
               <input aria-label="شماره موبایل" type="tel" autoComplete="username" placeholder="شماره موبایل" value={phone} onChange={e => setPhone(e.target.value)} disabled={loading} className="rounded-lg border border-border-soft bg-white px-3 py-2 text-label" />
               <input aria-label="رمز عبور" type="password" autoComplete="current-password" placeholder="رمز عبور" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} className="rounded-lg border border-border-soft bg-white px-3 py-2 text-label" />
               <Button variant="secondary" disabled={loading || !phone || !password} onClick={handleLogin}>ورود</Button>
             </div>
-          </>}
-          <p className="text-caption text-text-secondary">پیش‌نویس در سرور ثبت می‌شود. پیوست‌ها فقط برای آگهی کاری ارسال می‌شوند. سطح مستقل هر مهارت فعلاً در فرانت‌اند می‌ماند.</p>
         </div>}
-        {!saveToBackend && <p className="mt-3 text-caption text-text-secondary">انتشار مجدد فعلاً محلی است.</p>}
         {draftError && <p role="alert" className="mt-3 text-label text-error">{draftError}</p>}
       </>}
       {step === 5 && <>
-        <p className="mb-3 rounded-lg border border-border-soft bg-background-page p-3 text-caption text-text-secondary">{saveToBackend ? `پیش‌نویس سرور: ${draftId?.toLocaleString("fa-IR")} — پرداخت و انتشار فعلاً محلی است.` : "پرداخت و انتشار فعلاً محلی است."}</p>
         <AdPublishStep fee={PUBLISH_FEE} balance={balance} error={publishError} />
         <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border-soft bg-background-page p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-caption leading-6 text-text-secondary">{insufficient ? `برای انتشار به ${(PUBLISH_FEE - balance).toLocaleString("fa-IR")} تومان شارژ بیشتر نیاز دارید. پس از شارژ به همین مرحله برمی‌گردید.` : "می‌توانید قبل از پرداخت، کیف پول خود را شارژ کنید."}</p>
@@ -214,7 +198,7 @@ function CreateForm({ source, preview }: { source?: EmployerAd; preview: string 
     </section>
     <WalletTopUpDialog isOpen={topUpOpen} onClose={() => setTopUpOpen(false)} onSuccess={() => setPublishError("")} minimumNeeded={Math.max(0, PUBLISH_FEE - balance)} />
     <Dialog isOpen={cancelOpen} title="انصراف از انتشار آگهی" onClose={() => setCancelOpen(false)}>
-      <p className="text-label text-text-secondary">{draftId !== null ? `پیش‌نویس ${draftId.toLocaleString("fa-IR")} در سرور باقی می‌ماند. تغییرات ثبت‌نشده از بین می‌روند. آیا مطمئن هستید؟` : "با خروج از این صفحه اطلاعات واردشده ذخیره نمی‌شوند. آیا مطمئن هستید؟"}</p>
+      <p className="text-label text-text-secondary">{draftId !== null ? "پیش‌نویس ذخیره‌شده باقی می‌ماند. تغییرات ثبت‌نشده از بین می‌روند. آیا مطمئن هستید؟" : "با خروج از این صفحه اطلاعات واردشده ذخیره نمی‌شوند. آیا مطمئن هستید؟"}</p>
       <div className="mt-5 flex flex-col gap-3">
         <Button variant="secondary" fullWidth onClick={() => setCancelOpen(false)}>ادامه</Button>
         <Button color="error" fullWidth onClick={() => navigate(returnTo)}>انصراف</Button>

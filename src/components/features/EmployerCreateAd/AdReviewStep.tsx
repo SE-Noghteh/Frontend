@@ -18,6 +18,7 @@ import type {
 
 interface AdReviewStepProps {
   form: CreateAdForm;
+  hideAttachments?: boolean;
   error?: string;
   onAccept: (value: boolean) => void;
   onEdit: (step: CreateAdStep) => void;
@@ -45,6 +46,7 @@ export function AdReviewStep({
   error,
   onAccept,
   onEdit,
+  hideAttachments = false,
 }: AdReviewStepProps) {
   const isInternship =
     form.kind === "internship";
@@ -59,7 +61,7 @@ export function AdReviewStep({
     ["شرح", form.description],
     ["خروجی", form.deliverables],
     ["فرمت تحویل", form.deliveryFormat],
-    ...(!isInternship ? [["پیوست‌ها", form.attachments.map(file => file.name).join("\n")]] : []),
+    ...(!isInternship && !hideAttachments ? [["پیوست‌ها", form.attachments.map(file => file.name).join("\n")]] : []),
   ];
 
   const conditions = [
