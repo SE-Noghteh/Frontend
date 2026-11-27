@@ -1,4 +1,5 @@
 
+import { SKILL_LEVEL_LABELS, formatWeeklyHours } from "@/utils/employerAdFields";
 import { Button } from "@/components/ui/Button";
 
 import {
@@ -51,10 +52,14 @@ export function AdReviewStep({
   const details = [
     ["عنوان", form.title],
     ["دسته‌بندی", form.category],
-    ["مهارت‌ها", form.skills.join("، ")],
+    ["مهارت‌ها", form.skills.map(skill => {
+      const level = form.skillLevels[skill];
+      return level ? `${skill} (${SKILL_LEVEL_LABELS[level]})` : skill;
+    }).join("، ")],
     ["شرح", form.description],
     ["خروجی", form.deliverables],
     ["فرمت تحویل", form.deliveryFormat],
+    ...(!isInternship ? [["پیوست‌ها", form.attachments.map(file => file.name).join("\n")]] : []),
   ];
 
   const conditions = [
@@ -70,7 +75,7 @@ export function AdReviewStep({
     ],
     [
       isInternship
-        ? "کمک‌هزینه"
+        ? "کمک‌هزینه ماهانه"
         : "بودجه",
       isInternship && !form.hasAllowance
         ? "بدون کمک‌هزینه"
@@ -89,11 +94,11 @@ export function AdReviewStep({
       ? [
           [
   "مدت دوره",
-  `${Number(form.internshipDuration).toLocaleString("fa-IR")} هفته`,
+  `${Number(form.internshipDuration).toLocaleString("fa-IR")} ماه`,
 ],
           [
             "ساعت هفتگی",
-            form.weeklyHours,
+            formatWeeklyHours(form.weeklyHours),
           ],
         ]
       : []),

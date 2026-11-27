@@ -1,3 +1,4 @@
+import { normalizeWeeklyHours, selectedSkillLevels } from "@/utils/employerAdFields";
 import type { EmployerAd } from "@/types/Employer/employer";
 
 import {
@@ -59,6 +60,8 @@ export function adToForm(ad: EmployerAd): CreateAdForm {
     title: ad.title,
     category: ad.category ?? "",
     skills: [...(ad.skills ?? [])],
+    skillLevels: selectedSkillLevels(ad.skills ?? [], ad.skillLevels ?? {}),
+    attachments: ad.kind === "work" ? [...(ad.attachments ?? [])] : [],
     description: ad.description ?? "",
     deliverables: ad.deliverables ?? "",
     deliveryFormat: ad.deliveryFormat ?? "",
@@ -71,7 +74,7 @@ export function adToForm(ad: EmployerAd): CreateAdForm {
     ageRange: ad.ageRange ?? "",
 
     internshipDuration: ad.internshipDuration ?? "",
-    weeklyHours: ad.weeklyHours ?? "",
+    weeklyHours: normalizeWeeklyHours(ad.weeklyHours),
     hasAllowance: ad.hasAllowance ?? false,
 
     acceptedTerms: false,
@@ -84,6 +87,8 @@ export function formToAdChanges(form: CreateAdForm) {
     description: form.description,
     category: form.category,
     skills: [...form.skills],
+    skillLevels: selectedSkillLevels(form.skills, form.skillLevels),
+    attachments: form.kind === "work" ? [...form.attachments] : [],
     deliverables: form.deliverables,
     deliveryFormat: form.deliveryFormat,
 
@@ -99,7 +104,7 @@ export function formToAdChanges(form: CreateAdForm) {
     ageRange: form.ageRange,
 
     internshipDuration: form.internshipDuration,
-    weeklyHours: form.weeklyHours,
+    weeklyHours: normalizeWeeklyHours(form.weeklyHours),
     hasAllowance: form.hasAllowance,
   };
 }
@@ -110,6 +115,8 @@ const FIELD_LABELS: Partial<
   title: "عنوان آگهی",
   category: "دسته‌بندی",
   skills: "مهارت‌ها",
+  skillLevels: "سطح مهارت‌ها",
+  attachments: "پیوست‌ها",
   description: "شرح آگهی",
   deliverables: "خروجی‌های مورد انتظار",
   deliveryFormat: "فرمت تحویل",
@@ -127,6 +134,9 @@ function comparable(value: unknown): string {
   if (Array.isArray(value)) {
     return JSON.stringify([...value].sort());
   }
+  if (value && typeof value === "object") {
+    return JSON.stringify(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));
+  }
 
   return String(value ?? "").trim();
 }
@@ -141,8 +151,13 @@ export function getChangedFields(
     Object.keys(FIELD_LABELS) as (keyof CreateAdForm)[]
   )
     .filter(
-      (key) =>
-        comparable(oldForm[key]) !== comparable(form[key]),
+      (key) => {
+        if (key === "attachments") {
+          return oldForm.attachments.length !== form.attachments.length ||
+            oldForm.attachments.some((file, index) => file !== form.attachments[index]);
+        }
+        return comparable(oldForm[key]) !== comparable(form[key]);
+      },
     )
     .map((key) => FIELD_LABELS[key]!);
 }

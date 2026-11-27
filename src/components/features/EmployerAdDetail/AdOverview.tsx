@@ -5,6 +5,7 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { SKILL_LEVEL_LABELS, formatWeeklyHours, downloadAttachment } from "@/utils/employerAdFields";
 import { Button } from "@/components/ui/Button";
 import { SectionCard } from "@/components/ui/SectionCard";
 
@@ -237,12 +238,12 @@ export function AdOverview({
           {
             label: "مدت دوره",
             value: ad.internshipDuration
-  ? `${Number(ad.internshipDuration).toLocaleString("fa-IR")} هفته`
+  ? `${Number(ad.internshipDuration).toLocaleString("fa-IR")} ماه`
   : "—",
           },
           {
             label: "ساعت کار هفتگی",
-            value: ad.weeklyHours,
+            value: formatWeeklyHours(ad.weeklyHours),
           },
         ]
       : []),
@@ -251,7 +252,7 @@ export function AdOverview({
   const conditionRows = [
     {
       label: isInternship
-        ? "کمک‌هزینه"
+        ? "کمک‌هزینه ماهانه"
         : "بودجه",
 
       value:
@@ -310,7 +311,7 @@ export function AdOverview({
                     key={skill}
                     className="rounded-lg bg-green-7 px-3 py-1.5 text-caption text-text-primary"
                   >
-                    {skill}
+                    {skill}{ad.skillLevels?.[skill] ? ` (${SKILL_LEVEL_LABELS[ad.skillLevels[skill]!]})` : ""}
                   </li>
 
                 ))}
@@ -369,6 +370,19 @@ export function AdOverview({
           )}
 
         </SectionCard>
+
+        {!isInternship && (ad.attachments?.length ?? 0) > 0 && (
+          <SectionCard title="پیوست‌های آگهی">
+            <ul className="flex flex-col gap-2">
+              {ad.attachments?.map((file, index) => (
+                <li key={`${index}-${file.name}`} className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-border-soft p-3">
+                  <span className="min-w-0 break-all text-label">{file.name}</span>
+                  <Button variant="secondary" size="sm" onClick={() => downloadAttachment(file)}>دانلود</Button>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
+        )}
 
         {/* Dates and conditions */}
 

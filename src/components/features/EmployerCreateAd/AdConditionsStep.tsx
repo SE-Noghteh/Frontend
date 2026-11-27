@@ -103,11 +103,12 @@ export function AdConditionsStep({
         <div className="grid gap-4 md:grid-cols-2">
 
           <AdFormField
-  label="مدت دوره (هفته)"
+  label="مدت دوره (ماه)"
   type="number"
   min={1}
+  max={24}
   step={1}
-  placeholder="تعداد هفته را وارد کنید"
+  placeholder="مدت دوره را وارد کنید"
   value={form.internshipDuration}
   onChange={(value) =>
     updateField("internshipDuration", value)
@@ -117,13 +118,11 @@ export function AdConditionsStep({
 
           <AdFormField
             label="ساعت کار در هفته"
-            type="select"
-            options={[
-              "۵ ساعت",
-              "۱۰ ساعت",
-              "۱۵ ساعت",
-              "۲۰ ساعت",
-            ]}
+            type="number"
+            min={1}
+            max={168}
+            step={1}
+            placeholder="تعداد ساعت را وارد کنید"
             value={form.weeklyHours}
             onChange={(value) =>
               updateField("weeklyHours", value)
@@ -138,7 +137,7 @@ export function AdConditionsStep({
   <AdFormField
     label={
       isInternship
-        ? "کمک‌هزینه (تومان)"
+        ? "کمک‌هزینه ماهانه (تومان)"
         : "بودجه همکاری (تومان)"
     }
     type="number"

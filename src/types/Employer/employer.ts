@@ -1,4 +1,6 @@
 
+export type EmployerSkillLevel = "beginner" | "intermediate" | "advanced";
+
 export type EmployerAdKind = "work" | "internship";
 
 export type EmployerAdStatus =
@@ -36,6 +38,8 @@ export interface EmployerAd {
   description?: string;
   category?: string;
   skills?: string[];
+  skillLevels?: Partial<Record<string, EmployerSkillLevel>>;
+  attachments?: File[];
   deliverables?: string;
   deliveryFormat?: string;
   deliveryDate?: string;

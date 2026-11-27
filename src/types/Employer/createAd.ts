@@ -1,5 +1,5 @@
 
-import type { EmployerAdKind } from "./employer";
+import type { EmployerAdKind, EmployerSkillLevel } from "./employer";
 
 export interface CreateAdForm {
   kind: EmployerAdKind | "";
@@ -7,6 +7,8 @@ export interface CreateAdForm {
   title: string;
   category: string;
   skills: string[];
+  skillLevels: Partial<Record<string, EmployerSkillLevel>>;
+  attachments: File[];
   description: string;
   deliverables: string;
   deliveryFormat: string;
@@ -36,6 +38,8 @@ export const INITIAL_CREATE_AD_FORM: CreateAdForm = {
   title: "",
   category: "",
   skills: [],
+  skillLevels: {},
+  attachments: [],
   description: "",
   deliverables: "",
   deliveryFormat: "",

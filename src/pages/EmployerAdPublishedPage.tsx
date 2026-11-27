@@ -1,6 +1,6 @@
 
 import { CheckCircle } from "lucide-react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "react-router-dom";
 
 import { PageHeader } from "@/components/shared/PageHeader/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
@@ -11,6 +11,9 @@ import { useEmployerStore } from "@/store/employer/useEmployerStore";
 
 export default function EmployerAdPublishedPage() {
   const { adId } = useParams();
+  const { state } = useLocation();
+  const local = state?.localPublication === true;
+  const draftId = typeof state?.backendDraftId === "number" ? state.backendDraftId : undefined;
 
   const ad = useEmployerStore((state) =>
     state.ads.find((item) => item.id === adId),
@@ -30,11 +33,11 @@ export default function EmployerAdPublishedPage() {
             to: "/employer/ads",
           },
           {
-            label: "انتشار موفق",
+            label: local ? "تکمیل مرحله انتشار" : "انتشار موفق",
           },
         ]}
-        title="آگهی منتشر شد"
-        subtitle="آگهی شما با موفقیت ثبت شده است."
+        title={local ? "مرحله انتشار تکمیل شد" : "آگهی منتشر شد"}
+        subtitle={local ? "پرداخت و انتشار در نسخه فعلی محلی است." : "آگهی شما با موفقیت ثبت شده است."}
         action={
           <ButtonLink to="/employer/ads">
             بازگشت به آگهی‌ها
@@ -47,8 +50,7 @@ export default function EmployerAdPublishedPage() {
         <CheckCircle size={20} />
 
         <p className="text-label">
-          آگهی شما منتشر شد و کارجویان می‌توانند
-          آن را مشاهده کنند.
+          {local ? (draftId !== undefined ? `پیش‌نویس با شناسه ${draftId.toLocaleString("fa-IR")} در سرور ثبت شده است. انتشار واقعی هنوز انجام نشده است.` : "آگهی در فرانت‌اند ثبت شده است. انتشار واقعی هنوز انجام نشده است.") : "آگهی شما منتشر شد و کارجویان می‌توانند آن را مشاهده کنند."}
         </p>
 
       </div>
@@ -61,7 +63,7 @@ export default function EmployerAdPublishedPage() {
             {ad.title}
           </h2>
 
-          <EmployerAdStatus status={ad.status} />
+          {local ? <span className="rounded-lg bg-green-7 px-2 py-1 text-caption">{draftId !== undefined ? "پیش‌نویس سرور" : "ثبت محلی"}</span> : <EmployerAdStatus status={ad.status} />}
 
         </div>
 
@@ -91,9 +93,7 @@ export default function EmployerAdPublishedPage() {
           </p>
 
           <p>مهلت درخواست: {ad.deadline}</p>
-
           <p>نحوه همکاری: {ad.collaborationMode}</p>
-
           <p>بازه سنی: {ad.ageRange}</p>
 
         </div>

@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import * as Popover from "@radix-ui/react-popover";
 
 import { ChevronDown, X } from "lucide-react";
@@ -21,6 +21,8 @@ interface MultiSelectDropdownProps {
   emptyText?: string;
   className?: string;
   colors?: DropdownColors;
+  renderOptionAccessory?: (option: string, selected: boolean) => ReactNode;
+  formatSelectedOption?: (option: string) => string;
 }
 
 export function MultiSelectDropdown({
@@ -35,6 +37,8 @@ export function MultiSelectDropdown({
   emptyText = "موردی پیدا نشد",
   className,
   colors,
+  renderOptionAccessory,
+  formatSelectedOption,
 }: MultiSelectDropdownProps) {
   const generatedId = useId();
   const triggerId = id ?? generatedId;
@@ -168,6 +172,30 @@ export function MultiSelectDropdown({
                   const selected =
                     value.includes(option);
 
+                  if (renderOptionAccessory) {
+                    const checkboxId = `${generatedId}-option-${options.indexOf(option)}`;
+                    return (
+                      <div
+                        key={option}
+                        data-selected={selected || undefined}
+                        className="dd-option flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-label transition-colors duration-150 sm:gap-3"
+                      >
+                        <label htmlFor={checkboxId} className="min-w-0 flex-1 cursor-pointer break-words">
+                          {option}
+                        </label>
+                        {renderOptionAccessory(option, selected)}
+                        <input
+                          id={checkboxId}
+                          type="checkbox"
+                          checked={selected}
+                          disabled={disabled}
+                          onChange={() => toggleOption(option)}
+                          className="dd-checkbox size-4 shrink-0 cursor-pointer"
+                        />
+                      </div>
+                    );
+                  }
+
                   return (
                     <label
                       key={option}
@@ -237,7 +265,7 @@ export function MultiSelectDropdown({
             >
 
               <span className="break-words">
-                {option}
+                {formatSelectedOption ? formatSelectedOption(option) : option}
               </span>
 
               <button

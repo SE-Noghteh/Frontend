@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { selectedSkillLevels, normalizeWeeklyHours, validWeeklyHours, validateAttachments } from "@/utils/employerAdFields";
 
 import {
   INITIAL_CREATE_AD_FORM,
@@ -26,6 +27,9 @@ export function useCreateEmployerAd(
     () => ({
       ...initialForm,
       skills: [...initialForm.skills],
+      skillLevels: selectedSkillLevels(initialForm.skills, initialForm.skillLevels),
+      attachments: [...initialForm.attachments],
+      weeklyHours: normalizeWeeklyHours(initialForm.weeklyHours),
     }),
   );
 
@@ -33,6 +37,9 @@ export function useCreateEmployerAd(
     () => ({
       ...initialForm,
       skills: [...initialForm.skills],
+      skillLevels: selectedSkillLevels(initialForm.skills, initialForm.skillLevels),
+      attachments: [...initialForm.attachments],
+      weeklyHours: normalizeWeeklyHours(initialForm.weeklyHours),
     }),
   );
 
@@ -102,6 +109,12 @@ export function useCreateEmployerAd(
       [key]: value,
     };
 
+    if (key === "skills") {
+      nextForm.skillLevels = selectedSkillLevels(nextForm.skills, nextForm.skillLevels);
+    }
+    if (key === "kind" && nextForm.kind === "internship") {
+      nextForm.attachments = [];
+    }
     setForm(nextForm);
 
     setErrors((previous) => {
@@ -160,6 +173,10 @@ export function useCreateEmployerAd(
         nextErrors.description =
           "شرح آگهی را وارد کنید";
       }
+      if (form.kind === "work") {
+        const attachmentError = validateAttachments(form.attachments);
+        if (attachmentError) nextErrors.attachments = attachmentError;
+      }
     }
 
     // Step 3: Dates and conditions
@@ -213,22 +230,22 @@ export function useCreateEmployerAd(
           form.internshipDuration,
         );
 
-        // Duration in weeks
+        // Duration in months
 
         if (
           !/^[0-9]+$/.test(form.internshipDuration) ||
           !Number.isSafeInteger(duration) ||
-          duration <= 0
+          (duration < 1 || duration > 24)
         ) {
           nextErrors.internshipDuration =
-            "تعداد هفته باید یک عدد صحیح مثبت باشد";
+            "مدت دوره باید عدد صحیح بین ۱ تا ۲۴ ماه باشد";
         }
 
         // Weekly working hours
 
-        if (!form.weeklyHours) {
+        if (!validWeeklyHours(form.weeklyHours)) {
           nextErrors.weeklyHours =
-            "ساعت کار هفتگی را انتخاب کنید";
+            "ساعت کار هفتگی باید عدد صحیح بین ۱ تا ۱۶۸ باشد";
         }
       }
     }

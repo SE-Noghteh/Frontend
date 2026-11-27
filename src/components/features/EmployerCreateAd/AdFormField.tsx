@@ -23,6 +23,7 @@ interface AdFormFieldProps {
   options?: string[];
 
   min?: number;
+  max?: number;
   step?: number;
 
   disabled?: boolean;
@@ -37,6 +38,7 @@ export function AdFormField({
   type = "text",
   options = [],
   min,
+  max,
   step,
   disabled = false,
 }: AdFormFieldProps) {
@@ -113,6 +115,7 @@ export function AdFormField({
           type={type}
           value={value}
           min={min}
+          max={max}
           step={step}
           disabled={disabled}
           onChange={(event) =>
