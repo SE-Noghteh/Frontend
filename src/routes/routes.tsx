@@ -2,7 +2,6 @@ import { JobSeekerLoginPage } from "@/pages/JobSeekerLoginPage";
 import { JobSeekerForgotPasswordPage } from "@/pages/JobSeekerForgotPasswordPage";
 import { JobSeekerResetPasswordPage } from "@/pages/JobSeekerResetPasswordPage";
 import { Navigate, createBrowserRouter } from "react-router-dom";
-
 import PublicLayout from "@/layouts/PublicLayout";
 import SeekerDashboardLayout from "@/layouts/SeekerDashboardLayout";
 import AboutPage from "@/pages/AboutPage";
@@ -23,77 +22,37 @@ import EmployerCreateAdPage from "@/pages/EmployerCreateAdPage";
 import EmployerAdPublishedPage from "@/pages/EmployerAdPublishedPage";
 import EmployerAdDetailPage from "@/pages/EmployerAdDetailPage";
 import EmployerEditAdPage from "@/pages/EmployerEditAdPage";
+import EmployerWalletPage from "@/pages/EmployerWalletPage";
+import EmployerCollaborationPreviewPage from "@/pages/EmployerCollaborationPreviewPage";
 export const router = createBrowserRouter([
-  {
-    element: <PublicLayout />,
-    children: [
-      { path: "/", element: <LandingPage /> },
-      { path: "/search", element: <OpportunitySearchPage /> },
-      { path: "/faq", element: <FaqPage /> },
-      { path: "/support", element: <SupportPage /> },
-    ],
-  },
-  {
-    path: "/jobseekerlogin",
-    element: <JobSeekerLoginPage />, 
-  },
-  {
-    path: "/jobseekerlogin/forgot-password",
-    element: <JobSeekerForgotPasswordPage />,
-  },
-  {
-    path: "/jobseekerlogin/reset-password",
-    element: <JobSeekerResetPasswordPage />,
-  },
-  {
-    path: "/seeker",
-    element: <SeekerDashboardLayout />,
-    children: [
-      { index: true, element: <Navigate to="/seeker/ads" replace /> },
-      { path: "ads", element: <SeekerAdsPage /> },
-      { path: "ads/:adId", element: <SeekerAdDetailPage /> },
-      { path: "requests", element: <SeekerRequestsPage /> },
-      { path: "collabs", element: <SeekerCollabsPage /> },
-      { path: "collabs/:collabId", element: <SeekerCollabDetailPage /> },
-      { path: "requests/:requestId", element: <SeekerRequestDetailPage /> },
-    ],
-  },
-  {
-  path: "/employer",
-  element: <EmployerDashboardLayout />,
-  children: [
-    {
-      index: true,
-      element: <Navigate to="/employer/ads" replace />,
-    },
-    {
-      path: "ads",
-      element: <EmployerAdsPage />,
-    },
-    {
-      path: "ads/create",
-      element: <EmployerCreateAdPage />,
-    },
-    {
-      path: "ads/:adId/published",
-      element: <EmployerAdPublishedPage />,
-    },
-    {
-  path: "ads/:adId",
-  element: <EmployerAdDetailPage />,
-},
-{
-  path: "ads/:adId/edit",
-  element: <EmployerEditAdPage />,
-},
-  ],
-},
-  {
-    path: "/about",
-    element: <AboutPage />,
-  },
-  {
-    path: "/components-test",
-    element: <ComponentsTestPage />,
-  },
+  { element: <PublicLayout />, children: [
+    { path: "/", element: <LandingPage /> },
+    { path: "/search", element: <OpportunitySearchPage /> },
+    { path: "/faq", element: <FaqPage /> },
+    { path: "/support", element: <SupportPage /> },
+  ] },
+  { path: "/jobseekerlogin", element: <JobSeekerLoginPage /> },
+  { path: "/jobseekerlogin/forgot-password", element: <JobSeekerForgotPasswordPage /> },
+  { path: "/jobseekerlogin/reset-password", element: <JobSeekerResetPasswordPage /> },
+  { path: "/seeker", element: <SeekerDashboardLayout />, children: [
+    { index: true, element: <Navigate to="/seeker/ads" replace /> },
+    { path: "ads", element: <SeekerAdsPage /> },
+    { path: "ads/:adId", element: <SeekerAdDetailPage /> },
+    { path: "requests", element: <SeekerRequestsPage /> },
+    { path: "collabs", element: <SeekerCollabsPage /> },
+    { path: "collabs/:collabId", element: <SeekerCollabDetailPage /> },
+    { path: "requests/:requestId", element: <SeekerRequestDetailPage /> },
+  ] },
+  { path: "/employer", element: <EmployerDashboardLayout />, children: [
+    { index: true, element: <Navigate to="/employer/ads" replace /> },
+    { path: "ads", element: <EmployerAdsPage /> },
+    { path: "ads/create", element: <EmployerCreateAdPage /> },
+    { path: "wallet", element: <EmployerWalletPage /> },
+    { path: "ads/:adId/published", element: <EmployerAdPublishedPage /> },
+    { path: "ads/:adId", element: <EmployerAdDetailPage /> },
+    { path: "ads/:adId/edit", element: <EmployerEditAdPage /> },
+    { path: "ads/:adId/collaboration", element: <EmployerCollaborationPreviewPage /> },
+  ] },
+  { path: "/about", element: <AboutPage /> },
+  { path: "/components-test", element: <ComponentsTestPage /> },
 ]);

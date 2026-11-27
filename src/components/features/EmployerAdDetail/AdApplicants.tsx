@@ -61,9 +61,11 @@ interface AdApplicantsProps {
   applicants: AdApplicant[];
   onViewApplicant?: (id: string) => void;
   onDownloadResume?: (id: string) => void;
+  readOnly?: boolean;
+  onStatusChange?: (id: string, status: ApplicantStatus) => boolean;
 }
 
-type Filter = "all" | "new" | "rejected";
+type Filter = "all" | "rejected";
 type Sort = "match" | "newest";
 type DetailTab = "request" | "resume" | "portfolio";
 
@@ -72,7 +74,6 @@ const FILTERS: {
   label: string;
 }[] = [
   { value: "all", label: "همه" },
-  { value: "new", label: "جدید" },
   { value: "rejected", label: "کنار گذاشته" },
 ];
 
@@ -292,6 +293,8 @@ function PortfolioItems({
 export function AdApplicants({
   applicants,
   onDownloadResume,
+  readOnly = false,
+  onStatusChange,
 }: AdApplicantsProps) {
   const [filter, setFilter] =
     useState<Filter>("all");
@@ -353,6 +356,12 @@ export function AdApplicants({
     id: string,
     status: ApplicantStatus,
   ) {
+    if (readOnly) return;
+    if (onStatusChange) {
+      onStatusChange(id, status);
+      setConfirmOpen(false);
+      return;
+    }
     setStatuses((previous) => ({
       ...previous,
       [id]: status,
@@ -389,9 +398,7 @@ export function AdApplicants({
                 "rounded-lg border px-3 py-2 text-caption transition-colors",
                 filter === item.value
                   ? "border-blue bg-blue text-white"
-                  : item.value === "new"
-                    ? "border-green-3/30 bg-green-7"
-                    : "border-border-soft bg-white",
+                  : "border-border-soft bg-white",
               )}
             >
               {item.label}
@@ -681,7 +688,7 @@ export function AdApplicants({
                   این متقاضی برای همکاری انتخاب شده است.
                 </div>
 
-              ) : selected.status === "rejected" ? (
+              ) : readOnly ? null : selected.status === "rejected" ? (
 
                 <Button
                   variant="secondary"
@@ -732,7 +739,7 @@ export function AdApplicants({
 
       {/* Selection confirmation */}
 
-      {confirmOpen && selected && (
+      {!readOnly && confirmOpen && selected && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={() => setConfirmOpen(false)}
