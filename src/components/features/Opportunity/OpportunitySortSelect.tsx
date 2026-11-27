@@ -1,3 +1,4 @@
+import { Dropdown } from "@/components/ui/Dropdown";
 import { SORT_LABEL } from "@/constants/opportunityOptions";
 import type { OpportunitySort } from "@/types/Opportunity/opportunity";
 
@@ -6,21 +7,25 @@ interface OpportunitySortSelectProps {
   onChange: (value: OpportunitySort) => void;
 }
 
-const SORT_OPTIONS = Object.keys(SORT_LABEL) as OpportunitySort[];
+const SORT_OPTIONS = Object.entries(SORT_LABEL) as [OpportunitySort, string][];
+const SORT_LABELS = SORT_OPTIONS.map(([, label]) => label);
 
-export function OpportunitySortSelect({ value, onChange }: OpportunitySortSelectProps) {
+export function OpportunitySortSelect({
+  value,
+  onChange,
+}: OpportunitySortSelectProps) {
+  const currentLabel = SORT_LABEL[value];
+
   return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value as OpportunitySort)}
-      aria-label="مرتب‌سازی"
-      className="h-11 rounded-xl border border-border-decorative bg-surface-card px-3 text-label text-text-primary outline-none focus:border-action-primary"
-    >
-      {SORT_OPTIONS.map((option) => (
-        <option key={option} value={option}>
-          {SORT_LABEL[option]}
-        </option>
-      ))}
-    </select>
+    <Dropdown
+      id="opportunity-sort"
+      value={currentLabel}
+      options={SORT_LABELS}
+      onChange={(label) => {
+        const selected = SORT_OPTIONS.find(([, optionLabel]) => optionLabel === label);
+        if (selected) onChange(selected[0]);
+      }}
+      placeholder="مرتب‌سازی"
+    />
   );
 }

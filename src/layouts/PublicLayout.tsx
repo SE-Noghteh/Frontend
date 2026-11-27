@@ -3,7 +3,8 @@
  * Header and Footer are placeholders owned by other tasks.
  */
 
-import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { Footer } from "@/components/shared/Footer/Footer";
 import { Header } from "@/components/shared/Header/Header";
@@ -11,6 +12,16 @@ import { Header } from "@/components/shared/Header/Header";
 import "@/styles/public-pages.css";
 
 export default function PublicLayout() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [pathname]);
+
   return (
     <div className="flex min-h-svh flex-col bg-background-page text-text-primary">
       <Header />

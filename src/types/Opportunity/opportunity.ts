@@ -1,6 +1,8 @@
 /**
- * Opportunity (job / internship) domain types.
- * Shapes mirror what the backend is expected to return.
+ * Frontend opportunity domain.
+ *
+ * The backend uses `work`, `hybrid` and amounts in whole toman.
+ * The service layer maps those API values to the UI-friendly values below.
  */
 
 export type WorkMode = "online" | "onsite" | "both";
@@ -14,47 +16,67 @@ export interface OpportunityCategory {
   id: string;
   title: string;
   shortTitle: string;
-  /** Categories that need extra safety review before publishing. */
   requiresSpecialReview: boolean;
 }
 
 export interface OpportunityAttachment {
   name: string;
   meta: string;
+  url?: string;
+  contentType?: string;
+  size?: number;
 }
 
 export interface Opportunity {
   id: string;
   title: string;
   employerName: string;
-  employerRating: number;
+  employerRating?: number;
+  employerVerified?: boolean;
   categoryId: string;
   type: OpportunityType;
   workMode: WorkMode;
   level: SkillLevel;
   city?: string;
-  /** Amount in thousand tomans. */
-  budget: number;
-  /** True when the amount is a monthly stipend (internships). */
-  hasStipend: boolean;
-  durationDays: number;
-  deadlineInDays: number;
-  minAge: 15 | 18;
-  applicantsCount: number;
-  skills: string[];
-  postedDaysAgo: number;
-  requiresNoExperience: boolean;
 
   /**
-   * Optional detail fields. Current mock search data does not provide these yet.
-   * They can be populated when the search/detail API returns the full opportunity.
+   * Kept in thousand tomans because the existing UI slider/formatter uses
+   * thousand-toman values. The API adapter converts whole toman -> thousand.
    */
+  budget: number;
+  hasStipend: boolean;
+
+  durationDays: number;
+  deadlineInDays: number;
+  applyDeadline?: string;
+  minAge: number;
+  maxAge?: number;
+  applicantsCount?: number;
+
+  skills: string[];
+  postedDaysAgo: number;
+  publishedAt?: string;
+  createdAt?: string;
+
+  requiresNoExperience?: boolean;
+  requiresParentApproval?: boolean;
+  acceptingApplications?: boolean;
+  saved?: boolean;
+  matchPercent?: number;
+
   description?: string;
   deliverables?: string;
   deliveryFormat?: string;
   files?: OpportunityAttachment[];
   employerInitial?: string;
   employerCollabsCount?: number;
+}
+
+export interface OpportunityPage {
+  data: Opportunity[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface OpportunityFilters {
@@ -68,7 +90,13 @@ export interface OpportunityFilters {
   city: string;
   budgetMin: number;
   budgetMax: number;
+
+  /**
+   * Kept for existing landing-page links. Swagger currently has no direct
+   * query parameter for these two flags.
+   */
   isUrgent: boolean;
   requiresNoExperience: boolean;
+
   sort: OpportunitySort;
 }

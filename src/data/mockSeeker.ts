@@ -45,7 +45,7 @@ export const mockAds: SeekerAd[] = [
     publishedAt: "1405/08/01",
     saved: true,
     collabDuration: "۲ هفته",
-    application: "sentToEmployer",
+    application: "open",
   },
   {
     ...SHARED_AD_CONTENT,
@@ -66,7 +66,7 @@ export const mockAds: SeekerAd[] = [
     collabDuration: "۱ هفته",
     deliverables: "۱ ویدئوی ۶۰ ثانیه‌ای",
     deliveryFormat: "MP4",
-    application: "sentToEmployer",
+    application: "open",
   },
   {
     ...SHARED_AD_CONTENT,
@@ -87,7 +87,7 @@ export const mockAds: SeekerAd[] = [
     collabDuration: "۳ ماه",
     deliverables: "۸ محتوای هفتگی",
     deliveryFormat: "متن و تصویر",
-    application: "sentToEmployer",
+    application: "open",
   },
   {
     ...SHARED_AD_CONTENT,
@@ -127,6 +127,7 @@ export const mockAds: SeekerAd[] = [
     collabDuration: "۱۰ روز",
     deliverables: "۳ پیشنهاد لوگو",
     deliveryFormat: "AI و PNG",
+    // This sample ad is intentionally expired and cannot receive new requests.
     application: "expired",
   },
 ];
@@ -148,6 +149,8 @@ export const mockRequests: SeekerRequest[] = [
     kind: "work",
     budget: 2_400_000,
     deadline: "1405/08/15",
+    // Historical seed data is hidden so this ad can be used to test a fresh application.
+    demoOnly: true,
   },
   {
     id: "1",
@@ -161,6 +164,7 @@ export const mockRequests: SeekerRequest[] = [
     kind: "work",
     budget: 2_400_000,
     deadline: "1405/08/15",
+    demoOnly: true,
   },
   {
     id: "2",
@@ -174,6 +178,7 @@ export const mockRequests: SeekerRequest[] = [
     kind: "work",
     budget: 2_400_000,
     deadline: "1405/08/15",
+    demoOnly: true,
   },
   {
     id: "3",
@@ -200,6 +205,7 @@ export const mockRequests: SeekerRequest[] = [
     kind: "work",
     budget: 2_400_000,
     deadline: "1405/08/15",
+    demoOnly: true,
   },
   {
     id: "6",

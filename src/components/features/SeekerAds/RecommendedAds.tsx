@@ -10,8 +10,10 @@ interface RecommendedAdsProps {
   onShowAll: () => void;
 }
 
-/** "آگهی‌های مناسب تو": the best matches, shown above the list on the default tab. */
-export function RecommendedAds({ ads, onShowAll }: RecommendedAdsProps) {
+export function RecommendedAds({
+  ads,
+  onShowAll,
+}: RecommendedAdsProps) {
   if (ads.length === 0) return null;
 
   return (
@@ -20,12 +22,16 @@ export function RecommendedAds({ ads, onShowAll }: RecommendedAdsProps) {
       className="rounded-2xl border border-border-soft bg-white p-4 shadow-[0_2px_10px_rgba(38,35,33,0.04)] md:p-5"
     >
       <header className="mb-3 flex items-center justify-between gap-3">
-        <h2 id="recommended-ads-title" className="flex items-center gap-2.5 text-body font-bold text-text-primary">
+        <h2
+          id="recommended-ads-title"
+          className="flex items-center gap-2.5 text-body font-bold text-text-primary"
+        >
           <span className="grid size-8 place-items-center rounded-full bg-brand-peach-soft text-error">
             <Flag size={15} aria-hidden="true" />
           </span>
           آگهی‌های مناسب تو
         </h2>
+
         <button
           type="button"
           onClick={onShowAll}
@@ -45,16 +51,28 @@ export function RecommendedAds({ ads, onShowAll }: RecommendedAdsProps) {
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ocean-8 text-label font-bold text-ocean-3">
               {ad.employerInitial}
             </span>
+
             <div className="min-w-0 flex-1">
-              <p className="truncate text-label font-bold text-text-primary">{ad.title}</p>
+              <p className="truncate text-label font-bold text-text-primary">
+                {ad.title}
+              </p>
               <p className="truncate text-caption text-text-secondary">
                 {ad.employerName} · {formatAdAmount(ad)}
               </p>
             </div>
+
             <div className="flex shrink-0 items-center gap-2">
-              <AdMatchBadge percent={ad.matchPercent} />
-              <ButtonLink to={`/seeker/ads/${ad.id}`} variant="secondary" size="sm" className="hidden md:inline-flex">
-                مشاهده و درخواست
+              {ad.matchPercent !== undefined ? (
+                <AdMatchBadge percent={ad.matchPercent} />
+              ) : null}
+
+              <ButtonLink
+                to={ad.detailPath ?? `/seeker/ads/${ad.id}`}
+                variant="secondary"
+                size="sm"
+                className="hidden md:inline-flex"
+              >
+                مشاهده آگهی
               </ButtonLink>
             </div>
           </li>

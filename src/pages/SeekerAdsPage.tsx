@@ -1,5 +1,3 @@
-/** Job-seeker dashboard: list of ads the seeker can apply to. */
-
 import { useState } from "react";
 
 import { AdListItem } from "@/components/features/SeekerAds/AdListItem";
@@ -9,9 +7,11 @@ import { AdsToolbar } from "@/components/features/SeekerAds/AdsToolbar";
 import { RecommendedAds } from "@/components/features/SeekerAds/RecommendedAds";
 import { PageHeader } from "@/components/shared/PageHeader/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { SectionCard } from "@/components/ui/SectionCard";
 import { TabPills } from "@/components/ui/TabPills";
 import { useSeekerAds } from "@/hooks/useSeekerAds";
 import type { SeekerAdsTab } from "@/types/Seeker/seeker";
+import { toPersianDigits } from "@/utils/toPersianDigits";
 
 const TABS: { value: SeekerAdsTab; label: string }[] = [
   { value: "all", label: "همه" },
@@ -29,17 +29,10 @@ const TAB_TRAIL: Record<SeekerAdsTab, string> = {
   saved: "ذخیره‌شده",
 };
 
-const TAB_SUBTITLE: Record<SeekerAdsTab, string> = {
-  all: "۴۸ آگهی مناسب سن و مهارت‌های تو",
-  recommended: "آگهی‌هایی که با سن و مهارت‌های تو می‌خوانند",
-  work: "۴۸ آگهی مناسب سن و مهارت‌های تو",
-  internship: "۴۸ آگهی مناسب سن و مهارت‌های تو",
-  saved: "آگهی‌هایی که ذخیره کرده‌ای",
-};
-
 export default function SeekerAdsPage() {
   const {
     ads,
+    total,
     recommendedAds,
     tab,
     setTab,
@@ -52,37 +45,89 @@ export default function SeekerAdsPage() {
     hasActiveFilters,
     clearFilters,
     toggleSaved,
+    isPending,
+    isFetching,
+    isError,
   } = useSeekerAds();
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const showRecommendedBox = tab === "all" && !query && !hasActiveFilters;
+  const showRecommendedBox =
+    tab === "all" && !query && !hasActiveFilters;
+
+  const subtitle =
+    tab === "saved"
+      ? `${toPersianDigits(total)} آگهی ذخیره‌شده`
+      : tab === "recommended"
+        ? `${toPersianDigits(total)} آگهی متناسب با مهارت‌های تو`
+        : `${toPersianDigits(total)} آگهی`;
 
   return (
     <div className="flex flex-col gap-4 lg:gap-5">
       <PageHeader
-        breadcrumb={[{ label: "آگهی‌ها", to: "/seeker/ads" }, { label: TAB_TRAIL[tab] }]}
+        breadcrumb={[
+          { label: "آگهی‌ها", to: "/seeker/ads" },
+          { label: TAB_TRAIL[tab] },
+        ]}
         title="آگهی‌ها"
-        subtitle={TAB_SUBTITLE[tab]}
+        subtitle={subtitle}
         action={
-          <Button variant="secondary" size="sm" fullWidth className="md:w-auto" onClick={() => setIsFilterOpen(true)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            className="md:w-auto"
+            onClick={() => setIsFilterOpen(true)}
+          >
             فیلترها
           </Button>
         }
       />
 
-      <TabPills tabs={TABS} value={tab} onChange={setTab} ariaLabel="دسته‌بندی آگهی‌ها" />
+      <TabPills
+        tabs={TABS}
+        value={tab}
+        onChange={setTab}
+        ariaLabel="دسته‌بندی آگهی‌ها"
+      />
 
-      <AdsToolbar query={query} onQueryChange={setQuery} sort={sort} onSortChange={setSort} />
+      <AdsToolbar
+        query={query}
+        onQueryChange={setQuery}
+        sort={sort}
+        onSortChange={setSort}
+      />
 
-      {showRecommendedBox ? <RecommendedAds ads={recommendedAds} onShowAll={() => setTab("recommended")} /> : null}
+      {isFetching && !isPending ? (
+        <p className="text-caption text-text-secondary">
+          در حال به‌روزرسانی آگهی‌ها...
+        </p>
+      ) : null}
 
-      {ads.length === 0 ? (
+      {showRecommendedBox ? (
+        <RecommendedAds
+          ads={recommendedAds}
+          onShowAll={() => setTab("recommended")}
+        />
+      ) : null}
+
+      {isError ? (
+        <SectionCard>
+          <p className="text-label text-error">
+            دریافت آگهی‌های داشبورد انجام نشد. اگر Login انجام شده،
+            ذخیره‌شدن JWT و دسترسی شبکه به API را بررسی کن.
+          </p>
+        </SectionCard>
+      ) : !isPending && ads.length === 0 ? (
         <AdsEmptyState onClear={clearFilters} />
       ) : (
         <ul className="flex flex-col gap-3">
           {ads.map((ad) => (
             <li key={ad.id}>
-              <AdListItem ad={ad} onToggleSave={toggleSaved} />
+              <AdListItem
+                ad={ad}
+                onToggleSave={toggleSaved}
+              />
             </li>
           ))}
         </ul>

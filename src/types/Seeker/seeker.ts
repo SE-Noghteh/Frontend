@@ -1,23 +1,42 @@
-/** Domain types of the job-seeker dashboard (ads, requests, parent, profile). */
+/** Domain types of the job-seeker dashboard. */
 
 export type SeekerAdKind = "work" | "internship";
-export type SeekerAdCategory = "design" | "video" | "programming";
-export type SeekerAdsTab = "all" | "recommended" | "work" | "internship" | "saved";
+export type SeekerAdCategory = "design" | "video" | "programming" | "other";
+export type SeekerAdsTab =
+  | "all"
+  | "recommended"
+  | "work"
+  | "internship"
+  | "saved";
 export type SeekerAdsSort = "newest" | "deadline" | "match";
 export type BudgetBucket = "under1" | "from1to3" | "over3";
 
-/** The seeker's application state for an ad. Parent approval is not part of this flow. */
-export type AdApplicationState = "open" | "sentToEmployer" | "expired";
+export type AdApplicationState =
+  | "open"
+  | "sentToEmployer"
+  | "expired";
 
-/** Legacy type retained for the unused ParentApprovalCard component. */
-export type RequestParentStatus = "approved" | "pending" | "rejected" | "notRequired";
+export type RequestParentStatus =
+  | "approved"
+  | "pending"
+  | "rejected"
+  | "notRequired";
 
-export type RequestEmployerStatus = "accepted" | "reviewing" | "rejectedByEmployer";
-export type RequestTab = "all" | "reviewing" | "accepted" | "rejected";
+export type RequestEmployerStatus =
+  | "accepted"
+  | "reviewing"
+  | "rejectedByEmployer";
+
+export type RequestTab =
+  | "all"
+  | "reviewing"
+  | "accepted"
+  | "rejected";
 
 export interface SeekerAdFile {
   name: string;
   meta: string;
+  url?: string;
 }
 
 export interface SeekerAd {
@@ -27,24 +46,27 @@ export interface SeekerAd {
   category: SeekerAdCategory;
   employerName: string;
   employerInitial: string;
-  employerCollabsCount: number;
+  employerCollabsCount?: number;
   budget?: number;
   stipend?: number;
-  matchPercent: number;
+  matchPercent?: number;
   deadline: string;
   publishedAt: string;
   saved: boolean;
-  description: string;
+  description?: string;
   skills: string[];
-  deliverables: string;
-  deliveryFormat: string;
-  files: SeekerAdFile[];
+  deliverables?: string;
+  deliveryFormat?: string;
+  files?: SeekerAdFile[];
   collabDuration: string;
-  applicantsCount: number;
+  applicantsCount?: number;
   application: AdApplicationState;
+
+  /** Raw backend opportunity id when this record is stored for a mock request. */
+  sourceOpportunityId?: string;
+  detailPath?: string;
 }
 
-/** A request is sent directly to the employer; parent approval happens after contract agreement. */
 export interface SeekerRequest {
   id: string;
   adId: string;
@@ -63,6 +85,9 @@ export interface SeekerRequest {
   deadline: string;
   collabId?: string;
   demoOnly?: boolean;
+
+  /** Used only by mock requests created from real backend opportunities. */
+  sourceOpportunityId?: string;
 }
 
 export interface SeekerParent {

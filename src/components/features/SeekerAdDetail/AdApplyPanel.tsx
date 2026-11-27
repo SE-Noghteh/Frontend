@@ -28,10 +28,19 @@ interface AdApplyPanelProps {
   requestId?: string;
   onApply: () => void;
   onToggleSave: () => void;
+  /** Hide saving when this panel is used for public-search opportunities. */
+  showSaveButton?: boolean;
 }
 
 /** Right-hand card of the ad page: the primary action and the status note that explains it. */
-export function AdApplyPanel({ state, isSaved, requestId, onApply, onToggleSave }: AdApplyPanelProps) {
+export function AdApplyPanel({
+  state,
+  isSaved,
+  requestId,
+  onApply,
+  onToggleSave,
+  showSaveButton = true,
+}: AdApplyPanelProps) {
   const viewRequest = (
     <ButtonLink to={requestId ? `/seeker/requests/${requestId}` : "/seeker/requests"} variant="secondary" fullWidth>
       مشاهده درخواست
@@ -51,9 +60,11 @@ export function AdApplyPanel({ state, isSaved, requestId, onApply, onToggleSave 
           <Note tone="warning" icon={<Check size={16} aria-hidden="true" />}>
             درخواستت مستقیماً برای کارفرما ارسال می‌شود
           </Note>
-          <Button variant="text" size="sm" onClick={onToggleSave}>
-            {isSaved ? "حذف از ذخیره‌شده‌ها" : "ذخیره آگهی"}
-          </Button>
+          {showSaveButton ? (
+            <Button variant="text" size="sm" onClick={onToggleSave}>
+              {isSaved ? "حذف از ذخیره‌شده‌ها" : "ذخیره آگهی"}
+            </Button>
+          ) : null}
         </>
       ) : null}
 

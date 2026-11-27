@@ -24,6 +24,10 @@ export const router = createBrowserRouter([
       { path: "/search", element: <OpportunitySearchPage /> },
       { path: "/faq", element: <FaqPage /> },
       { path: "/support", element: <SupportPage /> },
+      {
+    path: "/about",
+    element: <AboutPage />,
+  },
     ],
   },
   {
@@ -38,12 +42,11 @@ export const router = createBrowserRouter([
       { path: "collabs", element: <SeekerCollabsPage /> },
       { path: "collabs/:collabId", element: <SeekerCollabDetailPage /> },
       { path: "requests/:requestId", element: <SeekerRequestDetailPage /> },
+      
+      
     ],
   },
-  {
-    path: "/about",
-    element: <AboutPage />,
-  },
+  
   {
     path: "/components-test",
     element: <ComponentsTestPage />,

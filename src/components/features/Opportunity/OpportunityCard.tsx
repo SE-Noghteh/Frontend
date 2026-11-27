@@ -31,11 +31,11 @@ interface OpportunityCardProps {
   opportunity: Opportunity;
 }
 
-/** Summary card of one opportunity (job / internship). */
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
-  // TODO: persist bookmarks through the backend once the endpoint exists.
-  const [isSaved, setIsSaved] = useState(false);
-  const isUrgent = opportunity.deadlineInDays <= URGENT_DEADLINE_DAYS;
+  const [isSaved, setIsSaved] = useState(Boolean(opportunity.saved));
+  const isUrgent =
+    opportunity.deadlineInDays >= 0 &&
+    opportunity.deadlineInDays <= URGENT_DEADLINE_DAYS;
 
   return (
     <motion.article
@@ -51,10 +51,13 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
           categoryId={opportunity.categoryId}
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
+
         <div className="absolute inset-x-2 top-2 flex items-center justify-between sm:inset-x-3 sm:top-3">
-          <span className="rounded-full bg-white/90 px-2 py-0.5 text-caption font-semibold text-text-primary backdrop-blur sm:px-2.5 sm:py-1 sm:text-caption">
+          <span className="rounded-full bg-white/90 px-2 py-0.5 text-caption font-semibold text-text-primary backdrop-blur sm:px-2.5 sm:py-1">
             {OPPORTUNITY_TYPE_LABEL[opportunity.type]}
           </span>
+
+          {/* Public search remains usable for guests. Real saved-state mutation is done in the seeker dashboard. */}
           <button
             type="button"
             onClick={() => setIsSaved((previous) => !previous)}
@@ -62,25 +65,39 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             aria-pressed={isSaved}
             className="relative z-10 grid size-7 place-items-center rounded-full bg-white/90 text-text-primary backdrop-blur transition-colors hover:bg-white sm:size-8"
           >
-            <Bookmark className={`size-4 transition-all ${isSaved ? "fill-blue" : ""}`} />
+            <Bookmark
+              className={`size-4 transition-all ${isSaved ? "fill-blue" : ""}`}
+            />
           </button>
         </div>
-        {isUrgent && (
-          <span className="absolute bottom-2 start-2 flex items-center gap-1 rounded-full bg-action-primary px-2 py-0.5 text-caption font-medium text-white sm:bottom-3 sm:start-3 sm:px-2.5 sm:py-1 sm:text-caption">
+
+        {isUrgent ? (
+          <span className="absolute bottom-2 start-2 flex items-center gap-1 rounded-full bg-action-primary px-2 py-0.5 text-caption font-medium text-white sm:bottom-3 sm:start-3 sm:px-2.5 sm:py-1">
             <Clock className="size-3" />
             {toPersianDigits(opportunity.deadlineInDays)} روز تا مهلت
           </span>
-        )}
+        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-3 sm:gap-3 sm:p-4">
-        <div className="flex items-center gap-1.5 text-caption text-charcoal-2 sm:text-caption">
-          <span className="font-medium text-text-primary">{opportunity.employerName}</span>
-          <BadgeCheck className="size-3.5 text-green-3" aria-label="کارفرمای تأییدشده" />
-          <span className="ms-auto flex items-center gap-0.5">
-            <Star className="size-3 fill-status-warning text-status-warning" />
-            {toPersianDigits(opportunity.employerRating)}
+        <div className="flex items-center gap-1.5 text-caption text-charcoal-2">
+          <span className="font-medium text-text-primary">
+            {opportunity.employerName}
           </span>
+
+          {opportunity.employerVerified ? (
+            <BadgeCheck
+              className="size-3.5 text-green-3"
+              aria-label="کارفرمای تأییدشده"
+            />
+          ) : null}
+
+          {opportunity.employerRating !== undefined ? (
+            <span className="ms-auto flex items-center gap-0.5">
+              <Star className="size-3 fill-status-warning text-status-warning" />
+              {toPersianDigits(opportunity.employerRating)}
+            </span>
+          ) : null}
         </div>
 
         <h3 className="line-clamp-2 min-h-[2.9em] text-label font-bold leading-[1.45] text-text-primary sm:text-body">
@@ -100,28 +117,42 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             {WORK_MODE_LABEL[opportunity.workMode]}
             {opportunity.city ? ` · ${opportunity.city}` : ""}
           </OpportunityTag>
-          <OpportunityTag>{SKILL_LEVEL_LABEL[opportunity.level]}</OpportunityTag>
-          {opportunity.minAge === 15 && (
-            <OpportunityTag hideOnMobile icon={<ShieldCheck className="size-3" />}>
+
+          <OpportunityTag>
+            {SKILL_LEVEL_LABEL[opportunity.level]}
+          </OpportunityTag>
+
+          {opportunity.requiresParentApproval ? (
+            <OpportunityTag
+              hideOnMobile
+              icon={<ShieldCheck className="size-3" />}
+            >
               با رضایت والد
             </OpportunityTag>
-          )}
+          ) : null}
         </div>
 
         <div className="mt-auto flex items-end justify-between border-t border-border-decorative pt-2 sm:pt-3">
           <div>
             <div className="text-caption text-charcoal-2">
-              {opportunity.hasStipend ? "کمک‌هزینه ماهانه" : "مبلغ پروژه"}
+              {opportunity.hasStipend
+                ? "کمک‌هزینه ماهانه"
+                : "مبلغ پروژه"}
             </div>
             <div className="text-label font-extrabold text-text-primary sm:text-body">
               {formatBudget(opportunity.budget)}{" "}
-              <span className="text-caption font-medium text-charcoal-2">تومان</span>
+              <span className="text-caption font-medium text-charcoal-2">
+                تومان
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-caption text-charcoal-2 sm:text-caption">
-            <Users className="size-3.5" />
-            {toPersianDigits(opportunity.applicantsCount)} درخواست
-          </div>
+
+          {opportunity.applicantsCount !== undefined ? (
+            <div className="flex items-center gap-1 text-caption text-charcoal-2">
+              <Users className="size-3.5" />
+              {toPersianDigits(opportunity.applicantsCount)} درخواست
+            </div>
+          ) : null}
         </div>
 
         <ButtonLink
