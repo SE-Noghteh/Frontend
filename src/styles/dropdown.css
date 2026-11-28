@@ -1,0 +1,95 @@
+/**
+ * Colors of the dropdown components and the date picker trigger.
+ * Override per usage with the `colors` prop. Rules live in the components layer,
+ * so Tailwind utilities passed through `className` still win.
+ */
+
+@layer components {
+  .dd {
+    --dd-trigger-bg: var(--color-white);
+    --dd-trigger-text: var(--color-text-primary);
+    --dd-placeholder: var(--color-text-secondary);
+    --dd-border: var(--color-ocean-blue);
+    --dd-active-border: var(--color-blue);
+    --dd-menu-bg: var(--color-white);
+    --dd-menu-border: var(--color-border-soft);
+    --dd-option-text: var(--color-text-primary);
+    --dd-hover-bg: var(--color-green-7);
+    --dd-hover-text: var(--dd-option-text);
+    --dd-selected-bg: var(--color-green-7);
+    --dd-selected-text: var(--dd-option-text);
+    --dd-check: var(--color-green-2);
+    --dd-accent: var(--color-blue);
+    --dd-chip-bg: var(--color-green-7);
+    --dd-chip-text: var(--color-text-primary);
+  }
+
+  .dd-trigger {
+    border-color: var(--dd-border);
+    background: var(--dd-trigger-bg);
+    color: var(--dd-trigger-text);
+  }
+
+  .dd-trigger[data-state="open"] {
+    border-color: var(--dd-active-border);
+  }
+
+  .dd-trigger[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
+
+  .dd-placeholder,
+  .dd-icon {
+    color: var(--dd-placeholder);
+  }
+
+  .dd-menu {
+    border-color: var(--dd-menu-border);
+    background: var(--dd-menu-bg);
+    color: var(--dd-option-text);
+  }
+
+  .dd-search {
+    border-color: var(--dd-menu-border);
+    background: var(--dd-menu-bg);
+  }
+
+  .dd-search:focus {
+    border-color: var(--dd-active-border);
+  }
+
+  .dd-option:hover,
+  .dd-option:focus-visible,
+  .dd-option:focus-within {
+    background: var(--dd-hover-bg);
+    color: var(--dd-hover-text);
+  }
+
+  /* After hover on purpose: a selected option keeps its selected colors. */
+  .dd-option[data-selected] {
+    background: var(--dd-selected-bg);
+    color: var(--dd-selected-text);
+  }
+
+  .dd-check {
+    color: var(--dd-check);
+  }
+
+  .dd-checkbox {
+    accent-color: var(--dd-accent);
+  }
+
+  .dd-confirm {
+    background: var(--dd-chip-bg);
+    color: var(--dd-accent);
+  }
+
+  .dd-chip {
+    background: var(--dd-chip-bg);
+    color: var(--dd-chip-text);
+  }
+
+  .dd-chip button:hover {
+    background: color-mix(in oklab, var(--dd-chip-text) 12%, transparent);
+  }
+}

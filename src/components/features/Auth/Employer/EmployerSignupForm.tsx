@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { EmployerIdentityForm } from "./EmployerIdentityForm";
+import { EmployerLegalIdentityForm } from "./EmployerLegalIdentityForm";
+import { useEmployerSignup } from "@/providers/EmployerSignupProvider";
 
 export function EmployerSignupForm() {
-  const [accountType, setAccountType] = useState<"real" | "legal">("real");
+  const { accountType, setAccountType } = useEmployerSignup();
   const [legalType, setLegalType] = useState("");
   const [hasLicense, setHasLicense] = useState(false);
   const [acceptRules, setAcceptRules] = useState(false);
   const [step, setStep] = useState(1);
+
+  // 🔥 اسکرول به بالا با تغییر مرحله
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +26,9 @@ export function EmployerSignupForm() {
   };
 
   if (step === 2) {
+    if (accountType === "legal") {
+      return <EmployerLegalIdentityForm onBack={() => setStep(1)} />;
+    }
     return <EmployerIdentityForm onBack={() => setStep(1)} />;
   }
 
@@ -28,7 +38,6 @@ export function EmployerSignupForm() {
       className="flex flex-col gap-5 w-full text-right font-vazirmatn pb-12 mt-2"
       dir="rtl"
     >
-      {/* استپر مراحل */}
       <div className="flex items-center justify-between w-full border-b border-border-decorative pb-3 mb-2 text-[13px] font-medium text-text-secondary">
         <div className="text-text-primary border-b-2 border-action-primary pb-3 -mb-3.5">نوع کارفرما</div>
         <div>اطلاعات هویتی</div>
@@ -46,7 +55,6 @@ export function EmployerSignupForm() {
         </p>
       </div>
 
-      {/* کارت انتخاب شخص حقیقی */}
       <div
         onClick={() => {
           setAccountType("real");
@@ -63,7 +71,6 @@ export function EmployerSignupForm() {
             {accountType === "real" && <div className="w-2.5 h-2.5 rounded-full bg-action-primary" />}
           </div>
         </div>
-
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -82,7 +89,6 @@ export function EmployerSignupForm() {
         </div>
       </div>
 
-      {/* کارت انتخاب شخص حقوقی */}
       <div
         onClick={() => setAccountType("legal")}
         className={`relative p-4 rounded-xl border-[1.5px] cursor-pointer transition-all flex items-start gap-4 ${
@@ -96,7 +102,6 @@ export function EmployerSignupForm() {
             {accountType === "legal" && <div className="w-2.5 h-2.5 rounded-full bg-action-primary" />}
           </div>
         </div>
-
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -115,7 +120,6 @@ export function EmployerSignupForm() {
         </div>
       </div>
 
-      {/* فیلد انتخاب نوع شخص حقوقی */}
       {accountType === "legal" && (
         <div className="flex flex-col gap-1.5 w-full mt-2">
           <label className="text-label text-text-primary font-medium">
@@ -128,18 +132,17 @@ export function EmployerSignupForm() {
             style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center" }}
           >
             <option value="" disabled>انتخاب کنید</option>
-            <option value="limited">مسئولیت محدود</option>
-            <option value="stock">سهامی خاص</option>
+            <option value="limited_liability">مسئولیت محدود</option>
+            <option value="private_joint_stock">سهامی خاص</option>
+            <option value="public_joint_stock">سهامی عام</option>
             <option value="cooperative">تعاونی</option>
-            <option value="government">دولتی</option>
-            <option value="other">سایر</option>
+            <option value="institution">مؤسسه</option>
+            <option value="organization">سازمان</option>
           </select>
         </div>
       )}
 
-      {/* چک‌باکس‌ها */}
       <div className="flex flex-col gap-4 mt-2 w-full">
-        {/* چک‌باکس جواز - تیک سمت راست */}
         <label className="flex items-center justify-start gap-3 cursor-pointer group w-full">
           <input
             type="checkbox"
@@ -150,7 +153,6 @@ export function EmployerSignupForm() {
           <span className="text-label text-text-primary text-right">کسب‌وکار دارای جواز دارم</span>
         </label>
 
-        {/* چک‌باکس قوانین - تیک سمت راست */}
         <label className="flex items-start justify-start gap-3 cursor-pointer group w-full">
           <input
             type="checkbox"

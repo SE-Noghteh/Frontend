@@ -9,6 +9,7 @@ import type { LoginFormValues } from "@/types/Auth/authTypes";
 export function EmployerLoginForm() {
   const { login, isLoading, globalError } = useAuth();
   const [localError, setLocalError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ mobile?: string; password?: string }>({});
 
   const [formData, setFormData] = useState<LoginFormValues>({
     authMethod: "mobile",
@@ -23,40 +24,41 @@ export function EmployerLoginForm() {
   const handleChange = (field: keyof LoginFormValues, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (localError) setLocalError(null);
+    if (fieldErrors[field as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
+    setFieldErrors({});
 
-    if (!formData.mobile.trim() || !formData.password?.trim()) {
-      setLocalError("شماره موبایل و رمز عبور را وارد کنید");
-      return;
+    const newErrors: { mobile?: string; password?: string } = {};
+    
+    if (!formData.mobile.trim()) {
+      newErrors.mobile = "شماره موبایل را وارد کنید";
+    } else {
+      const mobileRegex = /^09\d{9}$/;
+      if (!mobileRegex.test(formData.mobile)) {
+        newErrors.mobile = "شماره موبایل معتبر نیست. شماره باید با 09 شروع شود و 11 رقم داشته باشد";
+      }
     }
 
-    const mobileRegex = /^09\d{9}$/;
-    if (!mobileRegex.test(formData.mobile)) {
-      setLocalError("شماره موبایل معتبر نیست. شماره باید با 09 شروع شود و 11 رقم داشته باشد");
+    if (!formData.password?.trim()) {
+      newErrors.password = "رمز عبور را وارد کنید";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
       return;
     }
 
     login(formData);
   };
 
-  const displayError = (() => {
-    if (localError) return localError;
-    if (globalError) {
-      if (
-        globalError.includes("رمز") || 
-        globalError.includes("نادرست") || 
-        globalError.includes("اطلاعات ورود")
-      ) {
-        return "اطلاعات ورود نادرست است؛ رمز عبور را دوباره بررسی کنید";
-      }
-      return globalError;
-    }
-    return null;
-  })();
+  const errorTitle = globalError ? globalError.split('\n')[0] : null;
+  const errorDesc = globalError && globalError.includes('\n') ? globalError.split('\n')[1] : null;
 
   return (
     <form
@@ -82,6 +84,7 @@ export function EmployerLoginForm() {
         helperText="شماره موبایل خود را وارد کنید." 
         value={formData.mobile}
         onChange={(e) => handleChange("mobile", e.target.value)}
+        error={fieldErrors.mobile}
       />
 
       <PasswordInput
@@ -91,6 +94,7 @@ export function EmployerLoginForm() {
         helperText="رمز عبور خود را وارد کنید."
         value={formData.password}
         onChange={(e) => handleChange("password", e.target.value)}
+        error={fieldErrors.password}
       >
         <a
           href="/employer/forgot-password"
@@ -100,24 +104,19 @@ export function EmployerLoginForm() {
         </a>
       </PasswordInput>
 
-      <ErrorBox message={displayError} />
+      <ErrorBox 
+        title={errorTitle || undefined} 
+        description={errorDesc || undefined} 
+        message={localError || undefined} 
+      />
 
+      {/* استفاده از کامپوننت Button جدید */}
       <Button
         type="submit"
+        loading={isLoading}
         fullWidth
-        disabled={isLoading}
-        className={`mt-2 w-full flex items-center justify-center gap-2 text-white py-2.5 rounded-lg font-bold transition-all ${
-          isLoading 
-            ? "bg-action-primary/80 cursor-not-allowed disabled:!bg-action-primary/80 disabled:!text-white" 
-            : "bg-action-primary hover:bg-action-hover disabled:opacity-50"
-        }`}
+        className="mt-2"
       >
-        {isLoading && (
-          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        )}
         {isLoading ? "در حال ورود..." : "ورود"}
       </Button>
     </form>

@@ -1,35 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { iranProvinces } from "@/data/iranProvinces";
 import { EmployerDocumentsForm } from "./EmployerDocumentsForm";
+import { useEmployerSignup } from "@/providers/EmployerSignupProvider";
+import { useSignupOptions } from "@/hooks/useSignupOptions";
+import { Calendar } from "@/components/ui/Calendar/Calendar";
+import { toPersianDigits } from "@/utils/toPersianDigits";
+import { JALALI_MONTH_NAMES } from "@/utils/jalali";
 
 export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
+  const { setIndividualIdentity, individualIdentity } = useEmployerSignup(); 
+  const { options, isLoading: isLoadingOptions } = useSignupOptions("real");
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    fatherName: "",
-    nationalId: "",
-    gender: "female",
-    birthDay: "",
-    birthMonth: "",
-    birthYear: "",
-    province: "",
-    city: "",
-    address: "",
-    postalCode: "",
-    businessName: "",
-    businessField: "",
-    website: "",
-    hasLicense: false,
+    firstName: individualIdentity?.firstName || "",
+    lastName: individualIdentity?.lastName || "",
+    fatherName: individualIdentity?.fatherName || "",
+    nationalId: individualIdentity?.nationalId || "",
+    gender: individualIdentity?.gender || "female",
+    birthDay: individualIdentity?.birthDay || "",
+    birthMonth: individualIdentity?.birthMonth || "",
+    birthYear: individualIdentity?.birthYear || "",
+    province: individualIdentity?.province || "",
+    city: individualIdentity?.city || "",
+    address: individualIdentity?.address || "",
+    postalCode: individualIdentity?.postalCode || "",
+    businessName: individualIdentity?.businessName || "",
+    businessField: individualIdentity?.businessField || "",
+    website: individualIdentity?.website || "",
+    hasLicense: individualIdentity?.hasLicense || false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(2);
 
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -37,7 +50,6 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
         return newErrors;
       });
     }
-
     if (field === "nationalId" && typeof value === "string") {
       if (value && !/^\d*$/.test(value)) {
         setErrors((prev) => ({ ...prev, nationalId: "کد ملی باید فقط شامل عدد باشد" }));
@@ -45,7 +57,6 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
         setErrors((prev) => ({ ...prev, nationalId: "کد ملی باید دقیقاً ۱۰ رقم باشد" }));
       }
     }
-    
     if (field === "postalCode" && typeof value === "string") {
       if (value && !/^\d*$/.test(value)) {
         setErrors((prev) => ({ ...prev, postalCode: "کد پستی باید فقط شامل عدد باشد" }));
@@ -55,9 +66,26 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const handleDateSelect = (date: Date, jalali: any) => {
+    setSelectedDate(date);
+    setFormData((prev) => ({
+      ...prev,
+      birthDay: String(jalali.day),
+      birthMonth: String(jalali.month),
+      birthYear: String(jalali.year),
+    }));
+    if (errors.birthDate) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.birthDate;
+        return newErrors;
+      });
+    }
+    setIsCalendarOpen(false);
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.firstName.trim()) newErrors.firstName = "نام خود را وارد کنید";
     if (!formData.lastName.trim()) newErrors.lastName = "نام خانوادگی خود را وارد کنید";
     if (!formData.fatherName.trim()) newErrors.fatherName = "نام پدر را وارد کنید";
@@ -66,22 +94,21 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
       newErrors.nationalId = "کد ملی را وارد کنید";
     } else if (!/^\d{10}$/.test(formData.nationalId)) {
       newErrors.nationalId = "کد ملی باید ۱۰ رقم و فقط شامل عدد باشد";
+    } else if (/^(\d)\1{9}$/.test(formData.nationalId)) {
+      newErrors.nationalId = "کد ملی نمی‌تواند تکراری باشد (مثل ۱۱۱۱۱۱۱۱۱۱)";
     }
 
     if (!formData.birthDay || !formData.birthMonth || !formData.birthYear) {
       newErrors.birthDate = "تاریخ تولد را کامل وارد کنید";
     }
-    
     if (!formData.province) newErrors.province = "استان را انتخاب کنید";
     if (!formData.city) newErrors.city = "شهر را انتخاب کنید";
     if (!formData.address.trim()) newErrors.address = "نشانی کامل محل سکونت را وارد کنید";
-    
     if (!formData.postalCode.trim()) {
       newErrors.postalCode = "کد پستی را وارد کنید";
     } else if (!/^\d{10}$/.test(formData.postalCode)) {
       newErrors.postalCode = "کد پستی باید ۱۰ رقم و فقط شامل عدد باشد";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -89,10 +116,28 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
-    // ذخیره نام و نام خانوادگی در localStorage
+
     localStorage.setItem("employerFullName", `${formData.firstName} ${formData.lastName}`);
-    
+
+    setIndividualIdentity({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      fatherName: formData.fatherName,
+      nationalId: formData.nationalId,
+      gender: formData.gender as "female" | "male",
+      birthDay: formData.birthDay,
+      birthMonth: formData.birthMonth,
+      birthYear: formData.birthYear,
+      province: formData.province,
+      city: formData.city,
+      address: formData.address,
+      postalCode: formData.postalCode,
+      businessName: formData.businessName,
+      businessField: formData.businessField,
+      website: formData.website,
+      hasLicense: formData.hasLicense,
+    });
+
     setStep(3);
   };
 
@@ -124,7 +169,7 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
         <p style={{ fontFamily: "Vazirmatn", fontSize: "16px", fontWeight: "bold", color: "#1d3557" }} className="mb-2">
           هویت فردی
         </p>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <Input label="نام" isRequired placeholder="" value={formData.firstName} onChange={(e) => handleChange("firstName", e.target.value)} error={errors.firstName} />
           <Input label="نام خانوادگی" isRequired placeholder="" value={formData.lastName} onChange={(e) => handleChange("lastName", e.target.value)} error={errors.lastName} />
@@ -139,65 +184,111 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
           <label className="text-label text-text-primary font-medium">جنسیت <span className="text-status-error">*</span></label>
           <div className="flex items-center gap-6 mt-1">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="gender" checked={formData.gender === "female"} onChange={() => handleChange("gender", "female")} className="w-5 h-5 appearance-none rounded-full border-2 border-action-primary bg-white checked:bg-action-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50 cursor-pointer transition-all" style={{ boxShadow: formData.gender === "female" ? "inset 0 0 0 3px white" : "none" }} />
+              <input type="radio" name="gender" checked={formData.gender === "female"} onChange={() => handleChange("gender", "female")} className="w-5 h-5 appearance-none rounded-full border-2 border-action-primary bg-white checked:bg-action-primary cursor-pointer transition-all" style={{ boxShadow: formData.gender === "female" ? "inset 0 0 0 3px white" : "none" }} />
               <span className="text-label text-text-primary">زن</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="gender" checked={formData.gender === "male"} onChange={() => handleChange("gender", "male")} className="w-5 h-5 appearance-none rounded-full border-2 border-action-primary bg-white checked:bg-action-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50 cursor-pointer transition-all" style={{ boxShadow: formData.gender === "male" ? "inset 0 0 0 3px white" : "none" }} />
+              <input type="radio" name="gender" checked={formData.gender === "male"} onChange={() => handleChange("gender", "male")} className="w-5 h-5 appearance-none rounded-full border-2 border-action-primary bg-white checked:bg-action-primary cursor-pointer transition-all" style={{ boxShadow: formData.gender === "male" ? "inset 0 0 0 3px white" : "none" }} />
               <span className="text-label text-text-primary">مرد</span>
             </label>
           </div>
         </div>
 
-        {/* تاریخ تولد */}
-        <div className="flex flex-col gap-1.5 w-full mt-2">
+        {/* بخش تاریخ تولد با تقویم */}
+        <div className="flex flex-col gap-1.5 w-full mt-2 relative">
           <label className="text-label text-text-primary font-medium">تاریخ تولد شمسی <span className="text-status-error">*</span></label>
-          <div className="grid grid-cols-3 gap-3">
-            <select className="w-full rounded-md border border-[#457b9d] px-3 py-2 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary transition-colors bg-surface-card shadow-sm cursor-pointer appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center", backgroundSize: "16px" }} onChange={(e) => handleChange("birthDay", e.target.value)}>
-              <option value="">روز</option>
-              {Array.from({ length: 31 }, (_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
-            </select>
-            <select className="w-full rounded-md border border-[#457b9d] px-3 py-2 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary transition-colors bg-surface-card shadow-sm cursor-pointer appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center", backgroundSize: "16px" }} onChange={(e) => handleChange("birthMonth", e.target.value)}>
-              <option value="">ماه</option>
-              {["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"].map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-            <select className="w-full rounded-md border border-[#457b9d] px-3 py-2 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary transition-colors bg-surface-card shadow-sm cursor-pointer appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center", backgroundSize: "16px" }} onChange={(e) => handleChange("birthYear", e.target.value)}>
-              <option value="">سال</option>
-              {Array.from({ length: 16 }, (_, i) => <option key={1395-i} value={1395-i}>{1395-i}</option>)}
-            </select>
-          </div>
+          
+          <button
+            type="button"
+            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+            className={`w-full text-right rounded-md border px-3 py-2 text-body focus:outline-none transition-colors bg-surface-card ${
+              errors.birthDate ? "border-status-error" : "border-[#457b9d]"
+            }`}
+          >
+            {formData.birthYear ? (
+              <span className="text-text-primary">
+                {toPersianDigits(formData.birthDay)} {JALALI_MONTH_NAMES[parseInt(formData.birthMonth) - 1]} {toPersianDigits(formData.birthYear)}
+              </span>
+            ) : (
+              <span className="text-text-disabled">انتخاب تاریخ تولد...</span>
+            )}
+          </button>
+          
           {errors.birthDate && <p className="text-red-500 text-caption mt-1">{errors.birthDate}</p>}
+
+          {/* تقویم شناور با استایل اصلاح‌شده */}
+          {isCalendarOpen && (
+            <div className="absolute top-full right-0 mt-2 w-[320px] max-h-[350px] overflow-y-auto bg-white border border-border-decorative rounded-xl shadow-lg z-50 p-2">
+               {/* استایل‌های ضروری برای نمایش درست تقویم */}
+               <style>{`
+                 .cal { width: 100%; font-family: inherit; }
+                 .cal__header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #e5e7eb; margin-bottom: 0.5rem; }
+                 .cal__title { font-weight: bold; font-size: 0.9rem; }
+                 .cal__nav { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 0.375rem; background: transparent; border: none; cursor: pointer; color: #374151; }
+                 .cal__nav:hover { background: #f3f4f6; }
+                 .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+                 .cal__weekday { font-size: 0.75rem; color: #6b7280; padding: 0.25rem 0; }
+                 .cal__cell { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 0.25rem; min-height: 2.5rem; border-radius: 0.375rem; }
+                 .cal__cell:hover { background: #f9fafb; }
+                 .cal__cell[data-selected="true"] { background: #e0f2fe; }
+                 .cal__day { font-size: 0.85rem; font-weight: 500; color: #1f2937; background: transparent; border: none; cursor: pointer; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 0; }
+                 .cal__day-number { width: 1.75rem; height: 1.75rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+                 .cal__day-number[data-today="true"] { background: #3b82f6; color: white; }
+                 .cal__cell--blank { background: transparent; }
+                 .cal__picker { padding: 0.5rem; }
+                 .cal__picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+                 .cal__picker-item { padding: 0.5rem; font-size: 0.85rem; border-radius: 0.375rem; border: 1px solid transparent; background: #f3f4f6; cursor: pointer; color: #374151; }
+                 .cal__picker-item:hover { background: #e5e7eb; }
+                 .cal__picker-item[data-active="true"] { background: #3b82f6; color: white; }
+                 .cal__legend { display: flex; gap: 0.5rem; font-size: 0.75rem; margin-bottom: 0.5rem; }
+                 .cal__legend-item { display: flex; align-items: center; gap: 0.25rem; }
+                 .cal__legend-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; }
+               `}</style>
+               <Calendar
+                 selectedDate={selectedDate}
+                 onSelectDate={handleDateSelect}
+                 yearRange={[1300, 1405]}
+                 dayPopup="none"
+               />
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex flex-col gap-5 mt-0">
         <p style={{ fontFamily: "Vazirmatn", fontSize: "16px", fontWeight: "bold", color: "#1d3557" }} className="mb-2">
-         نشانی محل سکونت
+          نشانی محل سکونت
         </p>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-label text-text-primary font-medium">استان <span className="text-status-error">*</span></label>
-            <select className={`w-full rounded-md border px-3 py-2 text-body text-text-primary focus:outline-none transition-colors bg-surface-card shadow-sm cursor-pointer appearance-none ${
-              errors.province 
-                ? "border-status-error focus:ring-2 focus:ring-status-error/50" 
-                : "border-[#457b9d] focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary"
-            }`} style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center", backgroundSize: "16px" }} value={formData.province} onChange={(e) => { handleChange("province", e.target.value); handleChange("city", ""); }}>
+            <select
+              className="w-full rounded-md border border-[#457b9d] px-3 py-2 text-body text-text-primary focus:outline-none bg-surface-card cursor-pointer disabled:opacity-50"
+              value={formData.province}
+              onChange={(e) => { handleChange("province", e.target.value); handleChange("city", ""); }}
+              disabled={isLoadingOptions}
+            >
               <option value="" disabled>انتخاب کنید</option>
-              {iranProvinces.map((province) => (<option key={province.name} value={province.name}>{province.name}</option>))}
+              {options?.provinces.map((province) => (
+                <option key={province} value={province}>{province}</option>
+              ))}
             </select>
             {errors.province && <p className="text-red-500 text-caption mt-1">{errors.province}</p>}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-label text-text-primary font-medium">شهر <span className="text-status-error">*</span></label>
-            <select className={`w-full rounded-md border px-3 py-2 text-body text-text-primary focus:outline-none transition-colors bg-surface-card shadow-sm cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
-              errors.city 
-                ? "border-status-error focus:ring-2 focus:ring-status-error/50" 
-                : "border-[#457b9d] focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary"
-            }`} style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "left 12px center", backgroundSize: "16px" }} value={formData.city} onChange={(e) => handleChange("city", e.target.value)} disabled={!formData.province}>
+            <select
+              className="w-full rounded-md border border-[#457b9d] px-3 py-2 text-body text-text-primary focus:outline-none bg-surface-card cursor-pointer disabled:opacity-50"
+              value={formData.city}
+              onChange={(e) => handleChange("city", e.target.value)}
+              disabled={!formData.province || isLoadingOptions}
+            >
               <option value="" disabled>انتخاب کنید</option>
-              {formData.province && iranProvinces.find((p) => p.name === formData.province)?.cities.map((city) => (<option key={city} value={city}>{city}</option>))}
+              {formData.province && options?.cities_by_province[formData.province]?.map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
             </select>
             {errors.city && <p className="text-red-500 text-caption mt-1">{errors.city}</p>}
           </div>
@@ -209,15 +300,15 @@ export function EmployerIdentityForm({ onBack }: { onBack: () => void }) {
 
       <div className="flex flex-col gap-5 mt-2">
         <p style={{ fontFamily: "Vazirmatn", fontSize: "16px", fontWeight: "bold", color: "#1d3557" }} className="mb-2">
-         کسب‌وکار شما (اختیاری)
+          کسب‌وکار شما (اختیاری)
         </p>
-        
+
         <Input label="نام نمایشی یا برند" placeholder="  " value={formData.businessName} onChange={(e) => handleChange("businessName", e.target.value)} />
         <Input label="حوزه‌های فعالیت" placeholder="   " value={formData.businessField} onChange={(e) => handleChange("businessField", e.target.value)} />
         <Input label="وب‌سایت یا صفحه کسب‌وکار" placeholder="https://example.com" type="url" dir="ltr" value={formData.website} onChange={(e) => handleChange("website", e.target.value)} />
-        
+
         <label className="flex items-center justify-start gap-3 cursor-pointer group mt-2 w-full">
-          <input type="checkbox" checked={formData.hasLicense} onChange={(e) => handleChange("hasLicense", e.target.checked)} className="w-5 h-5 appearance-none rounded border-2 border-action-primary bg-white checked:bg-white checked:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231d3557%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%2220%206%209%2017%204%2012%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat checked:bg-[length:14px_14px] focus:outline-none focus:ring-2 focus:ring-action-primary/50 cursor-pointer transition-all flex-shrink-0" />
+          <input type="checkbox" checked={formData.hasLicense} onChange={(e) => handleChange("hasLicense", e.target.checked)} className="w-5 h-5 appearance-none rounded border-2 border-action-primary bg-white checked:bg-white checked:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%231d3557%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%2220%206%209%2017%204%2012%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat checked:bg-[length:14px_14px] cursor-pointer transition-all flex-shrink-0" />
           <span className="text-label text-text-primary text-right">کسب‌وکار دارای جواز دارم</span>
         </label>
       </div>
