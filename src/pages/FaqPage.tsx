@@ -3,7 +3,7 @@
  */
 
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { FaqAccordion } from "@/components/features/Faq/FaqAccordion";
@@ -17,7 +17,17 @@ import { useFaqs } from "@/hooks/useFaqs";
 
 export default function FaqPage() {
   const [category, setCategory] = useState<FaqCategoryFilter>("همه");
-  const { data: faqs = [] } = useFaqs(category === "همه" ? undefined : category);
+  const { data: faqs = [] } = useFaqs(
+    category === "همه" ? undefined : category
+  );
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, []);
 
   return (
     <SectionContainer maxWidthClassName="max-w-[820px]" className="py-12">
@@ -28,15 +38,19 @@ export default function FaqPage() {
         <ArrowRight className="size-4" />
         بازگشت به صفحه اصلی
       </Link>
+
       <h1 className="mt-6 text-[36px] font-black text-text-primary sm:text-[44px]">
         همه‌ی سؤال‌ها
       </h1>
+
       <div className="mt-8">
         <FaqCategoryTabs value={category} onChange={setCategory} />
       </div>
+
       <div className="mt-5">
         <FaqAccordion items={faqs} />
       </div>
+
       <div className="mt-12">
         <SupportCallout />
       </div>

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
-import { Button, type ButtonColor } from "@/components/ui/Button";
+import { Button, ButtonLink, type ButtonColor } from "@/components/ui/Button";
 import { RoleIcon } from "@/components/ui/RoleIcon";
 import { SectionContainer } from "@/components/ui/SectionContainer";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -73,10 +73,15 @@ export function RolesSection() {
               >
                 <RoleIntroCard role={activeRole} guide={guide} />
                 <RoleStepList role={activeRole} steps={guide.steps} />
-                {/* TODO: point to the sign-up page once it exists. */}
-                <Button color={ROLE_BUTTON_COLOR[activeRole]} className="mt-8 w-fit" endIcon={<ArrowLeft />}>
-                  {guide.ctaLabel}
-                </Button>
+                {activeRole === "seeker" ? (
+                  <ButtonLink to="/jobseekerlogin" color={ROLE_BUTTON_COLOR[activeRole]} className="mt-8 w-fit" endIcon={<ArrowLeft />}>
+                    {guide.ctaLabel}
+                  </ButtonLink>
+                ) : (
+                  <Button color={ROLE_BUTTON_COLOR[activeRole]} className="mt-8 w-fit" endIcon={<ArrowLeft />}>
+                    {guide.ctaLabel}
+                  </Button>
+                )}
               </motion.div>
             </AnimatePresence>
 

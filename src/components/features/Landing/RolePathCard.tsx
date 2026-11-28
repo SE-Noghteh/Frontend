@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { RoleBadge } from "@/components/ui/RoleBadge";
 import type { UserRole } from "@/types/Landing/landing";
@@ -29,10 +29,15 @@ export function RolePathCard({ role, text, ctaLabel, delay, hasDivider }: RolePa
       <RoleScene role={role} className="w-[140px] sm:w-[190px]" />
       <RoleBadge role={role} size="md" className="mt-2" />
       <p className="mt-4 max-w-[280px] text-label leading-8 text-text-secondary">{text}</p>
-      {/* TODO: point to the sign-up page once it exists. */}
-      <Button variant="secondary" className="mt-6" endIcon={<ArrowLeft />}>
-        {ctaLabel}
-      </Button>
+      {role === "seeker" ? (
+        <ButtonLink to="/jobseekerlogin" variant="secondary" className="mt-6" endIcon={<ArrowLeft />}>
+          {ctaLabel}
+        </ButtonLink>
+      ) : (
+        <Button variant="secondary" className="mt-6" endIcon={<ArrowLeft />}>
+          {ctaLabel}
+        </Button>
+      )}
     </Reveal>
   );
 }
