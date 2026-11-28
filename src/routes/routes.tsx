@@ -1,3 +1,4 @@
+
 import { motion, useReducedMotion } from "framer-motion";
 import { useLayoutEffect } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
@@ -22,12 +23,6 @@ import SeekerCollabsPage from "@/pages/SeekerCollabsPage";
 import SeekerRequestDetailPage from "@/pages/SeekerRequestDetailPage";
 import SeekerRequestsPage from "@/pages/SeekerRequestsPage";
 import SupportPage from "@/pages/SupportPage";
-
-import type { UserRole } from "@/types/Landing/landing";
-
-const roleAuthDestinations: Partial<Record<UserRole, string>> = {
-  seeker: "/jobseekerlogin",
-};
 
 function AnimatedJobSeekerLogin() {
   const reduceMotion = useReducedMotion();
@@ -67,24 +62,18 @@ export const router = createBrowserRouter([
       { path: "/search", element: <OpportunitySearchPage /> },
       { path: "/faq", element: <FaqPage /> },
       { path: "/support", element: <SupportPage /> },
+
       {
         path: "/login",
-        element: (
-          <RoleSelectionPage
-            destinations={roleAuthDestinations}
-          />
-        ),
+        element: <RoleSelectionPage />,
       },
       {
         path: "/signup",
-        element: (
-          <RoleSelectionPage
-            destinations={roleAuthDestinations}
-          />
-        ),
+        element: <RoleSelectionPage />,
       },
     ],
   },
+
   {
     path: "/jobseekerlogin",
     element: <AnimatedJobSeekerLogin />,
@@ -97,6 +86,7 @@ export const router = createBrowserRouter([
     path: "/jobseekerlogin/reset-password",
     element: <JobSeekerResetPasswordPage />,
   },
+
   {
     path: "/seeker",
     element: <SeekerDashboardLayout />,
@@ -119,6 +109,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
   {
     path: "/about",
     element: <AboutPage />,
